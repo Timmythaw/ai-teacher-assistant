@@ -16,6 +16,15 @@ from agents.timetable_agent import timetable_agent
 # Google API settings
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 CLIENT_SECRETS_FILE = "credentials.json"
+client_config = {
+    "web": {
+        "client_id": st.secrets["google"]["client_id"],
+        "client_secret": st.secrets["google"]["client_secret"],
+        "redirect_uris": st.secrets["google"]["redirect_uris"],
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+    }
+}
 
 st.title("📅 AI Teaching Assistant – Timetable Agent")
 
@@ -26,11 +35,7 @@ if "credentials" not in st.session_state:
 # Step 1: Google Login
 if not st.session_state.credentials:
     st.info("Please connect your Google account to continue.")
-    flow = Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
-        scopes=SCOPES,
-        redirect_uri="http://localhost:8501/"
-    )
+    flow = Flow.from_client_config(client_config, scopes=["https://www.googleapis.com/auth/userinfo.email"])
 
     auth_url, _ = flow.authorization_url(prompt="consent")
     st.markdown(f"[🔑 Login with Google]({auth_url})")
