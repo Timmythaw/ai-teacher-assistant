@@ -211,4 +211,4 @@ __pycache__/
 .ipynb_checkpoints/
 .uv/
 
-client_secret_840970484260-019tusa2dnknt9s8445n1m0185sl1qn8.apps.googleusercontent.com.json
+credentials.json
