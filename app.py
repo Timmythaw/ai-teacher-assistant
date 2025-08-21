@@ -51,21 +51,22 @@ client_config = {
     }
 }
 
+# ... existing code ...
+
+creds = None
 if st.session_state["credentials"] is None:
     if st.button("🔑 Login with Google"):
-#        flow = InstalledAppFlow.from_client_secrets_file(
-#           "credentials.json",  # this file is required only once in dev
-#           SCOPES
-#        )
         flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
         creds = flow.run_local_server(port=8080, browser="chrome")
         st.session_state["credentials"] = creds.to_json()
         st.success("✅ Google account connected. Please refresh the page.")
-
 else:
-    creds = Credentials.from_authorized_user_info(json.loads(st.session_state["credentials"]), SCOPES)
-    service = build("calendar", "v3", credentials=creds)
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
+# Only proceed if we have credentials
+if creds:
+    service = build("calendar", "v3", credentials=creds)
+    
     # Step 2: Fetch events using the existing function
     try:
         events = fetch_calendar_events(days_ahead=7, service=service)
@@ -92,3 +93,5 @@ else:
     except Exception as e:
         st.error(f"Error fetching calendar events: {str(e)}")
         st.info("Please ensure your Google credentials are properly configured.")
+else:
+    st.info("Please log in with Google to access your calendar.")
