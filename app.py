@@ -31,7 +31,7 @@ st.title("📅 AI Teaching Assistant – Timetable Agent")
 
 # Store session credentials
 if "credentials" not in st.session_state:
-    st.session_state.credentials = None
+    st.session_state["credentials"] = None
 
 # Step 1: Google Login
 # The following block is commented out to disable Google login functionality.
@@ -42,7 +42,7 @@ if "credentials" not in st.session_state:
 #     auth_url, _ = flow.authorization_url(prompt="consent")
 #     st.markdown(f"[🔑 Login with Google]({auth_url})")
 
-if st.session_state.creds is None:
+if st.session_state["credentials"] is None:
     if st.button("🔑 Login with Google"):
         flow = InstalledAppFlow.from_client_secrets_file(
             "credentials.json",  # this file is required only once in dev
