@@ -6,6 +6,15 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import sys
 import os
+import webbrowser
+
+# Force WSL to use Windows Chrome
+CHROME_PATH = "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+webbrowser.register(
+    "chrome",
+    None,
+    webbrowser.BackgroundBrowser(CHROME_PATH)
+)
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -49,7 +58,7 @@ if st.session_state["credentials"] is None:
 #           SCOPES
 #        )
         flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-        creds = flow.run_local_server(port=8080)
+        creds = flow.run_local_server(port=8080, browser="chrome")
         st.session_state["credentials"] = creds.to_json()
         st.success("✅ Google account connected. Please refresh the page.")
 
