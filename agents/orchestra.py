@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 from core.ai_client import chat_completion
 
@@ -12,7 +15,7 @@ def validate_json_schema(output_str, schema_keys):
         return False, None
 
 class Orchestrator:
-    def __init__(self, model="openai/gpt-4o"):
+    def __init__(self, model="openai/gpt-5-chat-latest"):
         self.model = model
 
     def plan(self, teacher_request: str) -> dict:
