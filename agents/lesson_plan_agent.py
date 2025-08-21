@@ -1,10 +1,11 @@
-import json
-import re
-import os
 import sys
+import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import json
 from core.ai_client import chat_completion
 from core.pdf_tool import extract_text_from_pdf
+from core.logger import logger
 
 class LessonPlanAgent:
     def __init__(self, model="openai/gpt-5-chat-latest"):
@@ -12,14 +13,23 @@ class LessonPlanAgent:
 
     def generate_plan(self, inputs: dict, study_duration_weeks, num_students, sections_per_week) -> dict:
         try:
+            logger.info("LessonPlanAgent started with inputs: %s", inputs)
             combined_text = ""
 
             if "course_outline" in inputs:
-                combined_text += extract_text_from_pdf(inputs["course_outline"]) + "\n"
+                text = extract_text_from_pdf(inputs["course_outline"])
+                logger.info("Extracted course outline: %s (length=%d)",
+                            inputs["course_outline"], len(text))
+                combined_text += text + "\n"
+                
             if "lecture_notes" in inputs:
-                combined_text += extract_text_from_pdf(inputs["lecture_notes"]) + "\n"
+                text = extract_text_from_pdf(inputs["lecture_notes"])
+                logger.info("Extracted lecture notes: %s (length=%d)",
+                            inputs["lecture_notes"], len(text))
+                combined_text += text + "\n"
 
             if not combined_text.strip():
+                logger.warning("No valid text extracted from provided PDFs")
                 return {"error": "No valid text extracted from provided PDFs."}
 
             system_prompt = f"""
@@ -53,12 +63,19 @@ class LessonPlanAgent:
                 temperature=0.4,
                 max_tokens=4000
             )
-            #print(raw)
-            return json.loads(raw)
 
-        except json.JSONDecodeError:
-            return {"error": "Model did not return valid JSON."}
+            try:
+                result = json.loads(raw)
+                logger.info("LessonPlanAgent successfully generated lesson plan (weeks=%s, sections_per_week=%s)",
+                            result.get("total_duration"), result.get("sections_per_week"))
+                return result
+            
+            except json.JSONDecodeError:
+                logger.error("Model did not return valid JSON. Raw output: %s", raw)
+                return {"error": "Model did not return valid JSON."}
+
         except Exception as e:
+            logger.error("LessonPlanAgent failed: %s", e, exc_info=True)
             return {"error": f"LessonPlanAgent failed: {e}"}
 
 lp_agent = LessonPlanAgent()
