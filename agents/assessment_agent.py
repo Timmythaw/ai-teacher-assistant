@@ -34,6 +34,7 @@ class AssessmentAgent:
             - difficulty
             - questions: [{q, options(if MCQ), answer}]
             - rubric: [{criteria, points}] (if rubric requested)
+            RESPOND IN CORRECT JSON FORMAT ONLY.
             """
 
             user_prompt = f"""
@@ -52,8 +53,9 @@ class AssessmentAgent:
                 ],
                 temperature=0.4
             )
+            print(raw)
             try:
-                result = json.load(raw)
+                result = json.loads(raw)
                 logger.info("AssessmentAgent successfully generated assessment with %d questions", 
                             len(result.get("questions", [])))
                 return result
@@ -65,3 +67,12 @@ class AssessmentAgent:
         except Exception as e:
             logger.error("AssessmentAgent failed: %s", e, exc_info=True)
             return {"error": f"AssessmentAgent failed: {e}"}
+
+"""
+asmt_agent = AssessmentAgent()
+assessment = asmt_agent.generate_assessment(
+    "/home/timmy/ai-teacher-assistant/static/Lecture_Slide.pdf",
+    {"type": "MCQ", "difficulty": "Medium", "count": 5, "rubric": True}
+)
+print(assessment)
+"""
