@@ -10,7 +10,8 @@ def get_calendar_service():
 
 def fetch_calendar_events(days_ahead: int = 7, service=None):
     """Fetch upcoming events from Google Calendar within N days."""
-    service = get_calendar_service()
+    if service is None:
+        service = get_calendar_service()
     now = datetime.datetime.utcnow().isoformat() + "Z"
     end = (datetime.datetime.utcnow() + datetime.timedelta(days=days_ahead)).isoformat() + "Z"
 
