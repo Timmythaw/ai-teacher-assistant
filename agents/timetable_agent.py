@@ -24,7 +24,7 @@ Rules:
   during weekdays (Mon–Fri), 9am–5pm, avoiding conflicts.
 """
 
-def timetable_agent(user_request: str, openai_key: str = None):
+def timetable_agent(user_request: str, openai_key= None):
     if openai_key is None:
         sys.path.append('..')
         from client import create_client
