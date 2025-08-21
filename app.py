@@ -17,15 +17,6 @@ from agents.timetable_agent import timetable_agent
 # Google API settings
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 CLIENT_SECRETS_FILE = "credentials.json"
-# client_config = {
-#     "web": {
-#         "client_id": st.secrets["google"]["client_id"],
-#         "client_secret": st.secrets["google"]["client_secret"],
-#         "redirect_uris": st.secrets["google"]["redirect_uris"],
-#         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-#         "token_uri": "https://oauth2.googleapis.com/token",
-#     }
-# }
 
 st.title("📅 AI Teaching Assistant – Timetable Agent")
 
@@ -41,19 +32,29 @@ if "credentials" not in st.session_state:
 #
 #     auth_url, _ = flow.authorization_url(prompt="consent")
 #     st.markdown(f"[🔑 Login with Google]({auth_url})")
+client_config = {
+    "installed": {
+        "client_id": st.secrets["google"]["GOOGLE_CLIENT_ID"],
+        "client_secret": st.secrets["google"]["GOOGLE_CLIENT_SECRET"],
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "redirect_uris": ["http://localhost:8501/"],
+    }
+}
 
 if st.session_state["credentials"] is None:
     if st.button("🔑 Login with Google"):
-        flow = InstalledAppFlow.from_client_secrets_file(
-            "credentials.json",  # this file is required only once in dev
-            SCOPES
-        )
+#        flow = InstalledAppFlow.from_client_secrets_file(
+#           "credentials.json",  # this file is required only once in dev
+#           SCOPES
+#        )
+        flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
         creds = flow.run_local_server(port=8080)
-        st.session_state.creds = creds.to_json()
+        st.session_state["credentials"] = creds.to_json()
         st.success("✅ Google account connected. Please refresh the page.")
 
 else:
-    creds = Credentials.from_authorized_user_info(json.loads(st.session_state.creds), SCOPES)
+    creds = Credentials.from_authorized_user_info(json.loads(st.session_state["credentials"]), SCOPES)
     service = build("calendar", "v3", credentials=creds)
 
     # Step 2: Fetch events using the existing function
