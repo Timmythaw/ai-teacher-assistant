@@ -1,8 +1,9 @@
 import streamlit as st
 import datetime
 import json
-from google_auth_oauthlib.flow import Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 import sys
 import os
 
@@ -33,19 +34,31 @@ if "credentials" not in st.session_state:
     st.session_state.credentials = None
 
 # Step 1: Google Login
-if not st.session_state.credentials:
-    st.info("Please connect your Google account to continue.")
-    flow = Flow.from_client_config(client_config, scopes=["https://www.googleapis.com/auth/userinfo.email"])
+# The following block is commented out to disable Google login functionality.
+# if not st.session_state.credentials:
+#     st.info("Please connect your Google account to continue.")
+#     flow = Flow.from_client_config(client_config, scopes=["https://www.googleapis.com/auth/userinfo.email"])
+#
+#     auth_url, _ = flow.authorization_url(prompt="consent")
+#     st.markdown(f"[🔑 Login with Google]({auth_url})")
 
-    auth_url, _ = flow.authorization_url(prompt="consent")
-    st.markdown(f"[🔑 Login with Google]({auth_url})")
+if st.session_state.creds is None:
+    if st.button("🔑 Login with Google"):
+        flow = InstalledAppFlow.from_client_secrets_file(
+            "credentials.json",  # this file is required only once in dev
+            SCOPES
+        )
+        creds = flow.run_local_server(port=8080)
+        st.session_state.creds = creds.to_json()
+        st.success("✅ Google account connected. Please refresh the page.")
 
 else:
-    st.success("✅ Google account connected!")
+    creds = Credentials.from_authorized_user_info(json.loads(st.session_state.creds), SCOPES)
+    service = build("calendar", "v3", credentials=creds)
 
     # Step 2: Fetch events using the existing function
     try:
-        events = fetch_calendar_events(days_ahead=7)
+        events = fetch_calendar_events(days_ahead=7, service=service)
         
         st.subheader("📌 Upcoming Events (next 7 days)")
         if not events:

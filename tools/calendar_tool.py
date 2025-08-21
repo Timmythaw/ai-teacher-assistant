@@ -8,7 +8,7 @@ def get_calendar_service():
     creds = Credentials.from_authorized_user_file("/home/timmy/ai-teacher-assistant/token.json", SCOPES)
     return build("calendar", "v3", credentials=creds)
 
-def fetch_calendar_events(days_ahead: int = 7):
+def fetch_calendar_events(days_ahead: int = 7, service=None):
     """Fetch upcoming events from Google Calendar within N days."""
     service = get_calendar_service()
     now = datetime.datetime.utcnow().isoformat() + "Z"
