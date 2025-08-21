@@ -16,6 +16,8 @@ webbrowser.register(
     webbrowser.BackgroundBrowser(CHROME_PATH)
 )
 
+openai_key = st.secrets["openai"]["OPENAI_API_KEY"]
+
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -83,7 +85,7 @@ else:
             user_request = "Suggest 3 suitable 1-hour lesson slots in the next week for Algebra class during weekdays 9am–5pm."
             
             with st.spinner("AI is analyzing your calendar and suggesting times..."):
-                suggestion = timetable_agent(user_request)
+                suggestion = timetable_agent(user_request, )
             
             st.subheader("✨ Suggested Lesson Times")
             st.write(suggestion)
