@@ -17,15 +17,15 @@ from agents.timetable_agent import timetable_agent
 # Google API settings
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 CLIENT_SECRETS_FILE = "credentials.json"
-client_config = {
-    "web": {
-        "client_id": st.secrets["google"]["client_id"],
-        "client_secret": st.secrets["google"]["client_secret"],
-        "redirect_uris": st.secrets["google"]["redirect_uris"],
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-    }
-}
+# client_config = {
+#     "web": {
+#         "client_id": st.secrets["google"]["client_id"],
+#         "client_secret": st.secrets["google"]["client_secret"],
+#         "redirect_uris": st.secrets["google"]["redirect_uris"],
+#         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+#         "token_uri": "https://oauth2.googleapis.com/token",
+#     }
+# }
 
 st.title("📅 AI Teaching Assistant – Timetable Agent")
 
