@@ -17,7 +17,7 @@ SCOPES = [
 
 def get_google_service(api: str, version: str,
                        credentials_path="/home/timmy/ai-teacher-assistant/credentials.json",
-                       token_path="token.pickle"):
+                       token_path="/home/timmy/ai-teacher-assistant/token.pickle"):
     """
     Authenticate and return a Google API service client with error handling.
     """
