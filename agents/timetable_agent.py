@@ -24,11 +24,17 @@ Rules:
   during weekdays (Mon–Fri), 9am–5pm, avoiding conflicts.
 """
 
-def timetable_agent(user_request: str, openai_key: str):
+def timetable_agent(user_request: str, openai_key: str = None):
+    if openai_key is None:
+        sys.path.append('..')
+        from client import create_client
+        client = create_client()
+    else:
+        client = create_client(openai_key)
+
     # Step 1: Ask GPT what to do
     response = client.chat.completions.create(
         model="openai/gpt-4o",
-        api_key=openai_key,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_request}
