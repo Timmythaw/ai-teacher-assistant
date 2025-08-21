@@ -58,12 +58,12 @@ if st.session_state["credentials"] is None:
     if st.button("🔑 Login with Google"):
         try:
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            creds = flow.run_local_server(port=8081, browser="chrome")
+            creds = flow.run_local_server(port=8080, browser="chrome")
             st.session_state["credentials"] = creds.to_json()
             st.success("✅ Google account connected. Please refresh the page.")
         except OSError as e:
             if "Address already in use" in str(e):
-                st.warning("Port 8081 is busy. Trying to use existing credentials...")
+                st.warning("Port 8080 is busy. Trying to use existing credentials...")
                 try:
                     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
                     if creds and not creds.expired:
@@ -72,7 +72,7 @@ if st.session_state["credentials"] is None:
                     else:
                         st.error("No valid credentials found. Please try again later.")
                 except Exception:
-                    st.error("Port 8081 is busy and no valid credentials found. Please try again later.")
+                    st.error("Port 8080 is busy and no valid credentials found. Please try again later.")
             else:
                 st.error(f"Login error: {str(e)}")
 else:
