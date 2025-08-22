@@ -68,11 +68,10 @@ class AssessmentAgent:
             logger.error("AssessmentAgent failed: %s", e, exc_info=True)
             return {"error": f"AssessmentAgent failed: {e}"}
 
-"""
+
 asmt_agent = AssessmentAgent()
 assessment = asmt_agent.generate_assessment(
     "/home/timmy/ai-teacher-assistant/static/Lecture_Slide.pdf",
     {"type": "MCQ", "difficulty": "Medium", "count": 5, "rubric": True}
 )
 print(assessment)
-"""
