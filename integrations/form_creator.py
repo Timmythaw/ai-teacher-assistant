@@ -143,7 +143,7 @@ def create_google_form(assessment_json, title="Auto Assessment"):
                 if answer_key:
                     if is_mcq:
                         # Optional sanity: only keep answers that match options
-                        allowed = {o for o in clean_opts}x``
+                        allowed = {o for o in clean_opts}
                         filtered = [a for a in answer_key["answers"] if a["value"] in allowed]
                         if filtered:
                             question["grading"] = {

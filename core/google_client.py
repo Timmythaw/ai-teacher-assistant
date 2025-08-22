@@ -17,11 +17,27 @@ SCOPES = [
 ]
 
 def get_google_service(api: str, version: str,
-                       credentials_path=os.environ.get("CREDENTIALS_PATH"),
-                       token_path=os.environ.get("TOKEN_PATH")):
+                       credentials_path=None,
+                       token_path=None):
     """
     Authenticate and return a Google API service client with error handling.
     """
+    # Set default paths if none provided
+    if credentials_path is None:
+        credentials_path = os.environ.get("CREDENTIALS_PATH")
+    
+    if token_path is None:
+        token_path = os.environ.get("TOKEN_PATH")
+    
+    # If still no paths, use defaults in project root
+    if credentials_path is None:
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        credentials_path = os.path.join(project_root, "credentials.json")
+    
+    if token_path is None:
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        token_path = os.path.join(project_root, "token.pickle")
+    
     creds = None
     try:
         if os.path.exists(token_path):
