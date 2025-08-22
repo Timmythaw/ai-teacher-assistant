@@ -79,5 +79,5 @@ class LessonPlanAgent:
             return {"error": f"LessonPlanAgent failed: {e}"}
 
 lp_agent = LessonPlanAgent()
-plan = lp_agent.generate_plan({"course_outline": "/home/timmy/ai-teacher-assistant/static/SRAS_Course_Outline.pdf"}, 8, 30, 1)
+plan = lp_agent.generate_plan({"course_outline": os.environ.get("COURSE_OUTLINE_PATH")}, 8, 30, 1)
 print(plan)
