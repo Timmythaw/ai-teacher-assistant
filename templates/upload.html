@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Teaching Assistant — Generate Assessment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    form { max-width: 640px; display: grid; gap: .75rem; }
+    .row { display: flex; gap: 1rem; align-items: center; }
+    .result { white-space: pre-wrap; background: #f6f8fa; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Generate Assessment from PDF</h1>
+  <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+    <label for="pdf">Course PDF</label>
+    <input id="pdf" name="pdf" type="file" accept="application/pdf" required />
+
+    <div class="row">
+      <label for="type">Type</label>
+      <select id="type" name="type">
+        <option value="MCQ" selected>MCQ</option>
+        <option value="ShortAnswer">ShortAnswer</option>
+        <option value="Project">Project</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty" name="difficulty">
+        <option>Easy</option>
+        <option selected>Medium</option>
+        <option>Hard</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="count">Questions</label>
+      <input id="count" name="count" type="number" min="1" max="50" value="5" />
+    </div>
+
+    <div class="row">
+      <label for="rubric">Include rubric</label>
+      <input id="rubric" name="rubric" type="checkbox" checked />
+    </div>
+
+    <button type="submit">Generate</button>
+  </form>
+
+  <div id="result" class="result" style="display:none;"></div>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const resultEl = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultEl.style.display = 'none';
+      const data = new FormData(form);
+      const res = await fetch('/upload', { method: 'POST', body: data });
+      const text = await res.text();
+      resultEl.textContent = text;
+      resultEl.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
