@@ -44,7 +44,7 @@ class LessonPlanAgent:
 
             Requirements:
             1) Provide an overview with goals and success criteria tailored to the class size.
-            2) Break down the plan by week with clear learning objectives, key topics, and vocabulary.
+            2) Break down the plan by week w    ith clear learning objectives, key topics, and vocabulary.
             3) For each week, divide into exactly {sections_per_week} section(s). For each section include:
             - Activities (at least one teacher-led, one student-centered, one collaborative activity)
             - Materials/resources

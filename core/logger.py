@@ -3,7 +3,11 @@ import os
 
 #PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
+<<<<<<< HEAD
 def setup_logger(name="agent", log_file=None, level=logging.INFO):
+=======
+def setup_logger(name="agent", log_file=os.environ.get("LOG_PATH"), level=logging.INFO):
+>>>>>>> api-development
     """
     Setup a logger that writes to both console and a file.
     """

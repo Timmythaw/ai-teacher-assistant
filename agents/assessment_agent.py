@@ -71,7 +71,11 @@ class AssessmentAgent:
 
 asmt_agent = AssessmentAgent()
 assessment = asmt_agent.generate_assessment(
+<<<<<<< HEAD
     os.environ.get("LECTURE_PDF_PATH") ,
+=======
+    os.environ.get("LECTURE_PDF_PATH"),
+>>>>>>> api-development
     {"type": "MCQ", "difficulty": "Medium", "count": 5, "rubric": True}
 )
 print(assessment)
