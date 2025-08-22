@@ -1,4 +1,4 @@
-import requests
+import requests 
 from core.config import AI_ML_API_KEY, AI_ML_BASE_URL
 
 def chat_completion(model: str, messages: list, max_tokens : int = None ,temperature: float = 0) -> str:
