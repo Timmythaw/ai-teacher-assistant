@@ -1,66 +1,84 @@
-import datetime
-import os, json
 import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def fetch_calendar_events(days_ahead=7):
-    from tools.calendar_tool import fetch_calendar_events
-    return fetch_calendar_events(days_ahead)
+import json
+from core.ai_client import chat_completion
+from core.logger import logger
+from integrations.calendar_tool import fetch_calendar_events
 
-system_prompt = """
-You are a teaching assistant agent that helps schedule lessons.
-You have access to this tool:
 
-Tool: fetch_calendar_events(days_ahead: int)
-- Returns upcoming events from the teacher's Google Calendar.
+class TimetableAgent:
+    def __init__(self, model="openai/gpt-5-chat-latest"):
+        self.model = model
 
-Rules:
-- If you need to call the tool, respond ONLY in JSON:
-  {"action": "fetch_calendar_events", "args": {"days_ahead": 7}}
-- If you are given calendar events, analyze them and suggest 3 suitable 1-hour lesson slots
-  during weekdays (Mon–Fri), 9am–5pm, avoiding conflicts.
-"""
+    def suggest_lesson_slots(self, days_ahead: int = 7, work_hours: tuple = (9, 17), slot_hours: int = 1) -> dict:
+        try:
+            logger.info(
+                "TimetableAgent started (days_ahead=%d, work_hours=%s, slot_hours=%d)",
+                days_ahead,
+                work_hours,
+                slot_hours,
+            )
 
-def timetable_agent(user_request: str, openai_key : str = None):
-    sys.path.append('..')
-    from client import create_client
-    if openai_key is None:
-        client = create_client()
-    else:
-        client = create_client(openai_key)
+            events = fetch_calendar_events(days_ahead=days_ahead)
+            if isinstance(events, dict) and events.get("error"):
+                logger.error("Calendar fetch error: %s", events.get("error"))
+                return {"error": events.get("error")}
 
-    # Step 1: Ask GPT what to do
-    response = client.chat.completions.create(
-        model="openai/gpt-4o",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_request}
-        ],
-        temperature=0
-    )
+            system_prompt = f"""
+            Respond ONLY in valid JSON.
+            You are a teaching assistant agent that helps schedule lessons.
+            Given upcoming Google Calendar events and constraints, suggest exactly 3 free lesson slots.
 
-    assistant_reply = response.choices[0].message.content
-    print("Assistant raw reply:", assistant_reply)
+            Constraints:
+            - Weekdays only (Mon–Fri)
+            - Working hours: {work_hours[0]}:00–{work_hours[1]}:00
+            - Slot duration: {slot_hours} hour(s)
+            - Avoid all conflicts with provided events (busy if overlapping or all-day)
+            - Align to 30-minute increments
+            - Prefer earliest available times
 
-    # Step 2: Check if it's a tool call
-    try:
-        action = json.loads(assistant_reply)
-        if action.get("action") == "fetch_calendar_events":
-            print("Tool requested:", action)
-            result = fetch_calendar_events(**action["args"])
+            Output JSON schema:
+            {{
+              "suggested_slots": [
+                {{"start": "YYYY-MM-DDTHH:MM", "end": "YYYY-MM-DDTHH:MM", "reason": "..."}},
+                {{"start": "YYYY-MM-DDTHH:MM", "end": "YYYY-MM-DDTHH:MM", "reason": "..."}},
+                {{"start": "YYYY-MM-DDTHH:MM", "end": "YYYY-MM-DDTHH:MM", "reason": "..."}}
+              ]
+            }}
+            """
 
-            # Step 3: Explicit second call to GPT to analyze events
-            followup = client.chat.completions.create(
-                model="openai/gpt-4o",
+            user_prompt = "Here are upcoming Google Calendar events (ISO times as available):\n" + json.dumps(events)
+
+            raw = chat_completion(
+                model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_request},
-                    {"role": "assistant", "content": "Calendar events retrieved."},
-                    {"role": "system", "content": f"Here are the calendar events: {json.dumps(result)}"}
+                    {"role": "user", "content": user_prompt},
                 ],
-                temperature=0
+                temperature=0.2,
+                max_tokens=1200,
             )
-            return followup.choices[0].message.content
-    except Exception:
-        # Not a tool call, just return GPT’s direct answer
-        return assistant_reply
+
+            try:
+                result = json.loads(raw)
+                logger.info(
+                    "TimetableAgent produced %d suggested slot(s)",
+                    len(result.get("suggested_slots", [])),
+                )
+                return result
+            except json.JSONDecodeError:
+                logger.error("Model did not return valid JSON. Raw output: %s", raw)
+                return {"error": "Model did not return valid JSON."}
+
+        except Exception as e:
+            logger.error("TimetableAgent failed: %s", e, exc_info=True)
+            return {"error": f"TimetableAgent failed: {e}"}
+
+
+
+tt_agent = TimetableAgent()
+slots = tt_agent.suggest_lesson_slots(days_ahead=7, work_hours=(9, 17), slot_hours=1)
+print(slots)
 
