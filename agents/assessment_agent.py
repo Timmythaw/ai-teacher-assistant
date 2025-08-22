@@ -71,7 +71,7 @@ class AssessmentAgent:
 
 asmt_agent = AssessmentAgent()
 assessment = asmt_agent.generate_assessment(
-    "/home/timmy/ai-teacher-assistant/static/Lecture_Slide.pdf",
+    os.environ.get("LECTURE_PDF_PATH") ,
     {"type": "MCQ", "difficulty": "Medium", "count": 5, "rubric": True}
 )
 print(assessment)

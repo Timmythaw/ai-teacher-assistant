@@ -3,7 +3,7 @@ import os
 
 #PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
-def setup_logger(name="agent", log_file="/home/timmy/ai-teacher-assistant/logs/agent.log", level=logging.INFO):
+def setup_logger(name="agent", log_file=os.environ.get("LOG_PATH"), level=logging.INFO):
     """
     Setup a logger that writes to both console and a file.
     """
