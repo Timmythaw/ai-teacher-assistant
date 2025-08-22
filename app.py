@@ -25,7 +25,7 @@ def allowed_file(filename: str) -> bool:
 @app.route("/", methods=["GET"])
 def index():
     # You can also use render_template("upload.html") if you placed a file there
-    return render_template("upload.html")
+    return render_template("base.html")
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -72,3 +72,4 @@ def upload():
 if __name__ == "__main__":
     # For local dev
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")), debug=True)
+
