@@ -1,0 +1,206 @@
+{% extends "base.html" %} {% block title %}Courses & Batches{% endblock %} {%
+block content %}
+<!-- Header -->
+<div class="flex items-center justify-between mb-8">
+  <h1 class="text-2xl font-semibold">Batches</h1>
+  <button
+    id="open-create"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+  >
+    + Create Batch
+  </button>
+</div>
+
+<!-- Existing Batches -->
+<div class="bg-white rounded-xl shadow-md p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-medium">Existing Batches</h2>
+    <span class="text-sm text-gray-500">{{ (batches|length) or 0 }} total</span>
+  </div>
+
+  {% if batches and batches|length > 0 %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {% for batch in batches %} {% set count = 0 %} {% if batch.students and
+    batch.students|length > 0 %} {% set count = batch.students[0].count or 0 %}
+    {% endif %}
+    <div class="border rounded-lg p-4 hover:shadow-sm transition">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="text-base font-semibold">
+            {{ batch.name or "Untitled Batch" }}
+          </div>
+          <div class="mt-1 text-sm text-gray-500">
+            {{ count }} student{{ '' if count == 1 else 's' }}
+          </div>
+          {% if batch.created_at %}
+          <div class="mt-1 text-xs text-gray-400">
+            Created: {{ batch.created_at }}
+          </div>
+          {% endif %}
+        </div>
+        <div
+          class="shrink-0 rounded-full bg-gray-100 text-gray-600 h-10 w-10 grid place-items-center font-semibold"
+        >
+          {{ (batch.name or 'B')[:1] | upper }}
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+        <!-- Link back to this page section; replace with a dedicated page if you have one -->
+        <a
+          href="{{ url_for('batch_show', batch_id=batch.id) }}"
+          class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+        >
+          View
+        </a>
+
+        <a
+          href="{{ url_for('assessments_list') }}"
+          class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+        >
+          Assign Assessments
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-gray-500 py-8">No batches found.</div>
+  {% endif %}
+</div>
+
+<!-- Create Batch Modal -->
+<div id="create-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative mx-auto mt-20 w-full max-w-lg">
+    <div class="bg-white rounded-xl shadow-xl border">
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="font-semibold">Create New Batch</h3>
+        <button
+          id="close-create"
+          class="p-1.5 rounded hover:bg-gray-100"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form
+        id="create-form"
+        class="p-4 grid gap-4"
+        enctype="multipart/form-data"
+      >
+        <div>
+          <label class="block text-sm font-medium mb-1" for="batch_name"
+            >Batch name</label
+          >
+          <input
+            id="batch_name"
+            name="batch_name"
+            type="text"
+            required
+            placeholder="e.g., CS101 - Fall 2025"
+            class="w-full rounded border border-gray-300 px-3 py-2 text-base focus:border-gray-900 focus:ring"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="students_csv"
+            >Students CSV</label
+          >
+          <input
+            id="students_csv"
+            name="students_csv"
+            type="file"
+            accept=".csv"
+            required
+            class="w-full rounded border border-gray-300 px-3 py-2 text-base"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            CSV must include columns <span class="font-mono">name</span> and
+            <span class="font-mono">email</span>.
+          </p>
+        </div>
+
+        <div id="create-status" class="text-xs text-gray-500"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+          <button
+            type="button"
+            id="cancel-create"
+            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="submit-create"
+            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
+          >
+            Create Batch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("create-modal");
+    const openBtn = document.getElementById("open-create");
+    const closeBtn = document.getElementById("close-create");
+    const cancelBtn = document.getElementById("cancel-create");
+    const form = document.getElementById("create-form");
+    const statusEl = document.getElementById("create-status");
+    const submitBtn = document.getElementById("submit-create");
+
+    function openModal() {
+      form.reset();
+      statusEl.textContent = "";
+      modal.classList.remove("hidden");
+    }
+    function closeModal() {
+      modal.classList.add("hidden");
+      statusEl.textContent = "";
+    }
+
+    openBtn?.addEventListener("click", openModal);
+    closeBtn?.addEventListener("click", closeModal);
+    cancelBtn?.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      // click outside panel to close
+      if (e.target === modal) closeModal();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusEl.textContent = "Uploading and creating batch…";
+      submitBtn.disabled = true;
+
+      try {
+        const fd = new FormData(form);
+        const res = await fetch("{{ url_for('create_batch_upload_csv') }}", {
+          method: "POST",
+          body: fd,
+        });
+
+        // Regardless of redirect/HTML response, we just refresh the page to show fresh data
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Failed (${res.status}). ${text.slice(0, 200)}`);
+        }
+
+        statusEl.textContent = "Success. Reloading…";
+        // small delay for UX
+        setTimeout(() => {
+          location.reload();
+        }, 400);
+      } catch (err) {
+        statusEl.textContent = "Error: " + (err.message || err);
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+{% endblock %}

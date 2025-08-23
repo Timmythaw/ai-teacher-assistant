@@ -1,0 +1,432 @@
+{% extends "base.html" %} {% block title %}Courses & Batches{% endblock %} {%
+block content %}
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-semibold">{{ batch.name }}</h1>
+    <p class="text-sm text-gray-500">Batch ID: {{ batch.id }}</p>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button
+      id="open-send-all"
+      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black text-sm"
+    >
+      ✉️ Send to All
+    </button>
+    <a
+      href="{{ url_for('batches_page') }}"
+      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
+    >
+      ← Back to Batches
+    </a>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-6">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-medium">Students</h2>
+    <span class="text-sm text-gray-500">{{ students|length }} total</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left font-medium text-gray-700">Name</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-700">Email</th>
+          <th class="px-4 py-2 w-56"></th>
+        </tr>
+      </thead>
+      <tbody id="students-tbody" class="divide-y divide-gray-100">
+        {% if students and students|length > 0 %} {% for s in students %}
+        <tr
+          data-row-id="{{ s.id }}"
+          data-name="{{ s.name }}"
+          data-email="{{ s.email }}"
+        >
+          <td class="px-4 py-2">{{ s.name }}</td>
+          <td class="px-4 py-2 text-gray-600">{{ s.email }}</td>
+          <td class="px-4 py-2 text-right space-x-2">
+            <button
+              class="px-2 py-1.5 text-xs rounded-md border hover:bg-gray-50"
+              data-send="{{ s.id }}"
+            >
+              Send Email
+            </button>
+          </td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="3" class="px-4 py-6 text-center text-gray-500">
+            No students in this batch.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <p id="status" class="text-xs text-gray-500 mt-3"></p>
+</div>
+
+<!-- Email Compose Modal -->
+<!-- Email Compose Modal -->
+<div id="email-modal" class="fixed inset-0 z-50 hidden">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50"></div>
+
+  <!-- Wrapper -->
+  <div class="relative mx-auto mt-10 w-full max-w-lg px-4 sm:px-0">
+    <div
+      class="bg-white rounded-lg shadow-xl border max-h-[90vh] overflow-y-auto"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="font-semibold text-base" id="email-modal-title">
+          Compose Email
+        </h3>
+        <button
+          id="email-close"
+          class="p-1.5 rounded hover:bg-gray-100"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form id="email-form" class="p-4 space-y-4">
+        <!-- Hidden mode fields -->
+        <input type="hidden" id="email-mode" value="single" />
+        <input type="hidden" id="email-single-name" />
+        <input type="hidden" id="email-single-email" />
+
+        <!-- Row 1: To (single or bulk summary) -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">To</label>
+          <input
+            id="email-to"
+            type="email"
+            class="w-full border rounded-md p-2"
+            placeholder="student@example.com"
+          />
+          <div
+            id="email-bulk-summary"
+            class="hidden text-sm text-gray-600"
+          ></div>
+        </div>
+
+        <!-- Row 2: CC / BCC side-by-side on md+ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">CC</label>
+            <input
+              id="email-cc"
+              type="text"
+              class="w-full border rounded-md p-2"
+              placeholder="cc1@example.com, cc2@example.com"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">BCC</label>
+            <input
+              id="email-bcc"
+              type="text"
+              class="w-full border rounded-md p-2"
+              placeholder="bcc1@example.com, bcc2@example.com"
+            />
+          </div>
+        </div>
+
+        <!-- Row 3: Subject -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">Subject</label>
+          <input
+            id="email-subject"
+            type="text"
+            class="w-full border rounded-md p-2"
+            placeholder="Subject"
+          />
+        </div>
+
+        <!-- Row 4: Notes -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">Notes / Instructions</label>
+          <textarea
+            id="email-notes"
+            rows="5"
+            class="w-full border rounded-md p-2"
+            placeholder="Tell the assistant what to write (agenda, links, tone hints, etc.)"
+          ></textarea>
+          <p class="text-xs text-gray-500">
+            The assistant drafts the message based on these notes and your tone
+            below.
+          </p>
+        </div>
+
+        <!-- Row 5: Tone / Action -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Tone</label>
+            <select id="email-tone" class="w-full border rounded-md p-2">
+              <option selected>professional, friendly</option>
+              <option>concise, formal</option>
+              <option>warm, encouraging</option>
+              <option>direct, action-oriented</option>
+            </select>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Action</label>
+            <div class="flex items-center gap-4 h-10">
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" name="email-action" value="send" checked />
+                Send
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" name="email-action" value="draft" />
+                Draft
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="email-progress" class="hidden text-xs text-gray-600"></div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+          <button
+            type="button"
+            id="email-cancel"
+            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="email-submit"
+            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tbody = document.getElementById("students-tbody");
+    const statusEl = document.getElementById("status");
+
+    // ===== Modal elements =====
+    const openSendAllBtn = document.getElementById("open-send-all");
+    const modal = document.getElementById("email-modal");
+    const closeBtn = document.getElementById("email-close");
+    const cancelBtn = document.getElementById("email-cancel");
+    const form = document.getElementById("email-form");
+
+    const modeEl = document.getElementById("email-mode");
+    const singleNameEl = document.getElementById("email-single-name");
+    const singleEmailEl = document.getElementById("email-single-email");
+
+    const toInput = document.getElementById("email-to");
+    const bulkSummary = document.getElementById("email-bulk-summary");
+    const subjectEl = document.getElementById("email-subject");
+    const notesEl = document.getElementById("email-notes");
+    const toneEl = document.getElementById("email-tone");
+    const ccEl = document.getElementById("email-cc");
+    const bccEl = document.getElementById("email-bcc");
+    const progressEl = document.getElementById("email-progress");
+    const titleEl = document.getElementById("email-modal-title");
+
+    let bulkRecipients = []; // [{name,email}, ...]
+
+    function showModal() {
+      modal.classList.remove("hidden");
+    }
+    function hideModal() {
+      modal.classList.add("hidden");
+    }
+
+    function resetForm() {
+      form.reset();
+      subjectEl.value = "";
+      notesEl.value = "";
+      ccEl.value = "";
+      bccEl.value = "";
+      bulkRecipients = [];
+      progressEl.classList.add("hidden");
+      progressEl.textContent = "";
+    }
+
+    function openEmailModalSingle(name, email) {
+      resetForm();
+      modeEl.value = "single";
+      titleEl.textContent = `Compose Email — ${name || email}`;
+      toInput.classList.remove("hidden");
+      toInput.value = email || "";
+      bulkSummary.classList.add("hidden");
+      singleNameEl.value = name || "";
+      singleEmailEl.value = email || "";
+      showModal();
+      setTimeout(() => subjectEl.focus(), 50);
+    }
+
+    function openEmailModalBulk(list) {
+      resetForm();
+      modeEl.value = "bulk";
+      titleEl.textContent = `Compose Email — Send to All (${list.length})`;
+      toInput.classList.add("hidden");
+      toInput.value = "";
+      bulkSummary.classList.remove("hidden");
+      bulkSummary.textContent = list.map((x) => x.email).join(", ");
+      bulkRecipients = list.slice();
+      showModal();
+      setTimeout(() => subjectEl.focus(), 50);
+    }
+
+    // Row button: Send Email
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-send]");
+      if (!btn) return;
+      const row = btn.closest("tr");
+      const name = row.getAttribute("data-name") || "";
+      const email = row.getAttribute("data-email") || "";
+      openEmailModalSingle(name, email);
+    });
+
+    // Header button: Send to All
+    openSendAllBtn?.addEventListener("click", () => {
+      const rows = [...tbody.querySelectorAll("tr[data-row-id]")];
+      const list = rows
+        .map((r) => ({
+          name: r.getAttribute("data-name") || "",
+          email: r.getAttribute("data-email") || "",
+        }))
+        .filter((x) => x.email);
+      if (!list.length) {
+        statusEl.textContent = "No students to email.";
+        return;
+      }
+      openEmailModalBulk(list);
+    });
+
+    // Close modal
+    closeBtn?.addEventListener("click", hideModal);
+    cancelBtn?.addEventListener("click", hideModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) hideModal();
+    });
+
+    // Helper to call your existing /email/compose route
+    async function sendOne(
+      toEmail,
+      name,
+      subject,
+      notes,
+      tone,
+      action,
+      cc,
+      bcc
+    ) {
+      const fd = new FormData();
+      fd.set("to_email", toEmail);
+      fd.set("subject", subject);
+      fd.set("notes", notes);
+      fd.set("tone", tone);
+      fd.set("action", action);
+      fd.set("cc", cc);
+      fd.set("bcc", bcc);
+
+      const res = await fetch("{{ url_for('email_compose') }}", {
+        method: "POST",
+        body: fd,
+      });
+      const ct = res.headers.get("Content-Type") || "";
+      const data = ct.includes("application/json")
+        ? await res.json()
+        : { ok: res.ok, raw: await res.text() };
+      if (!res.ok || !data.ok) {
+        const who = name ? `${name} <${toEmail}>` : toEmail;
+        throw new Error(
+          data.error ? `${who}: ${data.error}` : `${who}: HTTP ${res.status}`
+        );
+      }
+      return data;
+    }
+
+    // Submit modal
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const tone = toneEl.value || "professional, friendly";
+      const action = (
+        form.querySelector('input[name="email-action"]:checked')?.value ||
+        "send"
+      ).toLowerCase();
+      const cc = ccEl.value || "";
+      const bcc = bccEl.value || "";
+      const subject = subjectEl.value || "";
+      const notes = notesEl.value || "";
+
+      if (modeEl.value === "single") {
+        const to = (toInput.value || singleEmailEl.value || "").trim();
+        if (!to) {
+          alert("Recipient email is required.");
+          return;
+        }
+        try {
+          progressEl.classList.remove("hidden");
+          progressEl.textContent = "Sending…";
+          await sendOne(
+            to,
+            singleNameEl.value,
+            subject,
+            notes,
+            tone,
+            action,
+            cc,
+            bcc
+          );
+          progressEl.textContent =
+            action === "draft" ? "Draft created." : "Email sent.";
+          setTimeout(hideModal, 800);
+        } catch (err) {
+          progressEl.classList.remove("hidden");
+          progressEl.textContent = "Failed: " + (err?.message || err);
+        }
+        return;
+      }
+
+      // bulk
+      if (!bulkRecipients.length) {
+        alert("No recipients");
+        return;
+      }
+      progressEl.classList.remove("hidden");
+      let ok = 0,
+        fail = 0;
+      for (let i = 0; i < bulkRecipients.length; i++) {
+        const { name, email } = bulkRecipients[i];
+        progressEl.textContent = `Processing ${i + 1}/${
+          bulkRecipients.length
+        }…`;
+        try {
+          await sendOne(email, name, subject, notes, tone, action, cc, bcc);
+          ok++;
+        } catch (_) {
+          fail++;
+        }
+      }
+      progressEl.textContent =
+        action === "draft"
+          ? `Done. Drafted: ${ok}, Failed: ${fail}.`
+          : `Done. Sent: ${ok}, Failed: ${fail}.`;
+    });
+  });
+</script>
+{% endblock %}
