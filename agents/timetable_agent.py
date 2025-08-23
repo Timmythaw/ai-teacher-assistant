@@ -77,8 +77,8 @@ class TimetableAgent:
             return {"error": f"TimetableAgent failed: {e}"}
 
 
-
+"""
 tt_agent = TimetableAgent()
 slots = tt_agent.suggest_lesson_slots(days_ahead=7, work_hours=(9, 17), slot_hours=1)
 print(slots)
-
+"""
