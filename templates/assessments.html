@@ -72,15 +72,15 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     <span class="text-sm">Include rubric</span>
   </label>
 
-  <label class="inline-flex items-center gap-2">
-      <input
-        id="create_form"
-        name="create_form"
-        type="checkbox"
-        class="h-4 w-4"
-      />
-      <span class="text-sm">Also create a Google Form</span>
-    </label>
+  <!-- <label class="inline-flex items-center gap-2">
+    <input
+      id="create_form"
+      name="create_form"
+      type="checkbox"
+      class="h-4 w-4"
+    />
+    <span class="text-sm">Also create a Google Form</span>
+  </label> -->
 
   <!-- Submit -->
   <div class="flex items-center gap-3">
@@ -90,7 +90,15 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     >
       Generate
     </button>
-    
+    <button
+      id="save-btn"
+      type="button"
+      class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50 hidden"
+      title="Save to database"
+    >
+      Save
+    </button>
+    <span id="save-status" class="text-xs text-gray-500"></span>
 
     <span class="text-xs text-gray-500">
       Preview will render below. Use Download to get a PDF.
@@ -147,25 +155,24 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     const copyMdBtn = document.getElementById("copy-md-btn");
     const copyPlainBtn = document.getElementById("copy-plain-btn");
     const downloadPdfBtn = document.getElementById("download-pdf-btn");
+    const saveBtn = document.getElementById("save-btn");
+    const saveStatus = document.getElementById("save-status");
 
     let lastMarkdown = "";
     let suggestedFileName = "assessment";
+    let lastAssessmentObj = null;
+    let lastOptions = null;
+    let lastOriginalFilename = null;
 
-    // --- JSON → Markdown ---
     function jsonToMarkdownStrict(data) {
-      if (!data || typeof data !== "object") {
+      if (!data || typeof data !== "object")
         return "### Error\n\nInvalid data.";
-      }
-
       const lines = [];
       const title = data.type
         ? `${data.type} Assessment`
         : "Generated Assessment";
       lines.push(`# ${title}`, "");
-      if (data.difficulty) {
-        lines.push(`**Difficulty:** ${data.difficulty}`, "");
-      }
-
+      if (data.difficulty) lines.push(`**Difficulty:** ${data.difficulty}`, "");
       if (Array.isArray(data.questions)) {
         data.questions.forEach((q, i) => {
           lines.push(`## Q${i + 1}. ${q.q || "Untitled Question"}`, "");
@@ -176,62 +183,78 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
             });
             lines.push("");
           }
-          if (q.answer != null) {
-            lines.push(`**Answer:** ${q.answer}`, "");
-          }
+          if (q.answer != null) lines.push(`**Answer:** ${q.answer}`, "");
         });
       }
-
       if (Array.isArray(data.rubric) && data.rubric.length) {
         lines.push("## Rubric", "");
-        data.rubric.forEach((r) => {
-          lines.push(`- ${r.criteria || "Criteria"} (${r.points ?? 0} pts)`);
-        });
+        data.rubric.forEach((r) =>
+          lines.push(`- ${r.criteria || "Criteria"} (${r.points ?? 0} pts)`)
+        );
         lines.push("");
       }
-
       return lines.join("\n").trim();
     }
 
-    // --- Form submit handler ---
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       resultWrapper.classList.add("hidden");
       resultEl.innerHTML = "";
       lastMarkdown = "";
-      suggestedFileName = "assessment";
+      lastAssessmentObj = null;
+      saveStatus.textContent = "";
+      saveBtn.classList.add("hidden");
 
+      suggestedFileName = "assessment";
       const pdfInput = document.getElementById("pdf");
-      if (pdfInput.files && pdfInput.files[0]) {
+      if (pdfInput?.files && pdfInput.files[0]) {
         const base = pdfInput.files[0].name.replace(/\.[^.]+$/, "");
         suggestedFileName = `assessment_${base}`;
+        lastOriginalFilename = pdfInput.files[0].name;
+      } else {
+        lastOriginalFilename = null;
       }
 
+      lastOptions = {
+        type: document.getElementById("type")?.value || "MCQ",
+        difficulty: document.getElementById("difficulty")?.value || "Medium",
+        count: parseInt(document.getElementById("count")?.value || "5", 10),
+        rubric: !!document.getElementById("rubric")?.checked,
+      };
+
       try {
-        const res = await fetch(form.action, {
+        const res = await fetch(form.getAttribute("action"), {
           method: "POST",
           body: new FormData(form),
         });
-        const contentType = res.headers.get("Content-Type") || "";
-        let md = "";
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
 
-        if (contentType.includes("application/json")) {
-          const obj = await res.json();
-          if (obj.error) {
-            md = `### Error\n\n${obj.error}`;
+        const ct = res.headers.get("Content-Type") || "";
+        let md = "";
+        if (ct.includes("application/json")) {
+          const assessment = await res.json(); // server returns the assessment object directly
+          if (assessment.error) {
+            md = `### Error\n\n${assessment.error}`;
             suggestedFileName = "assessment_error";
           } else {
-            md = jsonToMarkdownStrict(obj);
+            lastAssessmentObj = assessment;
+            md = jsonToMarkdownStrict(assessment);
           }
         } else {
           md = await res.text();
         }
 
         lastMarkdown = md;
-        const html = marked.parse(md);
-        resultEl.innerHTML = DOMPurify.sanitize(html);
+        resultEl.innerHTML = DOMPurify.sanitize(marked.parse(md));
         resultWrapper.classList.remove("hidden");
         resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        if (lastAssessmentObj && Array.isArray(lastAssessmentObj.questions)) {
+          saveBtn.classList.remove("hidden");
+        }
       } catch (err) {
         lastMarkdown = `### Error\n\n${err.message}`;
         resultEl.innerText = lastMarkdown;
@@ -239,7 +262,36 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
       }
     });
 
-    // --- Copy buttons ---
+    // Save to DB (Supabase) via your Flask API
+    saveBtn.addEventListener("click", async () => {
+      if (!lastAssessmentObj) return;
+      saveBtn.disabled = true;
+      saveStatus.textContent = "Saving...";
+      try {
+        const payload = {
+          original_filename: lastOriginalFilename,
+          pdf_path: null, // optional; fill if your server returns a path
+          options: lastOptions,
+          result: lastAssessmentObj,
+          google_form: null, // we create this later in the table UI
+        };
+        const resp = await fetch("/api/assessments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok)
+          throw new Error(data.error || `HTTP ${resp.status}`);
+        saveStatus.textContent = `Saved! id=${data.id}`;
+      } catch (e) {
+        saveStatus.textContent = `Save failed: ${e.message}`;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    // Copy buttons
     async function copyWithFeedback(btnEl, text) {
       const original = btnEl.innerText;
       try {
@@ -267,22 +319,19 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
         }, 1400);
       }
     }
+    copyMdBtn.addEventListener("click", () =>
+      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
+    );
+    copyPlainBtn.addEventListener("click", () =>
+      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
+    );
 
-    copyMdBtn.addEventListener("click", () => {
-      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim());
-    });
-
-    copyPlainBtn.addEventListener("click", () => {
-      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim());
-    });
-
-    // --- PDF Download ---
+    // PDF Download
     downloadPdfBtn.addEventListener("click", () => {
       if (typeof html2pdf === "undefined") {
         alert("PDF generator not loaded yet. Please try again in a moment.");
         return;
       }
-
       const opt = {
         margin: [15, 15, 15, 15],
         filename: `${suggestedFileName}.pdf`,
@@ -290,7 +339,6 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
-
       const preview = resultEl.cloneNode(true);
       preview.className = "prose prose-slate";
       preview.style.cssText = `
@@ -306,9 +354,9 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
       line-height: 1.6;
       color: #000000;
     `;
-
       html2pdf().set(opt).from(preview).save();
     });
   });
 </script>
+
 {% endblock %}

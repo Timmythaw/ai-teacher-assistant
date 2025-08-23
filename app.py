@@ -40,13 +40,21 @@ def allowed_file(filename: str) -> bool:
 def index():
     return render_template("base.html")
 
-@app.route("/assessment", methods=["GET"])
+@app.route("/assessments")
+def assessments_list():
+    res = supabase.table("assessments").select("*").order("created_at", desc=True).execute()
+    assessments = res.data if res.data else []
+    return render_template("assessments_list.html", assessments=assessments)
+
+
+@app.route("/assessment-generate", methods=["GET"])
 def assessment_page():
     return render_template("assessments.html")
 
 @app.route("/lesson-generator", methods=["GET"])
 def lesson_generator_page():
     return render_template("lesson_generator.html")
+
 
 @app.route("/generate-assessment-test", methods=["POST"])
 def generate_assessment():
@@ -67,7 +75,7 @@ def generate_assessment():
         i += 1
     f.save(dest.as_posix())
 
-    # Parse options from form
+    # Parse options
     asmt_type = request.form.get("type", "MCQ")
     difficulty = request.form.get("difficulty", "Medium")
     try:
@@ -76,43 +84,108 @@ def generate_assessment():
         count = 5
     rubric = request.form.get("rubric") is not None
 
-    # Call your agent with the uploaded PDF path
+    # Generate
     agent = AssessmentAgent()
-    result = agent.generate_assessment(
+    assessment = agent.generate_assessment(
         dest.as_posix(),
         {"type": asmt_type, "difficulty": difficulty, "count": count, "rubric": rubric}
     )
-    if not isinstance(result, dict) or "questions" not in result:
+    if not isinstance(assessment, dict) or "questions" not in assessment:
         return app.response_class(
-            response=json.dumps({"ok": False, "error": result.get("error", "Invalid assessment result"), "assessment": result}, ensure_ascii=False, indent=2),
+            response=json.dumps(
+                {"ok": False, "error": assessment.get("error", "Invalid assessment result")},
+                ensure_ascii=False, indent=2
+            ),
             status=400,
             mimetype="application/json"
         )
 
-    # Optional: create a Google Form if user checked the box
-    create_form = request.form.get("create_form") is not None
-    form_info = None
-    if create_form:
-        # Title can use the filename or a friendly fallback
-        title = f"Assessment - {Path(dest).stem}"
-        form_info = create_google_form(result, title=title)
-        # You can add basic status normalization
-        if isinstance(form_info, dict) and form_info.get("success"):
-            result["_google_form"] = {
-                "formId": form_info.get("formId"),
-                "formUrl": form_info.get("formUrl"),
-                "questionCount": form_info.get("questionCount")
-            }
-        else:
-            # Include error from create_google_form so the UI can show it
-            result["_google_form_error"] = form_info
-
-    # Return JSON response
     return app.response_class(
-        response=json.dumps(result, ensure_ascii=False, indent=2),
+        response=json.dumps(assessment, ensure_ascii=False, indent=2),
         status=200,
         mimetype="application/json"
     )
+
+@app.route("/api/assessments", methods=["POST"])
+def save_assessment():
+    """
+    Body:
+    {
+      "original_filename": "...",   # optional
+      "pdf_path": "...",            # optional
+      "options": {...},             # what you sent to the agent
+      "result": {...},              # assessment JSON
+      "google_form": null           # should be null at this stage
+    }
+    """
+    try:
+        payload = request.get_json(silent=True) or {}
+        result = payload.get("result")
+
+        if not isinstance(result, dict) or "questions" not in result:
+            return jsonify({"ok": False, "error": "Invalid payload: missing result.questions"}), 400
+
+        row = {
+            "original_filename": payload.get("original_filename"),
+            "pdf_path": payload.get("pdf_path"),
+            "options": payload.get("options"),
+            "result": result,
+            "google_form": payload.get("google_form"),  # usually None now
+        }
+
+        db_res = supabase.table("assessments").insert(row).execute()
+        if getattr(db_res, "error", None):
+            return jsonify({"ok": False, "error": str(db_res.error)}), 500
+
+        saved = db_res.data[0] if db_res.data else None
+        return jsonify({"ok": True, "id": saved["id"] if saved else None, "saved": saved}), 200
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/assessments", methods=["GET"])
+def list_assessments():
+    try:
+        res = supabase.table("assessments").select("*").order("created_at", desc=True).limit(50).execute()
+        return app.response_class(
+            response=json.dumps(res.data or [], ensure_ascii=False, indent=2),
+            status=200, mimetype="application/json"
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route("/api/assessments/<uuid:id>/create-form", methods=["POST"])
+def create_form_for_assessment(id):
+    try:
+        # 1) fetch row
+        sel = supabase.table("assessments").select("*").eq("id", str(id)).single().execute()
+        row = sel.data
+        if not row:
+            return jsonify({"ok": False, "error": "Assessment not found"}), 404
+
+        assessment = row.get("result")
+        if not isinstance(assessment, dict) or "questions" not in assessment:
+            return jsonify({"ok": False, "error": "Row has no valid assessment JSON"}), 400
+
+        title = f"Assessment - {row.get('original_filename') or 'Untitled'}"
+
+        # 2) create Google Form
+        form_info = create_google_form(assessment, title=title)
+        if not isinstance(form_info, dict) or not form_info.get("success"):
+            return jsonify({"ok": False, "error": form_info.get("error", "Failed to create form")}), 500
+
+        # 3) update row with google_form
+        upd = supabase.table("assessments") \
+            .update({"google_form": form_info}) \
+            .eq("id", str(id)).execute()
+
+        updated = upd.data[0] if upd.data else None
+        return jsonify({"ok": True, "google_form": form_info, "updated": updated}), 200
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 
 @app.route("/generate-lesson-plan", methods=["POST"])
 def generate_lesson_plan():
