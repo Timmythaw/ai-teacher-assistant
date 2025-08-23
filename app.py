@@ -79,9 +79,9 @@ def generate_assessment():
 
 @app.route("/generate-lesson-plan", methods=["POST"])
 def generate_lesson_plan():
-    if "pdf" not in request.files:
+    if "course_outline" not in request.files:
         abort(400, description="Missing file field 'pdf'")
-    f = request.files["pdf"]
+    f = request.files["course_outline"]
     if f.filename == "":
         abort(400, description="No file selected")
     if not allowed_file(f.filename):
@@ -97,14 +97,14 @@ def generate_lesson_plan():
     f.save(dest.as_posix())
 
     # Parse options from form
-    weeks = 0
-    num_stu = 0
-    section_per_week = 0
+    weeks = 8
+    num_stu = 20
+    section_per_week = 1
 
     lp_agent = LessonPlanAgent()
     plan = lp_agent.generate_plan({"course_outline":dest.as_posix()}, weeks, num_stu, section_per_week)
     print(plan)
-    
+
     # Return JSON response
     return app.response_class(
         response=json.dumps(plan, ensure_ascii=False, indent=2),
