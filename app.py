@@ -185,8 +185,166 @@ def create_form_for_assessment(id):
 
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+    
+@app.route("/api/batches", methods=["GET"])
+def api_list_batches():
+    """
+    Returns [{ id, name, student_count }]
+    """
+    try:
+        res = supabase.table("batches").select("id,name,students(count)").order("name", desc=False).execute()
+        batches = []
+        for row in (res.data or []):
+            cnt = 0
+            s = row.get("students")
+            if isinstance(s, list) and s:
+                cnt = s[0].get("count", 0)
+            elif isinstance(s, dict):
+                cnt = s.get("count", 0)
+            batches.append({"id": row["id"], "name": row.get("name") or "Untitled", "student_count": cnt})
+        return jsonify({"ok": True, "batches": batches}), 200
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.route("/api/batches/<id>/students", methods=["GET"])
+def api_list_students(id):
+    """
+    Returns [{ id, name, email }] for the batch
+    """
+    try:
+        res = supabase.table("students").select("name,email").eq("batch_id", id).order("name", desc=False).execute()
+        return jsonify({"ok": True, "students": res.data or []}), 200
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/email/send-batch", methods=["POST"])
+def api_email_send_batch():
+    """
+    Body:
+    {
+      "batch_id": "uuid",
+      "subject": "string",
+      "notes": "string",
+      "tone": "string"        # default "professional, friendly"
+      "action": "send"|"draft",  # default "send"
+      "assessment_id": "uuid"    # optional: if present, we try to include google_form.formUrl
+    }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        batch_id = (data.get("batch_id") or "").strip()
+        subject = (data.get("subject") or "").strip()
+        notes = data.get("notes") or ""
+        tone = (data.get("tone") or "professional, friendly").strip()
+        action = (data.get("action") or "send").strip().lower()
+        assessment_id = (data.get("assessment_id") or "").strip()
+
+        if action not in ("send", "draft"):
+            action = "send"
+        if not batch_id:
+            return jsonify({"ok": False, "error": "batch_id is required"}), 400
+        if not subject:
+            return jsonify({"ok": False, "error": "subject is required"}), 400
+
+        # If an assessment_id is provided, try to fetch its Google Form URL
+        form_url = None
+        if assessment_id:
+            try:
+                sel = supabase.table("assessments").select("google_form").eq("id", assessment_id).single().execute()
+                gf = (sel.data or {}).get("google_form") if sel and sel.data else None
+                if isinstance(gf, dict):
+                    form_url = gf.get("formUrl")
+            except Exception:
+                # Non-fatal: we just skip adding a link
+                form_url = None
+
+        # Append the form link to the notes if available
+        if form_url:
+            # add a clear separator for readability
+            notes = (notes.strip() + "\n\nGoogle Form: " + form_url).strip()
+
+        # fetch students
+        stu_res = supabase.table("students").select("name,email").eq("batch_id", batch_id).execute()
+        students = stu_res.data or []
+        if not students:
+            return jsonify({"ok": False, "error": "No students found for this batch"}), 404
+
+        agent = EmailAgent()  # requires credentials.json + token.json at project root
+        results, sent, drafted, failed = [], 0, 0, 0
+
+        for s in students:
+            name = (s.get("name") or "").strip()
+            email = (s.get("email") or "").strip()
+            if not email:
+                results.append({"ok": False, "student_id": s.get("id"), "error": "Missing email"})
+                failed += 1
+                continue
+
+            prompt = f"""to: {email}
+to_name: {name}
+subject: {subject}
+tone: {tone}
+action: {action}
+notes: {notes}
+"""
+
+            try:
+                r = agent.run(prompt, default_use_html=True)
+                ok = r.get("ok", False)
+                results.append({
+                    "ok": ok,
+                    "student_id": s.get("id"),
+                    "to": email,
+                    "mode": r.get("mode"),
+                    "error": r.get("error")
+                })
+                if ok and r.get("mode") == "send":
+                    sent += 1
+                elif ok and r.get("mode") == "draft":
+                    drafted += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                results.append({"ok": False, "student_id": s.get("id"), "to": email, "error": str(e)})
+                failed += 1
+
+        return jsonify({
+            "ok": True,
+            "summary": {"total": len(students), "sent": sent, "drafted": drafted, "failed": failed},
+            "results": results
+        }), 200
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# Student in Batch 
+
+@app.route("/batches/<string:batch_id>", methods=["GET"])
+def batch_show(batch_id):
+    bres = supabase.table("batches")\
+        .select("id,name")\
+        .eq("id", batch_id)\
+        .single()\
+        .execute()
+    batch = bres.data
+    if not batch:
+        return render_template("404.html"), 404
+
+    sres = supabase.table("students")\
+        .select("student_id,name,email")\
+        .eq("batch_id", batch_id)\
+        .order("name")\
+        .execute()
+    students = sres.data or []
+
+    return render_template("batch_students.html", batch=batch, students=students)
+
+
+
+# Lesson Plans start here 
 @app.route("/generate-lesson-plan", methods=["POST"])
 def generate_lesson_plan():
     if "course_outline" not in request.files:

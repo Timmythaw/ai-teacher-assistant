@@ -21,22 +21,21 @@ endblock %} {% block content %}
         <th class="px-4 py-2 text-left font-medium text-gray-700">
           Google Form
         </th>
-        <th class="px-4 py-2"></th>
+        <th class="px-4 py-2 text-right font-medium text-gray-700">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
-      {% for asmt in assessments %}
+      {% for asmt in assessments %} {% set qcount = asmt.result.questions|length
+      if asmt.result and asmt.result.questions else 0 %} {% set has_form =
+      asmt.google_form and asmt.google_form.formUrl %}
       <tr>
         <td class="px-4 py-2">{{ asmt.original_filename or "Untitled" }}</td>
         <td class="px-4 py-2 text-gray-500">
           {{ asmt.created_at|default("") }}
         </td>
+        <td class="px-4 py-2">{{ qcount }}</td>
         <td class="px-4 py-2">
-          {{ asmt.result.questions|length if asmt.result and
-          asmt.result.questions else 0 }}
-        </td>
-        <td class="px-4 py-2">
-          {% if asmt.google_form and asmt.google_form.formUrl %}
+          {% if has_form %}
           <a
             href="{{ asmt.google_form.formUrl }}"
             target="_blank"
@@ -47,20 +46,34 @@ endblock %} {% block content %}
           <span class="text-gray-400">Not created</span>
           {% endif %}
         </td>
-        <td class="px-4 py-2 text-right">
-          {% if not asmt.google_form %}
-          <form
-            method="post"
-            action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
-          >
-            <button
-              type="submit"
-              class="px-3 py-1.5 text-sm rounded-md border bg-gray-50 hover:bg-gray-100"
+        <td class="px-4 py-2">
+          <div class="flex items-center justify-end gap-2">
+            {% if not has_form %}
+            <form
+              method="post"
+              action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
             >
-              Create Google Form
+              <button
+                type="submit"
+                class="px-3 py-1.5 text-sm rounded-md border bg-gray-50 hover:bg-gray-100"
+              >
+                Create Google Form
+              </button>
+            </form>
+            {% endif %}
+
+            <!-- Send to Students button -->
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+              data-send-btn
+              data-asmt-id="{{ asmt.id }}"
+              data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
+              title="Send email to a batch of students"
+            >
+              Send to Students
             </button>
-          </form>
-          {% endif %}
+          </div>
         </td>
       </tr>
       {% endfor %}
@@ -77,4 +90,229 @@ endblock %} {% block content %}
     Generate your first assessment
   </a>
 </div>
-{% endif %} {% endblock %}
+{% endif %}
+
+<!-- Modal overlay (one per page; JS binds row data to it) -->
+<div id="send-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative mx-auto w-full max-w-lg">
+    <div class="bg-white rounded-xl shadow-xl border">
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="font-semibold">Send Email to Batch</h3>
+        <button
+          id="send-close"
+          class="p-1.5 rounded hover:bg-gray-100"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form id="send-form" class="p-4 grid gap-4">
+        <!-- hidden selected assessment id -->
+        <input type="hidden" id="send-asmt-id" />
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Batch</label>
+          <select id="send-batch" class="w-full border rounded-md p-2" required>
+            <option value="">Loading…</option>
+          </select>
+          <p id="send-batch-hint" class="text-xs text-gray-500 mt-1"></p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Subject</label>
+          <input
+            id="send-subject"
+            class="w-full border rounded-md p-2"
+            type="text"
+            placeholder="e.g., Updates for this week"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Tone (optional)</label>
+          <input
+            id="send-tone"
+            class="w-full border rounded-md p-2"
+            type="text"
+            placeholder="professional, friendly"
+            value="professional, friendly"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Message / Notes</label>
+          <textarea
+            id="send-notes"
+            class="w-full border rounded-md p-2"
+            rows="5"
+            placeholder="Write the key message. The agent will draft a well‑formed email."
+          ></textarea>
+          <p class="text-xs text-gray-500 mt-1">
+            Tip: include context like the assessment title or due dates. We’ll
+            personalize per student name.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <label class="inline-flex items-center gap-2">
+            <input id="send-draft" type="checkbox" class="h-4 w-4" />
+            <span class="text-sm">Create drafts instead of sending</span>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+          <span id="send-status" class="text-xs text-gray-500 mr-auto"></span>
+          <button
+            type="button"
+            id="send-cancel"
+            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="send-submit"
+            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Buttons in table rows
+    const rowButtons = document.querySelectorAll("[data-send-btn]");
+    // Modal elements
+    const modal = document.getElementById("send-modal");
+    const btnClose = document.getElementById("send-close");
+    const btnCancel = document.getElementById("send-cancel");
+    const formSend = document.getElementById("send-form");
+    const selBatch = document.getElementById("send-batch");
+    const batchHint = document.getElementById("send-batch-hint");
+    const inpSubject = document.getElementById("send-subject");
+    const inpTone = document.getElementById("send-tone");
+    const taNotes = document.getElementById("send-notes");
+    const cbDraft = document.getElementById("send-draft");
+    const sendStatus = document.getElementById("send-status");
+    const sendSubmit = document.getElementById("send-submit");
+    const hiddenAsmtId = document.getElementById("send-asmt-id");
+
+    // open/close helpers
+    function openModal(prefill) {
+      hiddenAsmtId.value = prefill.asmtId || "";
+      // sensible default subject using the assessment title
+      const base = (prefill.asmtTitle || "Assessment").replace(/\.[^.]+$/, "");
+      if (!inpSubject.value.trim()) inpSubject.value = `Regarding ${base}`;
+      modal.classList.remove("hidden");
+      fetchBatches();
+    }
+    function closeModal() {
+      modal.classList.add("hidden");
+      sendStatus.textContent = "";
+      formSend.reset();
+      hiddenAsmtId.value = "";
+    }
+
+    rowButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const asmtId = btn.getAttribute("data-asmt-id");
+        const asmtTitle = btn.getAttribute("data-asmt-title");
+        openModal({ asmtId, asmtTitle });
+      });
+    });
+    btnClose?.addEventListener("click", closeModal);
+    btnCancel?.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    async function fetchBatches() {
+      selBatch.innerHTML = `<option value="">Loading…</option>`;
+      batchHint.textContent = "";
+      try {
+        const res = await fetch("/api/batches");
+        const data = await res.json();
+        if (!res.ok || !data.ok)
+          throw new Error(data.error || `HTTP ${res.status}`);
+
+        selBatch.innerHTML = `<option value="">Select a batch…</option>`;
+        for (const b of data.batches || []) {
+          const opt = document.createElement("option");
+          opt.value = b.id;
+          opt.textContent = `${b.name} (${b.student_count})`;
+          selBatch.appendChild(opt);
+        }
+        batchHint.textContent = data.batches?.length
+          ? "Choose who should receive the email."
+          : "No batches yet.";
+      } catch (e) {
+        selBatch.innerHTML = `<option value="">Failed to load</option>`;
+        batchHint.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    formSend.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const batchId = selBatch.value.trim();
+      const subject = inpSubject.value.trim();
+      const notes = taNotes.value;
+      const tone = inpTone.value.trim() || "professional, friendly";
+      const action = cbDraft.checked ? "draft" : "send";
+
+      if (!batchId) {
+        sendStatus.textContent = "Please select a batch.";
+        return;
+      }
+      if (!subject) {
+        sendStatus.textContent = "Subject is required.";
+        return;
+      }
+
+      sendSubmit.disabled = true;
+      sendStatus.textContent =
+        action === "send" ? "Sending…" : "Creating drafts…";
+
+      try {
+        // Optionally add assessment context into the notes:
+        const asmtId = hiddenAsmtId.value;
+        const mergedNotes = asmtId
+          ? `[Assessment ID: ${asmtId}] ` + notes
+          : notes;
+
+        const res = await fetch("/api/email/send-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            batch_id: batchId,
+            subject,
+            notes: mergedNotes,
+            tone,
+            action,
+            assessment_id: asmtId || null,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok)
+          throw new Error(data.error || `HTTP ${res.status}`);
+
+        const s = data.summary || {};
+        sendStatus.textContent = `Done. Total: ${s.total ?? 0}, Sent: ${
+          s.sent ?? 0
+        }, Drafted: ${s.drafted ?? 0}, Failed: ${s.failed ?? 0}`;
+        setTimeout(closeModal, 1200);
+      } catch (e) {
+        sendStatus.textContent = `Failed: ${e.message}`;
+      } finally {
+        sendSubmit.disabled = false;
+      }
+    });
+  });
+</script>
+{% endblock %}
