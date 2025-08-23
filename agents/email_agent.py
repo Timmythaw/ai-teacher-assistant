@@ -160,15 +160,15 @@ class EmailAgent:
             raise
 
 
-# Test code - only run if this file is executed directly
-if __name__ == "__main__":
-    try:
-        agent = EmailAgent()
-        result = agent.run(
-            "Send an email to john@example.com about the upcoming meeting tomorrow at 2 PM. "
-            "Make it professional and include the agenda."
-        )
-        print("\n---Email Agent Results---")
-        print(result)
-    except Exception as e:
-        print(f"Error testing EmailAgent: {e}")
+# # Test code - only run if this file is executed directly
+# if __name__ == "__main__":
+#     try:
+#         agent = EmailAgent()
+#         result = agent.run(
+#             "Send an email to john@example.com about the upcoming meeting tomorrow at 2 PM. "
+#             "Make it professional and include the agenda."
+#         )
+#         print("\n---Email Agent Results---")
+#         print(result)
+#     except Exception as e:
+#         print(f"Error testing EmailAgent: {e}")

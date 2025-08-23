@@ -4,6 +4,10 @@ import json
 from pathlib import Path
 from flask import Flask, request, render_template, abort
 from werkzeug.utils import secure_filename
+# --- Email routes ---
+from agents.email_agent import EmailAgent
+from flask import jsonify
+from integrations.form_creator import create_google_form
 
 # Ensure package imports work
 import sys
@@ -69,6 +73,30 @@ def generate_assessment():
         dest.as_posix(),
         {"type": asmt_type, "difficulty": difficulty, "count": count, "rubric": rubric}
     )
+    if not isinstance(result, dict) or "questions" not in result:
+        return app.response_class(
+            response=json.dumps({"ok": False, "error": result.get("error", "Invalid assessment result"), "assessment": result}, ensure_ascii=False, indent=2),
+            status=400,
+            mimetype="application/json"
+        )
+
+    # Optional: create a Google Form if user checked the box
+    create_form = request.form.get("create_form") is not None
+    form_info = None
+    if create_form:
+        # Title can use the filename or a friendly fallback
+        title = f"Assessment - {Path(dest).stem}"
+        form_info = create_google_form(result, title=title)
+        # You can add basic status normalization
+        if isinstance(form_info, dict) and form_info.get("success"):
+            result["_google_form"] = {
+                "formId": form_info.get("formId"),
+                "formUrl": form_info.get("formUrl"),
+                "questionCount": form_info.get("questionCount")
+            }
+        else:
+            # Include error from create_google_form so the UI can show it
+            result["_google_form_error"] = form_info
 
     # Return JSON response
     return app.response_class(
@@ -111,6 +139,47 @@ def generate_lesson_plan():
         status=200,
         mimetype="application/json"
     )
+
+@app.route("/email", methods=["GET"])
+def email_page():
+    return render_template("email.html")
+
+@app.route("/email/compose", methods=["POST"])
+def email_compose():
+    """
+    Accepts a simple form and builds a prompt for EmailAgent.
+    Fields: to_email, subject, notes, tone, action (send|draft), cc, bcc
+    """
+    to_email = (request.form.get("to_email") or "").strip()
+    subject = request.form.get("subject") or ""
+    notes = request.form.get("notes") or ""
+    tone = request.form.get("tone") or "professional, friendly"
+    action = (request.form.get("action") or "send").strip().lower()
+    cc = (request.form.get("cc") or "").strip()
+    bcc = (request.form.get("bcc") or "").strip()
+
+    # Build a structured prompt so parse_prompt_to_fields can extract everything
+    prompt = f"""to: {to_email}
+subject: {subject}
+tone: {tone}
+action: {action}
+cc: {cc}
+bcc: {bcc}
+notes: {notes}
+"""
+
+    try:
+        agent = EmailAgent()  # will init Gmail service; needs credentials.json
+        result = agent.run(prompt, default_use_html=True)
+        status = 200 if result.get("ok") else 400
+        return app.response_class(
+            response=json.dumps(result, ensure_ascii=False, indent=2),
+            status=status,
+            mimetype="application/json",
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 
 if __name__ == "__main__":
     # For local dev

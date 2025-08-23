@@ -1,20 +1,27 @@
-{% extends "base.html" %}
-{% set breadcrumbs = [
-{'label': 'Dashboard', 'url': url_for('index')},
-{'label': 'Generate Assessment', 'url': None}
-] %}
-{% block title %}Generate Assessment — AI Lesson Planner{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% set breadcrumbs = [ {'label': 'Dashboard', 'url':
+url_for('index')}, {'label': 'Generate Assessment', 'url': None} ] %} {% block
+title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
+%}
 <h1 class="text-xl font-semibold mb-4">Generate Assessment from PDF</h1>
 
-<form id="upload-form" action="{{ url_for('generate_assessment') }}" method="post" enctype="multipart/form-data"
-  class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5">
+<form
+  id="upload-form"
+  action="{{ url_for('generate_assessment') }}"
+  method="post"
+  enctype="multipart/form-data"
+  class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5"
+>
   <!-- PDF Upload -->
   <div>
     <label for="pdf" class="block text-sm font-medium mb-1">Course PDF</label>
-    <input id="pdf" name="pdf" type="file" accept="application/pdf" required class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md 
-                  file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
+    <input
+      id="pdf"
+      name="pdf"
+      type="file"
+      accept="application/pdf"
+      required
+      class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5"
+    />
   </div>
 
   <!-- Options -->
@@ -29,8 +36,14 @@
     </div>
 
     <div>
-      <label for="difficulty" class="block text-sm font-medium mb-1">Difficulty</label>
-      <select id="difficulty" name="difficulty" class="w-full border rounded-md p-2">
+      <label for="difficulty" class="block text-sm font-medium mb-1"
+        >Difficulty</label
+      >
+      <select
+        id="difficulty"
+        name="difficulty"
+        class="w-full border rounded-md p-2"
+      >
         <option>Easy</option>
         <option selected>Medium</option>
         <option>Hard</option>
@@ -38,8 +51,18 @@
     </div>
 
     <div>
-      <label for="count" class="block text-sm font-medium mb-1">Questions</label>
-      <input id="count" name="count" type="number" min="1" max="50" value="5" class="w-full border rounded-md p-2" />
+      <label for="count" class="block text-sm font-medium mb-1"
+        >Questions</label
+      >
+      <input
+        id="count"
+        name="count"
+        type="number"
+        min="1"
+        max="50"
+        value="5"
+        class="w-full border rounded-md p-2"
+      />
     </div>
   </div>
 
@@ -51,9 +74,22 @@
 
   <!-- Submit -->
   <div class="flex items-center gap-3">
-    <button type="submit" class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
+    <button
+      type="submit"
+      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+    >
       Generate
     </button>
+    <label class="inline-flex items-center gap-2">
+      <input
+        id="create_form"
+        name="create_form"
+        type="checkbox"
+        class="h-4 w-4"
+      />
+      <span class="text-sm">Also create a Google Form</span>
+    </label>
+
     <span class="text-xs text-gray-500">
       Preview will render below. Use Download to get a PDF.
     </span>
@@ -65,102 +101,123 @@
   <div class="flex items-center justify-between mb-2">
     <div class="text-sm text-gray-500">Preview</div>
     <div class="flex items-center gap-2">
-      <button id="copy-md-btn" type="button"
+      <button
+        id="copy-md-btn"
+        type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Markdown">Copy Markdown</button>
-      <button id="copy-plain-btn" type="button"
+        title="Copy Markdown"
+      >
+        Copy Markdown
+      </button>
+      <button
+        id="copy-plain-btn"
+        type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Visible Text">Copy Text</button>
-      <button id="download-pdf-btn" type="button"
+        title="Copy Visible Text"
+      >
+        Copy Text
+      </button>
+      <button
+        id="download-pdf-btn"
+        type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black"
-        title="Download as PDF">Download PDF</button>
+        title="Download as PDF"
+      >
+        Download PDF
+      </button>
     </div>
   </div>
-  <article id="result" class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"></article>
+  <article
+    id="result"
+    class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"
+  ></article>
 </section>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById('upload-form');
-    const resultWrapper = document.getElementById('result-wrapper');
-    const resultEl = document.getElementById('result');
-    const copyMdBtn = document.getElementById('copy-md-btn');
-    const copyPlainBtn = document.getElementById('copy-plain-btn');
-    const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const form = document.getElementById("upload-form");
+    const resultWrapper = document.getElementById("result-wrapper");
+    const resultEl = document.getElementById("result");
+    const copyMdBtn = document.getElementById("copy-md-btn");
+    const copyPlainBtn = document.getElementById("copy-plain-btn");
+    const downloadPdfBtn = document.getElementById("download-pdf-btn");
 
-    let lastMarkdown = '';
-    let suggestedFileName = 'assessment';
+    let lastMarkdown = "";
+    let suggestedFileName = "assessment";
 
     // --- JSON → Markdown ---
     function jsonToMarkdownStrict(data) {
-      if (!data || typeof data !== 'object') {
-        return '### Error\n\nInvalid data.';
+      if (!data || typeof data !== "object") {
+        return "### Error\n\nInvalid data.";
       }
 
       const lines = [];
-      const title = data.type ? `${data.type} Assessment` : "Generated Assessment";
-      lines.push(`# ${title}`, '');
+      const title = data.type
+        ? `${data.type} Assessment`
+        : "Generated Assessment";
+      lines.push(`# ${title}`, "");
       if (data.difficulty) {
-        lines.push(`**Difficulty:** ${data.difficulty}`, '');
+        lines.push(`**Difficulty:** ${data.difficulty}`, "");
       }
 
       if (Array.isArray(data.questions)) {
         data.questions.forEach((q, i) => {
-          lines.push(`## Q${i + 1}. ${q.q || "Untitled Question"}`, '');
+          lines.push(`## Q${i + 1}. ${q.q || "Untitled Question"}`, "");
           if (Array.isArray(q.options) && q.options.length) {
             q.options.forEach((opt, j) => {
               const letter = String.fromCharCode(65 + j);
               lines.push(`- ${letter}. ${opt}`);
             });
-            lines.push('');
+            lines.push("");
           }
           if (q.answer != null) {
-            lines.push(`**Answer:** ${q.answer}`, '');
+            lines.push(`**Answer:** ${q.answer}`, "");
           }
         });
       }
 
       if (Array.isArray(data.rubric) && data.rubric.length) {
-        lines.push('## Rubric', '');
-        data.rubric.forEach(r => {
+        lines.push("## Rubric", "");
+        data.rubric.forEach((r) => {
           lines.push(`- ${r.criteria || "Criteria"} (${r.points ?? 0} pts)`);
         });
-        lines.push('');
+        lines.push("");
       }
 
-      return lines.join('\n').trim();
+      return lines.join("\n").trim();
     }
 
     // --- Form submit handler ---
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      resultWrapper.classList.add('hidden');
-      resultEl.innerHTML = '';
-      lastMarkdown = '';
-      suggestedFileName = 'assessment';
+      resultWrapper.classList.add("hidden");
+      resultEl.innerHTML = "";
+      lastMarkdown = "";
+      suggestedFileName = "assessment";
 
-      const pdfInput = document.getElementById('pdf');
+      const pdfInput = document.getElementById("pdf");
       if (pdfInput.files && pdfInput.files[0]) {
-        const base = pdfInput.files[0].name.replace(/\.[^.]+$/, '');
+        const base = pdfInput.files[0].name.replace(/\.[^.]+$/, "");
         suggestedFileName = `assessment_${base}`;
       }
 
       try {
-        const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
-        const contentType = res.headers.get('Content-Type') || '';
-        let md = '';
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+        });
+        const contentType = res.headers.get("Content-Type") || "";
+        let md = "";
 
-        if (contentType.includes('application/json')) {
+        if (contentType.includes("application/json")) {
           const obj = await res.json();
           if (obj.error) {
             md = `### Error\n\n${obj.error}`;
-            suggestedFileName = 'assessment_error';
+            suggestedFileName = "assessment_error";
           } else {
             md = jsonToMarkdownStrict(obj);
           }
@@ -171,13 +228,12 @@
         lastMarkdown = md;
         const html = marked.parse(md);
         resultEl.innerHTML = DOMPurify.sanitize(html);
-        resultWrapper.classList.remove('hidden');
-        resultWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+        resultWrapper.classList.remove("hidden");
+        resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {
         lastMarkdown = `### Error\n\n${err.message}`;
         resultEl.innerText = lastMarkdown;
-        resultWrapper.classList.remove('hidden');
+        resultWrapper.classList.remove("hidden");
       }
     });
 
@@ -186,32 +242,40 @@
       const original = btnEl.innerText;
       try {
         await navigator.clipboard.writeText(text);
-        btnEl.innerText = 'Copied!';
-        btnEl.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-800');
+        btnEl.innerText = "Copied!";
+        btnEl.classList.add(
+          "bg-emerald-50",
+          "border-emerald-300",
+          "text-emerald-800"
+        );
         setTimeout(() => {
           btnEl.innerText = original;
-          btnEl.classList.remove('bg-emerald-50', 'border-emerald-300', 'text-emerald-800');
+          btnEl.classList.remove(
+            "bg-emerald-50",
+            "border-emerald-300",
+            "text-emerald-800"
+          );
         }, 1200);
       } catch {
-        btnEl.innerText = 'Failed';
-        btnEl.classList.add('bg-red-50', 'border-red-300', 'text-red-800');
+        btnEl.innerText = "Failed";
+        btnEl.classList.add("bg-red-50", "border-red-300", "text-red-800");
         setTimeout(() => {
           btnEl.innerText = original;
-          btnEl.classList.remove('bg-red-50', 'border-red-300', 'text-red-800');
+          btnEl.classList.remove("bg-red-50", "border-red-300", "text-red-800");
         }, 1400);
       }
     }
 
-    copyMdBtn.addEventListener('click', () => {
+    copyMdBtn.addEventListener("click", () => {
       copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim());
     });
 
-    copyPlainBtn.addEventListener('click', () => {
+    copyPlainBtn.addEventListener("click", () => {
       copyWithFeedback(copyPlainBtn, resultEl.innerText.trim());
     });
 
     // --- PDF Download ---
-    downloadPdfBtn.addEventListener('click', () => {
+    downloadPdfBtn.addEventListener("click", () => {
       if (typeof html2pdf === "undefined") {
         alert("PDF generator not loaded yet. Please try again in a moment.");
         return;
@@ -220,13 +284,13 @@
       const opt = {
         margin: [15, 15, 15, 15],
         filename: `${suggestedFileName}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
 
       const preview = resultEl.cloneNode(true);
-      preview.className = 'prose prose-slate';
+      preview.className = "prose prose-slate";
       preview.style.cssText = `
       background-color: #ffffff !important;
       border: none !important;
