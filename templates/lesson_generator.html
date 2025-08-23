@@ -1,87 +1,468 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %}Generate Lesson Plan — AI Lesson
+Planner{% endblock %} {% block content %}
+<h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
 
-{% block title %}Generate Lesson Plan — AI Lesson Planner{% endblock %}
-
-{% block content %}
-  <h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
-
-  <form id="lesson-form"
-        action="{{ url_for('lessons.generate_lesson_plan') }}"
-        method="post"
-        enctype="multipart/form-data"
-        class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5">
-
-    <div class="grid sm:grid-cols-2 gap-4">
-      <div>
-        <label for="pdf" class="block text-sm font-medium mb-1">Course Outline (PDF)</label>
-        <input id="pdf" name="pdf" type="file" accept="application/pdf"
-               class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
-        <p class="text-xs text-gray-500 mt-1">Optional. Provide at least one of Course Outline or Lecture Notes.</p>
-      </div>
-<!-- 
+<form
+  id="lesson-form"
+  action="{{ url_for('generate_lesson_plan') }}"
+  method="post"
+  enctype="multipart/form-data"
+  class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5"
+>
+  <div class="grid sm:grid-cols-2 gap-4">
+    <div>
+      <label for="course_outline" class="block text-sm font-medium mb-1"
+        >Course Outline (PDF)</label
+      >
+      <input
+        id="course_outline"
+        name="course_outline"
+        type="file"
+        accept="application/pdf"
+        class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5"
+      />
+      <p class="text-xs text-gray-500 mt-1">
+        Optional. Provide at least one of Course Outline or Lecture Notes.
+      </p>
+    </div>
+    <!-- 
       <div>
         <label for="lecture_notes" class="block text-sm font-medium mb-1">Lecture Notes (PDF)</label>
         <input id="lecture_notes" name="lecture_notes" type="file" accept="application/pdf"
                class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
-      </div>
-    </div> -->
+      </div> -->
+  </div>
 
-    <div class="grid sm:grid-cols-3 gap-4">
-      <div>
-        <label for="weeks" class="block text-sm font-medium mb-1">Study Duration (weeks)</label>
-        <input id="weeks" name="weeks" type="number" min="1" max="52" step="1" value="8"
-               class="w-full border rounded-md p-2" required />
-      </div>
-
-      <div>
-        <label for="students" class="block text-sm font-medium mb-1">Class Size (students)</label>
-        <input id="students" name="students" type="number" min="1" max="500" step="1" value="30"
-               class="w-full border rounded-md p-2" required />
-      </div>
-
-      <div>
-        <label for="sections" class="block text-sm font-medium mb-1">Sections per week</label>
-        <input id="sections" name="sections" type="number" min="1" max="10" step="1" value="1"
-               class="w-full border rounded-md p-2" required />
-        <p class="text-xs text-gray-500 mt-1">Enter how many sessions you run each week.</p>
-      </div>
+  <div class="grid sm:grid-cols-3 gap-4">
+    <div>
+      <label for="weeks" class="block text-sm font-medium mb-1"
+        >Study Duration (weeks)</label
+      >
+      <input
+        id="weeks"
+        name="weeks"
+        type="number"
+        min="1"
+        max="52"
+        step="1"
+        value="8"
+        class="w-full border rounded-md p-2"
+        required
+      />
     </div>
 
-    <div class="flex items-center gap-3">
-      <button type="submit" class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
-        Generate Plan
+    <div>
+      <label for="students" class="block text-sm font-medium mb-1"
+        >Class Size (students)</label
+      >
+      <input
+        id="students"
+        name="students"
+        type="number"
+        min="1"
+        max="500"
+        step="1"
+        value="30"
+        class="w-full border rounded-md p-2"
+        required
+      />
+    </div>
+
+    <div>
+      <label for="sections" class="block text-sm font-medium mb-1"
+        >Sections per week</label
+      >
+      <input
+        id="sections"
+        name="sections"
+        type="number"
+        min="1"
+        max="10"
+        step="1"
+        value="1"
+        class="w-full border rounded-md p-2"
+        required
+      />
+      <p class="text-xs text-gray-500 mt-1">
+        Enter how many sessions you run each week.
+      </p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button
+      type="submit"
+      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+    >
+      Generate Plan
+    </button>
+    <span id="hint" class="text-xs text-gray-500"
+      >Upload at least one PDF.</span
+    >
+  </div>
+</form>
+
+<!-- Preview -->
+<section id="lp-result-wrapper" class="mt-4 hidden">
+  <div class="flex items-center justify-between mb-2">
+    <div class="text-sm text-gray-500">Preview</div>
+    <div class="flex items-center gap-2">
+      <button
+        id="lp-copy-md-btn"
+        type="button"
+        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+        title="Copy Markdown"
+      >
+        Copy Markdown
       </button>
-      <span id="hint" class="text-xs text-gray-500">Upload at least one PDF.</span>
+      <button
+        id="lp-copy-plain-btn"
+        type="button"
+        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+        title="Copy Visible Text"
+      >
+        Copy Text
+      </button>
+      <button
+        id="lp-download-pdf-btn"
+        type="button"
+        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black"
+        title="Download as PDF"
+      >
+        Download PDF
+      </button>
     </div>
-  </form>
+  </div>
+  <article
+    id="lp-result"
+    class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"
+  ></article>
+</section>
+{% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-  <!-- Markdown-rendered result -->
-  <div id="plan-result" class="hidden"></div>
-{% endblock %}
-
-{% block scripts %}
 <script>
-  const form = document.getElementById('lesson-form');
-  const resultEl = document.getElementById('plan-result');
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("lesson-form");
+    const resultWrapper = document.getElementById("lp-result-wrapper");
+    const resultEl = document.getElementById("lp-result");
+    const copyMdBtn = document.getElementById("lp-copy-md-btn");
+    const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
+    const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    resultEl.classList.add('hidden');
+    let lastMarkdown = "";
+    let suggestedFileName = "lesson_plan";
 
-    const data = new FormData(form);
-    const res = await fetch(form.action, { method: 'POST', body: data });
-    const md = await res.text(); // server returns Markdown (or plain text you treat as MD)
+    function toArray(x) {
+      return Array.isArray(x) ? x : x == null ? [] : [x];
+    }
 
-    // Convert Markdown to HTML
-    const html = marked.parse(md);
+    function pick(obj, keys) {
+      for (const k of keys) {
+        if (
+          obj &&
+          Object.prototype.hasOwnProperty.call(obj, k) &&
+          obj[k] != null
+        ) {
+          return obj[k];
+        }
+      }
+      return undefined;
+    }
 
-    // Sanitize (important if any untrusted content can appear)
-    const safe = DOMPurify.sanitize(html);
+    function jsonToMarkdownFlexibleLP(data) {
+      if (!data || typeof data !== "object")
+        return "### Error\n\nInvalid data.";
+      const lines = [];
+      const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
+      const totalWeeks = pick(data, [
+        "total_duration",
+        "weeks",
+        "duration_weeks",
+      ]);
+      const classSize = pick(data, ["class_size", "students", "num_students"]);
+      const sectionsPerWeek = pick(data, [
+        "sections_per_week",
+        "sectionsPerWeek",
+      ]);
+      lines.push(`# ${title}`, "");
 
-    // Render and style
-    resultEl.innerHTML = safe;
-    resultEl.classList.remove('hidden');
-    resultEl.classList.add('prose', 'prose-slate', 'max-w-none'); // Tailwind typography
+      const meta = [];
+      if (totalWeeks != null)
+        meta.push(`Total duration: ${totalWeeks} week(s)`);
+      if (classSize != null) meta.push(`Class size: ${classSize}`);
+      if (sectionsPerWeek != null)
+        meta.push(`Sections per week: ${sectionsPerWeek}`);
+      if (meta.length) lines.push(...meta.map((m) => `- ${m}`));
+
+      const overview = pick(data, ["overview", "summary"]);
+      if (overview) {
+        lines.push(
+          "",
+          "## Overview",
+          "",
+          typeof overview === "string"
+            ? overview
+            : JSON.stringify(overview, null, 2)
+        );
+      }
+
+      const vocabulary = pick(data, ["vocabulary", "key_terms"]);
+      if (vocabulary) {
+        lines.push("", "## Key Vocabulary", "");
+        toArray(vocabulary).forEach((v) =>
+          lines.push(
+            `- ${typeof v === "object" ? JSON.stringify(v) : String(v)}`
+          )
+        );
+      }
+
+      const weekly = pick(data, [
+        "weekly_schedule",
+        "weeks_schedule",
+        "plan",
+        "weekly",
+      ]);
+      if (Array.isArray(weekly) && weekly.length) {
+        lines.push("", "## Weekly Schedule", "");
+        weekly.forEach((w, i) => {
+          const label = pick(w, ["week", "label"]) ?? i + 1;
+          const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
+          lines.push(`### Week ${label}: ${topic}`);
+
+          const objectives = pick(w, [
+            "objectives",
+            "goals",
+            "learning_objectives",
+          ]);
+          if (objectives) {
+            lines.push("", "**Objectives**");
+            toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
+          }
+
+          const sections = pick(w, [
+            "sections",
+            "lessons",
+            "parts",
+            "sessions",
+          ]);
+          if (Array.isArray(sections) && sections.length) {
+            sections.forEach((s, idx) => {
+              lines.push("", `#### Section ${idx + 1}`);
+              const activities = pick(s, ["activities", "activity", "tasks"]);
+              if (activities) {
+                lines.push("", "- Activities:");
+                toArray(activities).forEach((a) =>
+                  lines.push(
+                    ` - ${
+                      typeof a === "object" ? JSON.stringify(a) : String(a)
+                    }`
+                  )
+                );
+              }
+              const materials = pick(s, ["materials", "resources"]);
+              if (materials) {
+                lines.push("", "- Materials/Resources:");
+                toArray(materials).forEach((m) =>
+                  lines.push(
+                    ` - ${
+                      typeof m === "object" ? JSON.stringify(m) : String(m)
+                    }`
+                  )
+                );
+              }
+              const differentiation = pick(s, [
+                "differentiation",
+                "adaptations",
+              ]);
+              if (differentiation) {
+                lines.push("", "- Differentiation:");
+                toArray(differentiation).forEach((d) =>
+                  lines.push(
+                    ` - ${
+                      typeof d === "object" ? JSON.stringify(d) : String(d)
+                    }`
+                  )
+                );
+              }
+              const assessment = pick(s, [
+                "assessment",
+                "checks",
+                "evaluation",
+              ]);
+              if (assessment) {
+                lines.push("", "- Assessment:");
+                toArray(assessment).forEach((a) =>
+                  lines.push(
+                    ` - ${
+                      typeof a === "object" ? JSON.stringify(a) : String(a)
+                    }`
+                  )
+                );
+              }
+              const homework = pick(s, ["homework", "extension"]);
+              if (homework) {
+                lines.push("", "- Homework/Extension:");
+                toArray(homework).forEach((h) =>
+                  lines.push(
+                    ` - ${
+                      typeof h === "object" ? JSON.stringify(h) : String(h)
+                    }`
+                  )
+                );
+              }
+            });
+          }
+
+          const resources = pick(w, ["resources", "links", "reference"]);
+          if (resources) {
+            lines.push("", "**Weekly Resources**");
+            toArray(resources).forEach((r) =>
+              lines.push(
+                `- ${typeof r === "object" ? JSON.stringify(r) : String(r)}`
+              )
+            );
+          }
+          lines.push("");
+        });
+      }
+
+      const external = pick(data, ["external_resources", "references"]);
+      if (external) {
+        lines.push("## External Resources", "");
+        toArray(external).forEach((r) =>
+          lines.push(
+            `- ${typeof r === "object" ? JSON.stringify(r) : String(r)}`
+          )
+        );
+      }
+
+      const md = lines.join("\n").trim();
+      return md || "```json\n" + JSON.stringify(data, null, 2) + "\n```";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      resultWrapper.classList.add("hidden");
+      resultEl.innerHTML = "";
+      lastMarkdown = "";
+      suggestedFileName = "lesson_plan";
+
+      const file = document.getElementById("course_outline");
+      if (file.files && file.files.length > 0) {
+        const base = file.files[0].name.replace(/\.[^.]+$/, "");
+        suggestedFileName = `lesson_plan_${base}`;
+      }
+
+      const data = new FormData(form);
+      try {
+        const res = await fetch(form.action, { method: "POST", body: data });
+        const contentType = res.headers.get("Content-Type") || "";
+        let md = "";
+        if (contentType.includes("application/json")) {
+          const obj = await res.json();
+          if (obj && typeof obj === "object" && obj.error) {
+            md = `### Error\n\n${obj.error}`;
+            suggestedFileName = "lesson_plan_error";
+          } else {
+            md = jsonToMarkdownFlexibleLP(obj || {});
+          }
+        } else {
+          md = await res.text();
+        }
+        lastMarkdown = md;
+        const html = typeof marked !== "undefined" ? marked.parse(md) : md;
+        const safe =
+          typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+        resultEl.innerHTML = safe;
+        resultWrapper.classList.remove("hidden");
+        resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        lastMarkdown = `### Error\n\n${err.message}`;
+        resultEl.innerText = lastMarkdown;
+        resultWrapper.classList.remove("hidden");
+      }
+    });
+
+    async function copyWithFeedback(btn, text) {
+      const original = btn.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.innerText = "Copied!";
+        btn.classList.add(
+          "bg-emerald-50",
+          "border-emerald-300",
+          "text-emerald-800"
+        );
+        setTimeout(() => {
+          btn.innerText = original;
+          btn.classList.remove(
+            "bg-emerald-50",
+            "border-emerald-300",
+            "text-emerald-800"
+          );
+        }, 1200);
+      } catch {
+        btn.innerText = "Failed";
+        btn.classList.add("bg-red-50", "border-red-300", "text-red-800");
+        setTimeout(() => {
+          btn.innerText = original;
+          btn.classList.remove("bg-red-50", "border-red-300", "text-red-800");
+        }, 1400);
+      }
+    }
+
+    copyMdBtn.addEventListener("click", () => {
+      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim());
+    });
+    copyPlainBtn.addEventListener("click", () => {
+      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim());
+    });
+
+    downloadPdfBtn.addEventListener("click", () => {
+      const opt = {
+        margin: [15, 15, 15, 15],
+        filename: `${suggestedFileName}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+
+      const preview = resultEl.cloneNode(true);
+      preview.className = "prose prose-slate";
+      preview.style.cssText = `
+      background-color: #ffffff !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      color: #000000;
+    `;
+
+      const nestedCards = preview.querySelectorAll(
+        ".border, .rounded, .shadow, .bg-white"
+      );
+      nestedCards.forEach((el) => {
+        el.style.border = "none";
+        el.style.borderRadius = "0";
+        el.style.boxShadow = "none";
+        el.style.backgroundColor = "transparent";
+      });
+
+      html2pdf().set(opt).from(preview).save();
+    });
   });
 </script>
 {% endblock %}
