@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Lesson Plan — AI Lesson Planner{% endblock %}
+
+{% block content %}
+  <h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
+
+  <form id="lesson-form"
+        action="{{ url_for('generate_lesson_plan') }}"
+        method="post"
+        enctype="multipart/form-data"
+        class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5">
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label for="course_outline" class="block text-sm font-medium mb-1">Course Outline (PDF)</label>
+        <input id="course_outline" name="course_outline" type="file" accept="application/pdf"
+               class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
+        <p class="text-xs text-gray-500 mt-1">Optional. Provide at least one of Course Outline or Lecture Notes.</p>
+      </div>
+<!-- 
+      <div>
+        <label for="lecture_notes" class="block text-sm font-medium mb-1">Lecture Notes (PDF)</label>
+        <input id="lecture_notes" name="lecture_notes" type="file" accept="application/pdf"
+               class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
+      </div>
+    </div> -->
+
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label for="weeks" class="block text-sm font-medium mb-1">Study Duration (weeks)</label>
+        <input id="weeks" name="weeks" type="number" min="1" max="52" step="1" value="8"
+               class="w-full border rounded-md p-2" required />
+      </div>
+
+      <div>
+        <label for="students" class="block text-sm font-medium mb-1">Class Size (students)</label>
+        <input id="students" name="students" type="number" min="1" max="500" step="1" value="30"
+               class="w-full border rounded-md p-2" required />
+      </div>
+
+      <div>
+        <label for="sections" class="block text-sm font-medium mb-1">Sections per week</label>
+        <input id="sections" name="sections" type="number" min="1" max="10" step="1" value="1"
+               class="w-full border rounded-md p-2" required />
+        <p class="text-xs text-gray-500 mt-1">Enter how many sessions you run each week.</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
+        Generate Plan
+      </button>
+      <span id="hint" class="text-xs text-gray-500">Upload at least one PDF.</span>
+    </div>
+  </form>
+
+  <!-- Markdown-rendered result -->
+  <div id="plan-result" class="hidden"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById('upload-form');
+  const resultEl = document.getElementById('result');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultEl.classList.add('hidden');
+
+    const data = new FormData(form);
+    const res = await fetch(form.action, { method: 'POST', body: data });
+    const md = await res.text(); // server returns Markdown (or plain text you treat as MD)
+
+    // Convert Markdown to HTML
+    const html = marked.parse(md);
+
+    // Sanitize (important if any untrusted content can appear)
+    const safe = DOMPurify.sanitize(html);
+
+    // Render and style
+    resultEl.innerHTML = safe;
+    resultEl.classList.remove('hidden');
+    resultEl.classList.add('prose', 'prose-slate', 'max-w-none'); // Tailwind typography
+  });
+</script>
+{% endblock %}

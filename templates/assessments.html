@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Assessment — AI Lesson Planner{% endblock %}
+
+{% block content %}
+  <h1 class="text-xl font-semibold mb-4">Generate Assessment from PDF</h1>
+
+  <form id="upload-form"
+        action="{{ url_for('generate_assessment') }}"
+        method="post"
+        enctype="multipart/form-data"
+        class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5">
+
+    <div>
+      <label for="pdf" class="block text-sm font-medium mb-1">Course PDF</label>
+      <input id="pdf" name="pdf" type="file" accept="application/pdf" required
+             class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label for="type" class="block text-sm font-medium mb-1">Type</label>
+        <select id="type" name="type" class="w-full border rounded-md p-2">
+          <option value="MCQ" selected>MCQ</option>
+          <option value="ShortAnswer">ShortAnswer</option>
+          <option value="Project">Project</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="difficulty" class="block text-sm font-medium mb-1">Difficulty</label>
+        <select id="difficulty" name="difficulty" class="w-full border rounded-md p-2">
+          <option>Easy</option>
+          <option selected>Medium</option>
+          <option>Hard</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="count" class="block text-sm font-medium mb-1">Questions</label>
+        <input id="count" name="count" type="number" min="1" max="50" value="5"
+               class="w-full border rounded-md p-2" />
+      </div>
+    </div>
+
+    <label class="inline-flex items-center gap-2">
+      <input id="rubric" name="rubric" type="checkbox" checked class="h-4 w-4" />
+      <span class="text-sm">Include rubric</span>
+    </label>
+
+    <div>
+      <button type="submit" class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
+        Generate
+      </button>
+    </div>
+  </form>
+
+  <pre id="result" class="whitespace-pre-wrap bg-gray-50 border rounded-xl p-4 mt-4 hidden"></pre>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById('upload-form');
+  const resultEl = document.getElementById('result');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultEl.classList.add('hidden');
+
+    const data = new FormData(form);
+    const res = await fetch(form.action, { method: 'POST', body: data });
+    const md = await res.text(); // server returns Markdown (or plain text you treat as MD)
+
+    // Convert Markdown to HTML
+    const html = marked.parse(md);
+
+    // Sanitize (important if any untrusted content can appear)
+    const safe = DOMPurify.sanitize(html);
+
+    // Render and style
+    resultEl.innerHTML = safe;
+    resultEl.classList.remove('hidden');
+    resultEl.classList.add('prose', 'prose-slate', 'max-w-none'); // Tailwind typography
+  });
+</script>
+{% endblock %}
