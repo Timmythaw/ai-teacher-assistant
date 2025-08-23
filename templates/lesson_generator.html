@@ -6,15 +6,15 @@
   <h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
 
   <form id="lesson-form"
-        action="{{ url_for('generate_lesson_plan') }}"
+        action="{{ url_for('lessons.generate_lesson_plan') }}"
         method="post"
         enctype="multipart/form-data"
         class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5">
 
     <div class="grid sm:grid-cols-2 gap-4">
       <div>
-        <label for="course_outline" class="block text-sm font-medium mb-1">Course Outline (PDF)</label>
-        <input id="course_outline" name="course_outline" type="file" accept="application/pdf"
+        <label for="pdf" class="block text-sm font-medium mb-1">Course Outline (PDF)</label>
+        <input id="pdf" name="pdf" type="file" accept="application/pdf"
                class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
         <p class="text-xs text-gray-500 mt-1">Optional. Provide at least one of Course Outline or Lecture Notes.</p>
       </div>
@@ -61,8 +61,8 @@
 
 {% block scripts %}
 <script>
-  const form = document.getElementById('upload-form');
-  const resultEl = document.getElementById('result');
+  const form = document.getElementById('lesson-form');
+  const resultEl = document.getElementById('plan-result');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
