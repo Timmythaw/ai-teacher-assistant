@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% block title %}Email — AI Lesson Planner{% endblock
+%} {% block content %}
+<h1 class="text-xl font-semibold mb-4">Compose Email</h1>
+
+<form
+  id="email-form"
+  action="{{ url_for('email_compose') }}"
+  method="post"
+  class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5"
+>
+  <div class="grid sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1" for="to_email">To</label>
+      <input
+        class="w-full border rounded-md p-2"
+        id="to_email"
+        name="to_email"
+        placeholder="john@example.com"
+        required
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1" for="tone">Tone</label>
+      <input
+        class="w-full border rounded-md p-2"
+        id="tone"
+        name="tone"
+        value="professional, friendly"
+      />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="subject">Subject</label>
+    <input
+      class="w-full border rounded-md p-2"
+      id="subject"
+      name="subject"
+      placeholder="Project update"
+    />
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1" for="cc">CC</label>
+      <input
+        class="w-full border rounded-md p-2"
+        id="cc"
+        name="cc"
+        placeholder="alice@example.com,bob@example.com"
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1" for="bcc">BCC</label>
+      <input
+        class="w-full border rounded-md p-2"
+        id="bcc"
+        name="bcc"
+        placeholder=""
+      />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="notes"
+      >Notes (what you want to say)</label
+    >
+    <textarea
+      class="w-full border rounded-md p-2"
+      id="notes"
+      name="notes"
+      rows="6"
+      placeholder="Please draft a professional note about the meeting tomorrow at 2 PM. Include an agenda."
+    ></textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1">Action</label>
+    <div class="flex gap-4">
+      <label class="inline-flex items-center gap-2">
+        <input type="radio" name="mode" value="send" checked />
+        <span>Send</span>
+      </label>
+      <label class="inline-flex items-center gap-2">
+        <input type="radio" name="mode" value="draft" /> <span>Draft</span>
+      </label>
+    </div>
+  </div>
+
+  <div>
+    <button
+      type="submit"
+      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+    >
+      {{ "Send / Draft" }}
+    </button>
+  </div>
+</form>
+
+<pre
+  id="email-result"
+  class="whitespace-pre-wrap bg-gray-50 border rounded-xl p-4 mt-4 hidden"
+></pre>
+{% endblock %} {% block scripts %}
+<script>
+  const form = document.getElementById("email-form");
+  const resultEl = document.getElementById("email-result");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    resultEl.classList.add("hidden");
+
+    const data = new FormData(form);
+    const url = form.action;
+    const res = await fetch(url, { method: "POST", body: data });
+
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      resultEl.textContent = JSON.stringify(json, null, 2);
+    } catch {
+      resultEl.textContent = text;
+    }
+    resultEl.classList.remove("hidden");
+  });
+</script>
+{% endblock %}
