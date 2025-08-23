@@ -219,7 +219,8 @@ def create_events_from_suggestions(
     service = get_google_service("calendar", "v3")
     results = []
     for i, slot in enumerate(suggested_slots, start=1):
-        title = f"{title_prefix}: {course_name}" if course_name else title_prefix
+        title = slot.get("title") or (f"{title_prefix}: {course_name}" if course_name else title_prefix)
+        location = slot.get("location") or location  # prefer per-slot location if provided
         res = create_event_for_slot(
             slot,
             service=service,
