@@ -380,6 +380,61 @@ def generate_lesson_plan():
         mimetype="application/json"
     )
 
+# --- Lesson Plans: list & save ---
+
+@app.route("/lesson-plans", methods=["GET"])
+def lesson_plans_list():
+    try:
+        res = supabase.table("lesson_plans") \
+            .select("*") \
+            .order("created_at", desc=True) \
+            .limit(50) \
+            .execute()
+        lesson_plans = res.data or []
+        return render_template("lesson_plans_list.html", lesson_plans=lesson_plans)
+    except Exception as e:
+        # fail soft to empty list
+        return render_template("lesson_plans_list.html", lesson_plans=[], error=str(e)), 200
+
+
+@app.route("/api/lesson-plans", methods=["POST"])
+def save_lesson_plan():
+    """
+    Body JSON:
+    {
+      "original_filename": "...",   # optional
+      "pdf_path": "...",            # optional (local path you saved)
+      "options": {...},             # weeks, students, sections, etc
+      "result": {...}               # lesson plan JSON (the thing you render)
+    }
+    """
+    try:
+        payload = request.get_json(silent=True) or {}
+        result = payload.get("result")
+
+        if not isinstance(result, dict):
+            return jsonify({"ok": False, "error": "Invalid payload: missing result object"}), 400
+
+        row = {
+            "original_filename": payload.get("original_filename"),
+            "pdf_path": payload.get("pdf_path"),
+            "options": payload.get("options"),
+            "result": result
+        }
+
+        db_res = supabase.table("lesson_plans").insert(row).execute()
+        if getattr(db_res, "error", None):
+            return jsonify({"ok": False, "error": str(db_res.error)}), 500
+
+        saved = (db_res.data or [None])[0]
+        return jsonify({"ok": True, "id": saved["id"] if saved else None, "saved": saved}), 200
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# Email Sendings Start Here 
+
 @app.route("/email", methods=["GET"])
 def email_page():
     return render_template("email.html")
