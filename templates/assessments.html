@@ -72,15 +72,7 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     <span class="text-sm">Include rubric</span>
   </label>
 
-  <!-- Submit -->
-  <div class="flex items-center gap-3">
-    <button
-      type="submit"
-      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
-    >
-      Generate
-    </button>
-    <label class="inline-flex items-center gap-2">
+  <label class="inline-flex items-center gap-2">
       <input
         id="create_form"
         name="create_form"
@@ -89,6 +81,16 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
       />
       <span class="text-sm">Also create a Google Form</span>
     </label>
+
+  <!-- Submit -->
+  <div class="flex items-center gap-3">
+    <button
+      type="submit"
+      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+    >
+      Generate
+    </button>
+    
 
     <span class="text-xs text-gray-500">
       Preview will render below. Use Download to get a PDF.

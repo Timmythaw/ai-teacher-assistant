@@ -1,8 +1,11 @@
 # app.py
 import os
+import io
+import csv
+from supabase import create_client, Client
 import json
 from pathlib import Path
-from flask import Flask, request, render_template, abort
+from flask import Flask, request, render_template, abort, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 # --- Email routes ---
 from agents.email_agent import EmailAgent
@@ -23,6 +26,12 @@ app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_CONTENT_LENGTH_MB", "
 UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", "uploads")).resolve()
 ALLOWED_EXTENSIONS = {".pdf"}
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
 def allowed_file(filename: str) -> bool:
     return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
@@ -180,6 +189,57 @@ notes: {notes}
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
+@app.route("/batches", methods=["GET"])
+def batches_page():
+    return render_template("course_batches.html")
+
+
+@app.route("/add-new-batch", methods=["POST"])
+def create_batch_upload_csv():
+    batch_name = request.form.get("batch_name")
+    file = request.files.get("students_csv")
+
+    if not batch_name or not file:
+        flash("Batch name and CSV file are required.", "error")
+        return redirect(url_for("courses_batches"))
+
+    # Read CSV content
+    stream = io.StringIO(file.stream.read().decode("utf-8"))
+    csv_reader = csv.DictReader(stream)
+
+    # Insert batch into Supabase 'batches' table and get batch id
+    batch_resp = supabase.table("batches").insert({"name": batch_name}).execute()
+
+
+    batch_id = batch_resp.data[0]["id"] if batch_resp.data else None
+    if hasattr(batch_resp, 'error') and batch_resp.error:
+        flash("Failed to create batch: " + str(batch_resp.error), "error")
+        return redirect(url_for("courses_batches"))
+
+    # Prepare list of students to insert
+    students_to_insert = []
+    for row in csv_reader:
+        name = row.get("name")
+        email = row.get("email")
+        if not name or not email:
+            continue  # skip invalid row
+        students_to_insert.append({
+            "batch_id": batch_id,
+            "name": name,
+            "email": email,
+        })
+
+    # Insert students if any
+    if students_to_insert:
+        students_resp = supabase.table("students").insert(students_to_insert).execute()
+        if students_resp.error:
+            flash("Batch created, but failed to insert some students: " + str(students_resp.error), "warning")
+        else:
+            flash(f"Batch '{batch_name}' created with {len(students_to_insert)} students.", "success")
+    else:
+        flash(f"Batch '{batch_name}' created, but no valid students found in CSV.", "warning")
+
+    return redirect(url_for("batches_page"))
 
 if __name__ == "__main__":
     # For local dev
