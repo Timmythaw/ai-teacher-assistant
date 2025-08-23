@@ -8,58 +8,53 @@
 
 <div class="flex flex-col gap-8 max-w-2xl w-full">
 
-  <!-- Existing Batches Card -->
-  <div class="bg-white rounded-xl shadow-md px-8 py-6">
-    <h2 class="text-lg font-medium mb-4">Existing Batches</h2>
-    <table class="min-w-full border-collapse">
-      <thead>
-        <tr class="bg-gray-50">
-          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">Batch Name</th>
-          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">Students</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Example row - replace with your Jinja for-loop as needed -->
-        <tr>
-          <td class="px-4 py-2 border-b">Batch A</td>
-          <td class="px-4 py-2 border-b">25</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Existing Batches Card -->
+    <div class="bg-white rounded-xl shadow-md px-8 py-6">
+        <h2 class="text-lg font-medium mb-4">Existing Batches</h2>
+        <table class="min-w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">Batch Name</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">Students</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in batches %}
+                <tr>
+                    <td class="px-4 py-2 border-b">{{ batch.name }}</td>
+                    <td class="px-4 py-2 border-b">{{ batch.students[0].count }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2" class="px-4 py-2 text-center text-gray-500">No batches found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-  <!-- Create New Batch Card -->
-  <div class="bg-white rounded-xl shadow-md px-8 py-6">
-    <h2 class="text-lg font-medium mb-4">Create New Batch</h2>
-    <form action="{{ url_for('create_batch_upload_csv') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          name="batch_name"
-          required
-          placeholder="Batch name"
-          class="flex-1 rounded border border-gray-300 px-3 py-2 text-base focus:border-gray-900 focus:ring focus:ring-brand-200"
-        />
-        <input
-          type="file"
-          name="students_csv"
-          accept=".csv"
-          required
-          class="flex-1 rounded border border-gray-300 px-3 py-2 text-base"
-        />
-      </div>
-      <div class="flex">
-        <button
-          type="submit"
-          class="bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded px-6 py-2 ml-auto transition"
-        >
-          Create Batch
-        </button>
-      </div>
-      <p class="text-sm text-gray-400 mt-2">
-        Upload a CSV file with columns <span class="font-mono">name</span> and <span class="font-mono">email</span>.
-      </p>
-    </form>
-  </div>
+    <!-- Create New Batch Card -->
+    <div class="bg-white rounded-xl shadow-md px-8 py-6">
+        <h2 class="text-lg font-medium mb-4">Create New Batch</h2>
+        <form action="{{ url_for('create_batch_upload_csv') }}" method="POST" enctype="multipart/form-data"
+            class="space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" name="batch_name" required placeholder="Batch name"
+                    class="flex-1 rounded border border-gray-300 px-3 py-2 text-base focus:border-gray-900 focus:ring focus:ring-brand-200" />
+                <input type="file" name="students_csv" accept=".csv" required
+                    class="flex-1 rounded border border-gray-300 px-3 py-2 text-base" />
+            </div>
+            <div class="flex">
+                <button type="submit"
+                    class="bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded px-6 py-2 ml-auto transition">
+                    Create Batch
+                </button>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">
+                Upload a CSV file with columns <span class="font-mono">name</span> and <span
+                    class="font-mono">email</span>.
+            </p>
+        </form>
+    </div>
 </div>
 {% endblock %}

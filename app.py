@@ -189,9 +189,17 @@ notes: {notes}
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
-@app.route("/batches", methods=["GET"])
+@app.route('/batches')
 def batches_page():
-    return render_template("course_batches.html")
+    response = supabase.table('batches')\
+        .select('id, name, students(count)')\
+        .execute()
+
+    batches = response.data if response.data else []
+
+    # Render template passing batches
+    return render_template('course_batches.html', batches=batches)
+
 
 
 @app.route("/add-new-batch", methods=["POST"])
@@ -232,12 +240,7 @@ def create_batch_upload_csv():
     # Insert students if any
     if students_to_insert:
         students_resp = supabase.table("students").insert(students_to_insert).execute()
-        if students_resp.error:
-            flash("Batch created, but failed to insert some students: " + str(students_resp.error), "warning")
-        else:
-            flash(f"Batch '{batch_name}' created with {len(students_to_insert)} students.", "success")
-    else:
-        flash(f"Batch '{batch_name}' created, but no valid students found in CSV.", "warning")
+    
 
     return redirect(url_for("batches_page"))
 
