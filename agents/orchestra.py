@@ -231,12 +231,10 @@ class Orchestrator:
             tasks += [e1, e2]
             checkpoints += [e1["id"]]
 
-        # Default
+        # Default: if no known intent, leave tasks empty so the UI can prompt the user clearly
         if not tasks:
-            t1 = {"id": _tid(), "action": "generate_lesson_plan", "input": options.get("lesson_input", {}), "depends_on": [], "status": "pending"}
-            t2 = {"id": _tid(), "action": "render_lesson_markdown", "input": {"plan": f"${t1['id']}.result"}, "depends_on": [t1["id"]], "status": "pending"}
-            tasks += [t1, t2]
-            checkpoints += [t1["id"]]
+            tasks = []
+            checkpoints = []
 
         return {
             "job_id": job_id,
