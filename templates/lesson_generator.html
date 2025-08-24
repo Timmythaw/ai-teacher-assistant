@@ -43,6 +43,9 @@ Planner{% endblock %} {% block content %}
          disabled:opacity-50 disabled:cursor-not-allowed">
       Generate Plan
     </button>
+    <button id="lp-suggest-tt-btn" type="button" class="px-4 py-2 rounded-md border bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+      Suggest Timetable
+    </button>
     <span id="hint" class="text-xs text-gray-500">Upload at least one PDF.</span>
   </div>
 </form>
@@ -75,7 +78,39 @@ Planner{% endblock %} {% block content %}
     </div>
   </div>
   <article id="lp-result" class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"></article>
+  <!-- Timetable preview -->
+  <div id="tt-preview" class="mt-4 hidden bg-white border rounded-xl p-4">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-sm text-gray-500">Suggested Timetable</div>
+      <div class="flex items-center gap-2">
+        <button id="tt-insert-btn" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Insert into Google Calendar
+        </button>
+      </div>
+    </div>
+    <div id="tt-list" class="text-sm text-gray-800 max-h-64 overflow-auto"></div>
+  </div>
+
+  <!-- Timetable modal dialog -->
+  <div id="tt-modal" class="fixed inset-0 bg-black/50 hidden z-50">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold">Suggested Timetable</h3>
+          <button id="tt-modal-close" class="text-gray-500 hover:text-black" title="Close">✕</button>
+        </div>
+  <p class="text-sm text-gray-600 mb-2">Your schedule is ready. Review the suggested time slots below. Would you like to add them to your Google Calendar now?</p>
+        <div id="tt-modal-list" class="text-sm text-gray-800 max-h-64 overflow-auto border rounded-md p-3 bg-gray-50"></div>
+        <div class="mt-4 flex items-center justify-end gap-2">
+          <button id="tt-modal-cancel" class="px-4 py-2 rounded-md border hover:bg-gray-50">Maybe later</button>
+          <button id="tt-modal-confirm" class="px-4 py-2 rounded-md border bg-emerald-600 text-white hover:bg-emerald-700">Add to Google Calendar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+<!-- Toast container for notifications -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
@@ -91,6 +126,15 @@ Planner{% endblock %} {% block content %}
     const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
     const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
     const saveBtn = document.getElementById("lp-save-btn");
+  const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
+  const ttPreview = document.getElementById("tt-preview");
+  const ttList = document.getElementById("tt-list");
+  const ttInsertBtn = document.getElementById("tt-insert-btn");
+  const ttModal = document.getElementById("tt-modal");
+  const ttModalList = document.getElementById("tt-modal-list");
+  const ttModalClose = document.getElementById("tt-modal-close");
+  const ttModalCancel = document.getElementById("tt-modal-cancel");
+  const ttModalConfirm = document.getElementById("tt-modal-confirm");
 
     // State
     let lastMarkdown = "";
@@ -101,6 +145,49 @@ Planner{% endblock %} {% block content %}
       pdf_path: null,
       options: null,
     };
+  let lastTimetable = null;
+
+    // Bottom-right toast helper with optional action button
+    // action: { text: string, href: string, target?: string }
+    function showToast(message, type = 'success', timeout = 4500, action = null) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const wrapper = document.createElement('div');
+      const colors = type === 'success'
+        ? 'bg-emerald-600 text-white'
+        : type === 'error'
+          ? 'bg-red-600 text-white'
+          : 'bg-gray-800 text-white';
+      wrapper.className = `min-w-[260px] max-w-[420px] rounded-lg shadow-lg px-4 py-3 ${colors} transition transform translate-y-2 opacity-0`;
+      const actionHtml = action && action.href
+        ? `<a href="${action.href}" target="${(action.target||'_blank').replace('"','')}" class="ml-3 px-2 py-1 rounded-md bg-white/20 hover:bg-white/30 text-white text-xs">${action.text || 'Open'}</a>`
+        : '';
+      wrapper.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="text-sm leading-5 flex-1">${message}</div>
+          ${actionHtml}
+          <button class="shrink-0 text-white/80 hover:text-white" aria-label="Close">✕</button>
+        </div>`;
+      const closeBtn = wrapper.querySelector('button');
+      closeBtn.addEventListener('click', () => {
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'translateY(4px)';
+        setTimeout(() => wrapper.remove(), 180);
+      });
+      container.appendChild(wrapper);
+      requestAnimationFrame(() => {
+        wrapper.style.opacity = '1';
+        wrapper.style.transform = 'translateY(0)';
+      });
+      if (timeout > 0) {
+        setTimeout(() => {
+          wrapper.style.opacity = '0';
+          wrapper.style.transform = 'translateY(4px)';
+          setTimeout(() => wrapper.remove(), 180);
+        }, timeout);
+      }
+      return wrapper;
+    }
 
     // Helpers
     function toArray(x) {
@@ -346,6 +433,8 @@ Planner{% endblock %} {% block content %}
           if (obj && typeof obj === "object" && !obj.error) {
             // success: cache JSON for Save button
             lastRawJson = obj;
+            // enable Suggest Timetable
+            suggestTtBtn.disabled = false;
             lastUploadInfo.options = {
               weeks: Number(document.getElementById("weeks").value || 0),
               students: Number(document.getElementById("students").value || 0),
@@ -380,6 +469,122 @@ Planner{% endblock %} {% block content %}
         // 🔹 Restore button
         generateBtn.disabled = false;
         generateBtn.textContent = originalBtnText;
+      }
+    });
+
+    // Suggest timetable from the generated plan
+    suggestTtBtn.addEventListener("click", async () => {
+      if (!lastRawJson) return;
+      suggestTtBtn.disabled = true;
+      const original = suggestTtBtn.textContent;
+      suggestTtBtn.textContent = "Suggesting...";
+
+      try {
+        const payload = {
+          plan: (() => { const c = JSON.parse(JSON.stringify(lastRawJson)); delete c._markdown; return c; })(),
+          slot_hours: 1,
+          work_hours: [9, 17],
+          calendar_id: "primary",
+          location_hint: "Room 101",
+        };
+        const r = await fetch('/api/timetable/suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        lastTimetable = { suggested_slots: data.suggested_slots, metadata: data.metadata };
+        // Render a compact preview list
+        const items = (lastTimetable.suggested_slots || []).slice(0, 20).map(s => {
+          const when = `${s.start.replace('T', ' ')} → ${s.end.split('T')[1]}`;
+          return `<li class="py-1"><span class="font-medium">${s.title}</span> <span class="text-gray-500">(${when})</span></li>`;
+        });
+        ttList.innerHTML = items.length ? `<ul class="list-disc pl-5">${items.join('')}</ul>` : '<p>No slots suggested.</p>';
+        ttPreview.classList.remove('hidden');
+        ttInsertBtn.disabled = items.length === 0;
+
+        // Also show modal dialog with the same list (shortened)
+        const modalItems = (lastTimetable.suggested_slots || []).slice(0, 10).map(s => {
+          const when = `${s.start.replace('T', ' ')} → ${s.end.split('T')[1]}`;
+          return `<li class="py-1"><span class="font-medium">${s.title}</span> <span class="text-gray-500">(${when})</span></li>`;
+        });
+        const extra = (lastTimetable.suggested_slots || []).length - 10;
+        ttModalList.innerHTML = modalItems.length
+          ? `<ul class="list-disc pl-5">${modalItems.join('')}${extra > 0 ? `<li class=\"py-1 text-gray-500\">and ${extra} more…</li>` : ''}</ul>`
+          : '<p>No slots suggested.</p>';
+        ttModal.classList.remove('hidden');
+      } catch (e) {
+        alert('Failed to suggest timetable: ' + (e?.message || e));
+      } finally {
+        suggestTtBtn.disabled = false;
+        suggestTtBtn.textContent = original;
+      }
+    });
+
+    // Modal helpers
+    function hideTtModal() { ttModal.classList.add('hidden'); }
+    ttModalClose.addEventListener('click', hideTtModal);
+    ttModalCancel.addEventListener('click', hideTtModal);
+
+    ttModalConfirm.addEventListener('click', async () => {
+      if (!lastTimetable) return;
+      ttModalConfirm.disabled = true;
+      ttModalConfirm.textContent = 'Inserting...';
+      try {
+        const r = await fetch('/api/timetable/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ timetable: lastTimetable })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+        const s = data.summary || {};
+        const firstLink = (data.results || []).find(r => r.ok && r.html_link)?.html_link || 'https://calendar.google.com/calendar/u/0/r';
+        showToast(
+          `Time slots inserted.`,
+          'success',
+          0,
+          { text: 'Open Google Calendar', href: firstLink, target: '_blank' }
+        );
+        hideTtModal();
+      } catch (e) {
+        showToast('Failed to insert events: ' + (e?.message || e), 'error', 0);
+      } finally {
+        ttModalConfirm.disabled = false;
+        ttModalConfirm.textContent = 'Add to Google Calendar';
+      }
+    });
+
+    // Insert suggested timetable into Google Calendar
+    ttInsertBtn.addEventListener('click', async () => {
+      if (!lastTimetable) return;
+      if (!confirm('Insert these suggested time slots into your Google Calendar?')) return;
+      ttInsertBtn.disabled = true;
+      const original = ttInsertBtn.textContent;
+      ttInsertBtn.textContent = 'Inserting...';
+      try {
+        const r = await fetch('/api/timetable/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ timetable: lastTimetable })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+        const s = data.summary || {};
+        const firstLink = (data.results || []).find(r => r.ok && r.html_link)?.html_link || 'https://calendar.google.com/calendar/u/0/r';
+        showToast(
+          `Time slots inserted.`,
+          'success',
+          0,
+          { text: 'Open Google Calendar', href: firstLink, target: '_blank' }
+        );
+      } catch (e) {
+        showToast('Failed to insert events: ' + (e?.message || e), 'error', 0);
+      } finally {
+        ttInsertBtn.disabled = false;
+        ttInsertBtn.textContent = original;
       }
     });
 

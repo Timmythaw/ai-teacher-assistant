@@ -63,22 +63,18 @@
           class="block px-3 py-2 rounded-lg hover:bg-gray-100 {{ 'bg-gray-100 font-medium' if request.endpoint == 'index' else '' }}">
           Dashboard
         </a>
-        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Assessments
+        <a href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
+          Batches
         </a>
         <a href="{{ url_for('lesson_plans_list') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
           Lesson Plans
         </a>
-
-        <a href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Batches
+        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
+          Assessments
         </a>
-        <a
-            href="{{ url_for('email_page') }}"
-            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
-          >
-            Send Email
-          </a>
+        <a href="{{ url_for('email_page') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
+          Send Email
+        </a>
 
         <div class="px-3 pt-6">
           <p class="text-xs uppercase tracking-wide text-gray-400">
@@ -142,12 +138,12 @@
         </button>
       </div>
       <nav class="space-y-1 mt-2">
-        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a>
-        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Assessments</a>
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a> <a
+          href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Batches</a>
         <a href="{{ url_for('lesson_plans_list') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
           Lesson Plans</a>
-        <a href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Batches</a>
-         <a href="{{ url_for('email_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Send Email</a>
+        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Assessments</a>
+        <a href="{{ url_for('email_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Send Email</a>
       </nav>
     </div>
   </div>
