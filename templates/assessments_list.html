@@ -74,15 +74,38 @@ endblock %} {% block content %}
             <form
               method="post"
               action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
+              data-create-form
               onclick="event.stopPropagation();"
             >
               <button
                 type="submit"
-                class="px-3 py-1.5 text-sm rounded-md border bg-gray-50 hover:bg-gray-100"
+                class="px-3 py-1.5 text-sm rounded-md border bg-gray-50 hover:bg-gray-100 inline-flex items-center gap-2"
+                data-create-btn
               >
-                Create Google Form
+                <svg
+                  class="w-4 h-4 animate-spin hidden"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  data-spinner
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
+                  ></path>
+                </svg>
+                <span data-label>Create Google Form</span>
               </button>
             </form>
+
             {% endif %}
 
             <button
@@ -224,6 +247,62 @@ endblock %} {% block content %}
           navigate(row);
         }
       });
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const table = document.querySelector("table");
+
+    table?.addEventListener("submit", async (e) => {
+      const form = e.target.closest("form[data-create-form]");
+      if (!form) return;
+
+      e.preventDefault();
+
+      const btn = form.querySelector("[data-create-btn]");
+      const label = btn?.querySelector("[data-label]");
+      const spinner = btn?.querySelector("[data-spinner]");
+
+      // loading state
+      btn?.setAttribute("disabled", "disabled");
+      spinner?.classList.remove("hidden");
+      label && (label.textContent = "Creating…");
+
+      try {
+        const res = await fetch(form.getAttribute("action"), {
+          method: "POST",
+          headers: { Accept: "application/json" },
+        });
+
+        // Some setups may return HTML on error; parse safely
+        const ct = res.headers.get("Content-Type") || "";
+        const data = ct.includes("application/json")
+          ? await res.json()
+          : { ok: res.ok, error: await res.text() };
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        // Try the direct place first, then fallback to updated row
+        const formUrl =
+          data.google_form?.formUrl || data.updated?.google_form?.formUrl;
+
+        if (!formUrl) {
+          throw new Error("Form created but no URL returned.");
+        }
+
+        // Redirect to the Google Form (new tab or same tab—pick one)
+        window.location.href = formUrl;
+        // Or open in new tab:
+        // window.open(formUrl, "_blank");
+      } catch (err) {
+        alert("Failed to create Google Form: " + (err?.message || err));
+        // reset UI so user can retry
+        btn?.removeAttribute("disabled");
+        spinner?.classList.add("hidden");
+        label && (label.textContent = "Create Google Form");
+      }
     });
   });
 

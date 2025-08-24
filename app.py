@@ -21,8 +21,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from agents.assessment_agent import AssessmentAgent  # your existing 
 from agents.lesson_plan_agent import LessonPlanAgent
-from agents.timetable_agent import TimetableAgent
-from integrations.calendar_orchestrator import schedule_from_timetable
 from core.md_render import render_assessment_markdown, render_lesson_plan_markdown
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -240,7 +238,7 @@ def api_assessment_responses(assessment_id):
     try:
         sel = (
             supabase.table("assessments")
-            .select("id, google_form, result")
+            .select("id, google_form")
             .eq("id", str(assessment_id))
             .single()
             .execute()
@@ -258,37 +256,59 @@ def api_assessment_responses(assessment_id):
         if not info.get("ok"):
             return jsonify({"ok": False, "error": info.get("error", "Failed to fetch")}), 500
 
-        # Optional: a single overall max score if you can compute it from the form structure.
-        overall_max = info.get("Total Marks") 
-
         rows = []
-        for r in info.get("responses", []) or []:
-            score = r.get("marks")
-
-            # prefer a per-response max (if your CSV/parser provides it), else fall back
-            max_score = r.get("Total Score") or overall_max
-            pct = None
-            try:
-                if score is not None and max_score:
-                    pct = round(float(score) / float(max_score) * 100, 1)
-            except Exception:
-                pct = None
-
+        for r in (info.get("responses") or []):
             rows.append({
-                "email": (r.get("email") or "").strip(),
+                "email": r.get("email") or "",
                 "submitted": r.get("submitted") or "",
-                "score": score,
-                "max_score": max_score,
-                "percent": pct,      # <— computed here
+                "score": r.get("totalScore"),
+                "fraction": r.get("fraction") or "",
+                "percent": r.get("percent"),  # float or None
             })
 
         return jsonify({
             "ok": True,
             "form_title": info.get("form_title"),
+            "max_points": info.get("max_points"),
+            "is_quiz": info.get("is_quiz"),
             "num_responses": len(rows),
             "rows": rows,
         }), 200
 
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+    
+# Batches Start Here 
+@app.route("/api/batches", methods=["GET"])
+def api_list_batches():
+    """
+    Returns [{ id, name, student_count }]
+    """
+    try:
+        res = supabase.table("batches").select("id,name,students(count)").order("name", desc=False).execute()
+        batches = []
+        for row in (res.data or []):
+            cnt = 0
+            s = row.get("students")
+            if isinstance(s, list) and s:
+                cnt = s[0].get("count", 0)
+            elif isinstance(s, dict):
+                cnt = s.get("count", 0)
+            batches.append({"id": row["id"], "name": row.get("name") or "Untitled", "student_count": cnt})
+        return jsonify({"ok": True, "batches": batches}), 200
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/batches/<id>/students", methods=["GET"])
+def api_list_students(id):
+    """
+    Returns [{ id, name, email }] for the batch
+    """
+    try:
+        res = supabase.table("students").select("name,email").eq("batch_id", id).order("name", desc=False).execute()
+        return jsonify({"ok": True, "students": res.data or []}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -522,78 +542,6 @@ def lesson_plan_markdown(id):
             return jsonify({"ok": False, "error": "Lesson plan not found or invalid JSON"}), 404
         md = render_lesson_plan_markdown(result)
         return jsonify({"ok": True, "markdown": md}), 200
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
-
-
-# --- Timetable: suggest from lesson plan JSON & schedule into Google Calendar ---
-
-@app.route("/api/timetable/suggest", methods=["POST"])
-def api_timetable_suggest():
-    """
-    Body JSON:
-    {
-      "plan": { ... },              # required: lesson plan JSON
-      "slot_hours": 1,              # optional (default 1)
-      "work_hours": [9, 17],        # optional (default [9,17])
-      "calendar_id": "primary",     # optional
-      "location_hint": "Room 101"   # optional
-    }
-    Returns TimetableAgent.suggest_consistent_schedule output.
-    """
-    try:
-        payload = request.get_json(silent=True) or {}
-        plan = payload.get("plan")
-        if not isinstance(plan, dict):
-            return jsonify({"ok": False, "error": "Missing or invalid plan JSON"}), 400
-
-        slot_hours = int(payload.get("slot_hours") or 1)
-        work_hours = payload.get("work_hours") or [9, 17]
-        if not (isinstance(work_hours, (list, tuple)) and len(work_hours) == 2):
-            work_hours = [9, 17]
-        calendar_id = (payload.get("calendar_id") or "primary").strip() or "primary"
-        location_hint = payload.get("location_hint")
-
-        agent = TimetableAgent()
-        out = agent.suggest_consistent_schedule(
-            plan,
-            slot_hours=slot_hours,
-            work_hours=(int(work_hours[0]), int(work_hours[1])),
-            calendar_id=calendar_id,
-            location_hint=location_hint,
-        )
-        if isinstance(out, dict) and out.get("error"):
-            return jsonify({"ok": False, "error": out.get("error")}), 500
-        return jsonify({"ok": True, **out}), 200
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
-
-
-@app.route("/api/timetable/schedule", methods=["POST"])
-def api_timetable_schedule():
-    """
-    Body JSON:
-    {
-      "timetable": { "suggested_slots": [...], "metadata": {...} }
-    }
-    Returns list of per-slot results from calendar orchestration.
-    """
-    try:
-        payload = request.get_json(silent=True) or {}
-        tt = payload.get("timetable")
-        if not (isinstance(tt, dict) and isinstance(tt.get("suggested_slots"), list)):
-            return jsonify({"ok": False, "error": "Missing timetable.suggested_slots"}), 400
-
-        results = schedule_from_timetable(tt)
-        # Summarize
-        created = sum(1 for r in results if r.get("ok") and not r.get("deduped"))
-        deduped = sum(1 for r in results if r.get("ok") and r.get("deduped"))
-        failed = sum(1 for r in results if not r.get("ok"))
-        return jsonify({
-            "ok": True,
-            "summary": {"total": len(results), "created": created, "deduped": deduped, "failed": failed},
-            "results": results,
-        }), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 

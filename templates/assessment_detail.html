@@ -11,9 +11,8 @@ endblock %} {% block content %}
         href="{{ form_url }}"
         target="_blank"
         class="text-blue-600 hover:underline"
+        >Open form</a
       >
-        Open form
-      </a>
     </p>
     {% else %}
     <p class="text-sm text-amber-700 mt-1">
@@ -68,6 +67,9 @@ endblock %} {% block content %}
             Submitted
           </th>
           <th class="px-4 py-2 text-left font-medium text-gray-700">Score</th>
+          <th class="px-4 py-2 w-36 text-right font-medium text-gray-700">
+            Action
+          </th>
         </tr>
       </thead>
       <tbody id="resp-tbody" class="divide-y divide-gray-100">
@@ -77,6 +79,132 @@ endblock %} {% block content %}
   </div>
 
   <p id="resp-status" class="text-xs text-gray-500 mt-3"></p>
+</div>
+
+<!-- Email Compose Modal (single only) -->
+<div id="email-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative mx-auto mt-10 w-full max-w-lg px-4 sm:px-0">
+    <div
+      class="bg-white rounded-lg shadow-xl border max-h-[90vh] overflow-y-auto"
+    >
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="font-semibold text-base" id="email-modal-title">
+          Compose Email
+        </h3>
+        <button
+          id="email-close"
+          class="p-1.5 rounded hover:bg-gray-100"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form id="email-form" class="p-4 space-y-4">
+        <input type="hidden" id="email-student-name" />
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">To</label>
+          <input
+            id="email-to"
+            type="email"
+            class="w-full border rounded-md p-2"
+            placeholder="student@example.com"
+            required
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">CC</label>
+            <input
+              id="email-cc"
+              type="text"
+              class="w-full border rounded-md p-2"
+              placeholder="cc1@example.com, cc2@example.com"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">BCC</label>
+            <input
+              id="email-bcc"
+              type="text"
+              class="w-full border rounded-md p-2"
+              placeholder="bcc1@example.com, bcc2@example.com"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">Subject</label>
+          <input
+            id="email-subject"
+            type="text"
+            class="w-full border rounded-md p-2"
+            placeholder="Subject"
+            required
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-medium">Notes / Instructions</label>
+          <textarea
+            id="email-notes"
+            rows="5"
+            class="w-full border rounded-md p-2"
+            placeholder="Tell the assistant what to write (agenda, links, tone hints, etc.)"
+          ></textarea>
+          <p class="text-xs text-gray-500">
+            The assistant drafts the message based on these notes and your tone
+            below.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Tone</label>
+            <select id="email-tone" class="w-full border rounded-md p-2">
+              <option selected>professional, friendly</option>
+              <option>concise, formal</option>
+              <option>warm, encouraging</option>
+              <option>direct, action-oriented</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Action</label>
+            <div class="flex items-center gap-4 h-10">
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" name="email-action" value="send" checked />
+                Send
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" name="email-action" value="draft" /> Draft
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="email-progress" class="hidden text-xs text-gray-600"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+          <button
+            type="button"
+            id="email-cancel"
+            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="email-submit"
+            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %} {% block scripts %}
 <script>
@@ -88,6 +216,99 @@ endblock %} {% block content %}
     const summaryEl = document.getElementById("resp-summary");
     const hintEl = document.getElementById("resp-hint");
 
+    // email modal refs
+    const modal = document.getElementById("email-modal");
+    const closeBtn = document.getElementById("email-close");
+    const cancelBtn = document.getElementById("email-cancel");
+    const form = document.getElementById("email-form");
+    const nameEl = document.getElementById("email-student-name");
+    const toEl = document.getElementById("email-to");
+    const ccEl = document.getElementById("email-cc");
+    const bccEl = document.getElementById("email-bcc");
+    const subjectEl = document.getElementById("email-subject");
+    const notesEl = document.getElementById("email-notes");
+    const toneEl = document.getElementById("email-tone");
+    const progressEl = document.getElementById("email-progress");
+
+    function openEmailModal(email, name) {
+      form.reset();
+      toEl.value = email || "";
+      nameEl.value = name || "";
+      subjectEl.value =
+        subjectEl.value || "Regarding your recent assessment submission";
+      modal.classList.remove("hidden");
+      setTimeout(() => subjectEl.focus(), 50);
+    }
+    function closeEmailModal() {
+      modal.classList.add("hidden");
+    }
+
+    closeBtn?.addEventListener("click", closeEmailModal);
+    cancelBtn?.addEventListener("click", closeEmailModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeEmailModal();
+    });
+
+    // send helper (uses existing /email/compose)
+    async function sendEmail({ to, subject, notes, tone, action, cc, bcc }) {
+      const fd = new FormData();
+      fd.set("to_email", to);
+      fd.set("subject", subject);
+      fd.set("notes", notes);
+      fd.set("tone", tone);
+      fd.set("action", action);
+      fd.set("cc", cc || "");
+      fd.set("bcc", bcc || "");
+      const res = await fetch("{{ url_for('email_compose') }}", {
+        method: "POST",
+        body: fd,
+      });
+      const ct = res.headers.get("Content-Type") || "";
+      const data = ct.includes("application/json")
+        ? await res.json()
+        : { ok: res.ok, raw: await res.text() };
+      if (!res.ok || !data.ok)
+        throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const to = toEl.value.trim();
+      const subject = subjectEl.value.trim();
+      const notes = notesEl.value || "";
+      const tone = toneEl.value || "professional, friendly";
+      const action = (
+        form.querySelector('input[name="email-action"]:checked')?.value ||
+        "send"
+      ).toLowerCase();
+
+      if (!to) return alert("Recipient email is required.");
+      if (!subject) return alert("Subject is required.");
+
+      try {
+        progressEl.classList.remove("hidden");
+        progressEl.textContent =
+          action === "draft" ? "Creating draft…" : "Sending…";
+        await sendEmail({
+          to,
+          subject,
+          notes,
+          tone,
+          action,
+          cc: ccEl.value,
+          bcc: bccEl.value,
+        });
+        progressEl.textContent =
+          action === "draft" ? "Draft created." : "Email sent.";
+        setTimeout(closeEmailModal, 800);
+      } catch (err) {
+        progressEl.classList.remove("hidden");
+        progressEl.textContent = "Failed: " + (err?.message || err);
+      }
+    });
+
+    // fetch and draw responses
     async function fetchResponses() {
       statusEl.textContent = "Fetching…";
       btn.disabled = true;
@@ -99,36 +320,69 @@ endblock %} {% block content %}
           headers: { Accept: "application/json" },
         });
         const data = await res.json();
-        if (!res.ok || !data.ok) {
+        if (!res.ok || !data.ok)
           throw new Error(data.error || `HTTP ${res.status}`);
-        }
 
-        // fill summary
         summaryEl.textContent = `${
           data.num_responses
         } response(s) fetched from “${data.form_title || "Form"}”.`;
         summaryEl.classList.remove("hidden");
         hintEl.classList.add("hidden");
 
-        // fill table
         tbody.innerHTML = "";
-        if (!data.rows || !data.rows.length) {
-          tbody.innerHTML = `<tr>
-             <td colspan="3" class="px-4 py-6 text-center text-gray-500">No responses yet.</td>
-          </tr>`;
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+
+        if (!rows.length) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">No responses yet.</td></tr>`;
         } else {
-          for (const r of data.rows) {
+          for (const r of rows) {
+            // derive percent if backend didn't send one
+            let percent = r.percent;
+            if (
+              (percent == null || percent === "") &&
+              r.score != null &&
+              r.max_score
+            ) {
+              const p = (Number(r.score) / Number(r.max_score)) * 100;
+              if (isFinite(p)) percent = Math.round(p);
+            }
+
+            const isLow = typeof percent === "number" && percent < 50;
+            const scoreText = r.fraction
+              ? r.fraction
+              : r.score != null && r.max_score
+              ? `${r.score}/${r.max_score}`
+              : r.score != null
+              ? String(r.score)
+              : "";
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
               <td class="px-4 py-2">${escapeHtml(r.email || "")}</td>
               <td class="px-4 py-2 text-gray-600">${escapeHtml(
                 r.submitted || ""
               )}</td>
-              <td class="px-4 py-2">${r.score ?? ""}</td>
+              <td class="px-4 py-2">
+                <span class="${isLow ? "text-red-600 font-medium" : ""}">
+                  ${escapeHtml(scoreText)}${
+              typeof percent === "number" ? ` (${percent}%)` : ""
+            }
+                </span>
+              </td>
+              <td class="px-4 py-2 text-right">
+                <button
+                  type="button"
+                  class="px-2 py-1.5 text-xs rounded-md border hover:bg-gray-50"
+                  data-email="${escapeAttr(r.email || "")}"
+                >
+                  Send Email
+                </button>
+              </td>
             `;
             tbody.appendChild(tr);
           }
         }
+
         wrap.classList.remove("hidden");
         statusEl.textContent = "Done.";
       } catch (err) {
@@ -138,11 +392,22 @@ endblock %} {% block content %}
       }
     }
 
+    // open modal from table
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-email]");
+      if (!btn) return;
+      const email = btn.getAttribute("data-email") || "";
+      openEmailModal(email, email); // we don't have name here, pass email as label
+    });
+
     function escapeHtml(s) {
       return (s || "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;");
+    }
+    function escapeAttr(s) {
+      return (s || "").replaceAll('"', "&quot;");
     }
 
     btn?.addEventListener("click", fetchResponses);
