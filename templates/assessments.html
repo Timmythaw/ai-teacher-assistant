@@ -232,7 +232,7 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
           throw new Error(`HTTP ${res.status}: ${errText}`);
         }
 
-        const ct = res.headers.get("Content-Type") || "";
+    const ct = res.headers.get("Content-Type") || "";
         let md = "";
         if (ct.includes("application/json")) {
           const assessment = await res.json(); // server returns the assessment object directly
@@ -240,8 +240,9 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
             md = `### Error\n\n${assessment.error}`;
             suggestedFileName = "assessment_error";
           } else {
-            lastAssessmentObj = assessment;
-            md = jsonToMarkdownStrict(assessment);
+      lastAssessmentObj = assessment;
+      // Prefer server-rendered markdown if present
+      md = assessment._markdown || jsonToMarkdownStrict(assessment);
           }
         } else {
           md = await res.text();
@@ -267,12 +268,13 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
       if (!lastAssessmentObj) return;
       saveBtn.disabled = true;
       saveStatus.textContent = "Saving...";
-      try {
+    try {
         const payload = {
           original_filename: lastOriginalFilename,
           pdf_path: null, // optional; fill if your server returns a path
           options: lastOptions,
-          result: lastAssessmentObj,
+      // Store pure JSON only (drop any server-provided preview helpers)
+      result: (() => { const c = JSON.parse(JSON.stringify(lastAssessmentObj || {})); delete c._markdown; return c; })(),
           google_form: null, // we create this later in the table UI
         };
         const resp = await fetch("/api/assessments", {
