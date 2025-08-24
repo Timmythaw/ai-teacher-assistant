@@ -39,7 +39,7 @@ def allowed_file(filename: str) -> bool:
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("base.html")
+    return render_template("index.html")
 
 @app.route("/assessments")
 def assessments_list():
