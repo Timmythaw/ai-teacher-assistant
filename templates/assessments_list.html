@@ -27,31 +27,54 @@ endblock %} {% block content %}
     <tbody class="divide-y divide-gray-100">
       {% for asmt in assessments %} {% set qcount = asmt.result.questions|length
       if asmt.result and asmt.result.questions else 0 %} {% set has_form =
-      asmt.google_form and asmt.google_form.formUrl %}
-      <tr>
-        <td class="px-4 py-2">{{ asmt.original_filename or "Untitled" }}</td>
+      asmt.google_form and asmt.google_form.formUrl %} {% set detail_url =
+      url_for('assessment_detail', assessment_id=asmt.id) %}
+
+      <tr
+        class="hover:bg-gray-50 cursor-pointer"
+        data-href="{{ detail_url }}"
+        role="button"
+        tabindex="0"
+        aria-label="Open assessment detail"
+      >
+        <td class="px-4 py-2">
+          <a
+            href="{{ detail_url }}"
+            class="hover:underline"
+            onclick="event.stopPropagation();"
+          >
+            {{ asmt.original_filename or "Untitled" }}
+          </a>
+        </td>
+
         <td class="px-4 py-2 text-gray-500">
           {{ asmt.created_at|default("") }}
         </td>
+
         <td class="px-4 py-2">{{ qcount }}</td>
+
         <td class="px-4 py-2">
           {% if has_form %}
           <a
             href="{{ asmt.google_form.formUrl }}"
             target="_blank"
             class="text-blue-600 hover:underline"
-            >Open Form</a
+            onclick="event.stopPropagation();"
           >
+            Open Form
+          </a>
           {% else %}
           <span class="text-gray-400">Not created</span>
           {% endif %}
         </td>
+
         <td class="px-4 py-2">
           <div class="flex items-center justify-end gap-2">
             {% if not has_form %}
             <form
               method="post"
               action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
+              onclick="event.stopPropagation();"
             >
               <button
                 type="submit"
@@ -62,7 +85,6 @@ endblock %} {% block content %}
             </form>
             {% endif %}
 
-            <!-- Send to Students button -->
             <button
               type="button"
               class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
@@ -70,6 +92,7 @@ endblock %} {% block content %}
               data-asmt-id="{{ asmt.id }}"
               data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
               title="Send email to a batch of students"
+              onclick="event.stopPropagation();"
             >
               Send to Students
             </button>
@@ -92,7 +115,7 @@ endblock %} {% block content %}
 </div>
 {% endif %}
 
-<!-- Modal overlay (one per page; JS binds row data to it) -->
+<!-- Modal overlay (same as you had) -->
 <div id="send-modal" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-black/50"></div>
   <div class="relative mx-auto w-full max-w-lg">
@@ -109,9 +132,7 @@ endblock %} {% block content %}
       </div>
 
       <form id="send-form" class="p-4 grid gap-4">
-        <!-- hidden selected assessment id -->
         <input type="hidden" id="send-asmt-id" />
-
         <div>
           <label class="block text-sm font-medium mb-1">Batch</label>
           <select id="send-batch" class="w-full border rounded-md p-2" required>
@@ -119,7 +140,6 @@ endblock %} {% block content %}
           </select>
           <p id="send-batch-hint" class="text-xs text-gray-500 mt-1"></p>
         </div>
-
         <div>
           <label class="block text-sm font-medium mb-1">Subject</label>
           <input
@@ -130,7 +150,6 @@ endblock %} {% block content %}
             required
           />
         </div>
-
         <div>
           <label class="block text-sm font-medium mb-1">Tone (optional)</label>
           <input
@@ -141,7 +160,6 @@ endblock %} {% block content %}
             value="professional, friendly"
           />
         </div>
-
         <div>
           <label class="block text-sm font-medium mb-1">Message / Notes</label>
           <textarea
@@ -155,14 +173,12 @@ endblock %} {% block content %}
             personalize per student name.
           </p>
         </div>
-
         <div class="flex items-center gap-3">
           <label class="inline-flex items-center gap-2">
             <input id="send-draft" type="checkbox" class="h-4 w-4" />
             <span class="text-sm">Create drafts instead of sending</span>
           </label>
         </div>
-
         <div class="flex items-center justify-end gap-2 pt-2 border-t">
           <span id="send-status" class="text-xs text-gray-500 mr-auto"></span>
           <button
@@ -186,10 +202,34 @@ endblock %} {% block content %}
 </div>
 {% endblock %} {% block scripts %}
 <script>
+  // --- Make rows clickable (navigate to data-href), but ignore clicks on buttons/links/forms
   document.addEventListener("DOMContentLoaded", () => {
-    // Buttons in table rows
+    const rows = document.querySelectorAll("tbody tr[data-href]");
+
+    function navigate(row) {
+      const url = row.getAttribute("data-href");
+      if (url) window.location.href = url;
+    }
+
+    rows.forEach((row) => {
+      row.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t.closest("a, button, input, select, textarea, form, label"))
+          return;
+        navigate(row);
+      });
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate(row);
+        }
+      });
+    });
+  });
+
+  // --- Existing modal wiring (Send to Students) ---
+  document.addEventListener("DOMContentLoaded", () => {
     const rowButtons = document.querySelectorAll("[data-send-btn]");
-    // Modal elements
     const modal = document.getElementById("send-modal");
     const btnClose = document.getElementById("send-close");
     const btnCancel = document.getElementById("send-cancel");
@@ -204,10 +244,8 @@ endblock %} {% block content %}
     const sendSubmit = document.getElementById("send-submit");
     const hiddenAsmtId = document.getElementById("send-asmt-id");
 
-    // open/close helpers
     function openModal(prefill) {
       hiddenAsmtId.value = prefill.asmtId || "";
-      // sensible default subject using the assessment title
       const base = (prefill.asmtTitle || "Assessment").replace(/\.[^.]+$/, "");
       if (!inpSubject.value.trim()) inpSubject.value = `Regarding ${base}`;
       modal.classList.remove("hidden");
@@ -280,7 +318,6 @@ endblock %} {% block content %}
         action === "send" ? "Sending…" : "Creating drafts…";
 
       try {
-        // Optionally add assessment context into the notes:
         const asmtId = hiddenAsmtId.value;
         const mergedNotes = asmtId
           ? `[Assessment ID: ${asmtId}] ` + notes

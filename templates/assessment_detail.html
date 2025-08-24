@@ -1,0 +1,151 @@
+{% extends "base.html" %} {% block title %}Assessment — {{ page_title }}{%
+endblock %} {% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-semibold">{{ page_title }}</h1>
+    <p class="text-sm text-gray-500">ID: {{ assessment.id }}</p>
+    {% if form_url %}
+    <p class="text-sm mt-1">
+      Google Form:
+      <a
+        href="{{ form_url }}"
+        target="_blank"
+        class="text-blue-600 hover:underline"
+      >
+        Open form
+      </a>
+    </p>
+    {% else %}
+    <p class="text-sm text-amber-700 mt-1">
+      No Google Form attached to this assessment.
+    </p>
+    {% endif %}
+  </div>
+
+  <a
+    href="{{ url_for('assessments_list') }}"
+    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
+  >
+    ← Back to Assessments
+  </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-medium">Responses</h2>
+    <div class="flex items-center gap-2">
+      <button
+        id="btn-fetch"
+        class="px-3 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black text-sm"
+        {%
+        if
+        not
+        form_url
+        and
+        not
+        form_id
+        %}disabled{%
+        endif
+        %}
+      >
+        Generate Results
+      </button>
+    </div>
+  </div>
+
+  <p id="resp-hint" class="text-sm text-gray-500 mt-2">
+    Click “Generate Results” to fetch the latest submissions from Google Forms.
+  </p>
+
+  <div id="resp-summary" class="text-sm text-gray-700 mt-2 hidden"></div>
+
+  <div id="table-wrap" class="mt-4 hidden overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left font-medium text-gray-700">Email</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-700">
+            Submitted
+          </th>
+          <th class="px-4 py-2 text-left font-medium text-gray-700">Score</th>
+        </tr>
+      </thead>
+      <tbody id="resp-tbody" class="divide-y divide-gray-100">
+        <!-- rows via JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <p id="resp-status" class="text-xs text-gray-500 mt-3"></p>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btn-fetch");
+    const tbody = document.getElementById("resp-tbody");
+    const wrap = document.getElementById("table-wrap");
+    const statusEl = document.getElementById("resp-status");
+    const summaryEl = document.getElementById("resp-summary");
+    const hintEl = document.getElementById("resp-hint");
+
+    async function fetchResponses() {
+      statusEl.textContent = "Fetching…";
+      btn.disabled = true;
+
+      try {
+        const url =
+          "{{ url_for('api_assessment_responses', assessment_id=assessment.id) }}";
+        const res = await fetch(url, {
+          headers: { Accept: "application/json" },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        // fill summary
+        summaryEl.textContent = `${
+          data.num_responses
+        } response(s) fetched from “${data.form_title || "Form"}”.`;
+        summaryEl.classList.remove("hidden");
+        hintEl.classList.add("hidden");
+
+        // fill table
+        tbody.innerHTML = "";
+        if (!data.rows || !data.rows.length) {
+          tbody.innerHTML = `<tr>
+             <td colspan="3" class="px-4 py-6 text-center text-gray-500">No responses yet.</td>
+          </tr>`;
+        } else {
+          for (const r of data.rows) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td class="px-4 py-2">${escapeHtml(r.email || "")}</td>
+              <td class="px-4 py-2 text-gray-600">${escapeHtml(
+                r.submitted || ""
+              )}</td>
+              <td class="px-4 py-2">${r.score ?? ""}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+        wrap.classList.remove("hidden");
+        statusEl.textContent = "Done.";
+      } catch (err) {
+        statusEl.textContent = "Failed: " + (err.message || err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function escapeHtml(s) {
+      return (s || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    btn?.addEventListener("click", fetchResponses);
+  });
+</script>
+{% endblock %}

@@ -7,6 +7,9 @@ import json
 from pathlib import Path
 from flask import Flask, request, render_template, abort, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from integrations.form_response import get_form_full_info
+from datetime import datetime, timezone
+
 # --- Email routes ---
 from agents.email_agent import EmailAgent
 from flask import jsonify
@@ -194,35 +197,96 @@ def create_form_for_assessment(id):
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
     
-@app.route("/api/batches", methods=["GET"])
-def api_list_batches():
-    """
-    Returns [{ id, name, student_count }]
-    """
-    try:
-        res = supabase.table("batches").select("id,name,students(count)").order("name", desc=False).execute()
-        batches = []
-        for row in (res.data or []):
-            cnt = 0
-            s = row.get("students")
-            if isinstance(s, list) and s:
-                cnt = s[0].get("count", 0)
-            elif isinstance(s, dict):
-                cnt = s.get("count", 0)
-            batches.append({"id": row["id"], "name": row.get("name") or "Untitled", "student_count": cnt})
-        return jsonify({"ok": True, "batches": batches}), 200
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+# --- Assessment detail page + helpers ---
 
+from flask import jsonify
 
-@app.route("/api/batches/<id>/students", methods=["GET"])
-def api_list_students(id):
-    """
-    Returns [{ id, name, email }] for the batch
-    """
+@app.route("/assessments/<uuid:assessment_id>", methods=["GET"])
+def assessment_detail(assessment_id):
+    sel = (
+        supabase.table("assessments")
+        .select("*")
+        .eq("id", str(assessment_id))
+        .single()
+        .execute()
+    )
+    asmt = sel.data
+    if not asmt:
+        return render_template("404.html"), 404
+
+    # pull a few things for header
+    title = (
+        (asmt.get("result") or {}).get("title")
+        or asmt.get("original_filename")
+        or "Assessment"
+    )
+    gf = asmt.get("google_form") or {}
+    form_url = gf.get("formUrl")
+    form_id  = gf.get("formId")
+
+    return render_template(
+        "assessment_detail.html",
+        assessment=asmt,
+        page_title=title,
+        form_url=form_url,
+        form_id=form_id,
+    )
+
+# ---- API: fetch responses from Google Forms and return JSON (no DB writes) ----
+@app.route("/api/assessments/<uuid:assessment_id>/responses", methods=["GET"])
+def api_assessment_responses(assessment_id):
     try:
-        res = supabase.table("students").select("name,email").eq("batch_id", id).order("name", desc=False).execute()
-        return jsonify({"ok": True, "students": res.data or []}), 200
+        sel = (
+            supabase.table("assessments")
+            .select("id, google_form, result")
+            .eq("id", str(assessment_id))
+            .single()
+            .execute()
+        )
+        asmt = sel.data
+        if not asmt:
+            return jsonify({"ok": False, "error": "Assessment not found"}), 404
+
+        gf = asmt.get("google_form") or {}
+        form_id_or_link = gf.get("formId") or gf.get("formUrl")
+        if not form_id_or_link:
+            return jsonify({"ok": False, "error": "No Google Form attached"}), 400
+
+        info = get_form_full_info(form_id_or_link)
+        if not info.get("ok"):
+            return jsonify({"ok": False, "error": info.get("error", "Failed to fetch")}), 500
+
+        # Optional: a single overall max score if you can compute it from the form structure.
+        overall_max = info.get("Total Marks") 
+
+        rows = []
+        for r in info.get("responses", []) or []:
+            score = r.get("marks")
+
+            # prefer a per-response max (if your CSV/parser provides it), else fall back
+            max_score = r.get("Total Score") or overall_max
+            pct = None
+            try:
+                if score is not None and max_score:
+                    pct = round(float(score) / float(max_score) * 100, 1)
+            except Exception:
+                pct = None
+
+            rows.append({
+                "email": (r.get("email") or "").strip(),
+                "submitted": r.get("submitted") or "",
+                "score": score,
+                "max_score": max_score,
+                "percent": pct,      # <— computed here
+            })
+
+        return jsonify({
+            "ok": True,
+            "form_title": info.get("form_title"),
+            "num_responses": len(rows),
+            "rows": rows,
+        }), 200
+
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
