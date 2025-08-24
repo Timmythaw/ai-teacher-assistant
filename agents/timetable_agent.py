@@ -3,161 +3,248 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import json
-from core.ai_client import chat_completion
+import datetime as dt
 from core.logger import logger
 from integrations.calendar_tool import fetch_calendar_events
+from integrations.calendar_create import get_user_timezone
+from core.google_client import get_google_service
+from core.pdf_tool import extract_text_from_pdf
+
+
+def _pick(obj, keys, default=None):
+    for k in keys:
+        if isinstance(obj, dict) and k in obj and obj[k] is not None:
+            return obj[k]
+    return default
+
+def _extract_minimal_plan(plan_or_path) -> dict:
+    """Extract minimal fields from lesson plan JSON or a PDF path.
+    Returns { title, duration_weeks, sections_per_week, week_names[] }.
+    """
+    title = "Lesson Plan"
+    duration_weeks = 8
+    sections_per_week = 1
+    week_names: list[str] = []
+
+    try:
+        if isinstance(plan_or_path, dict):
+            plan = plan_or_path
+        elif isinstance(plan_or_path, str) and plan_or_path.lower().endswith(".pdf"):
+            # Heuristic parse from PDF text
+            text = extract_text_from_pdf(plan_or_path) or ""
+            # Find duration like "8 week" or "8 weeks"
+            import re
+            m = re.search(r"(\d{1,2})\s*week", text, re.IGNORECASE)
+            if m:
+                duration_weeks = int(m.group(1))
+            # Find section per week pattern (optional)
+            m2 = re.search(r"sections?\s*per\s*week\s*[:=]?\s*(\d{1,2})", text, re.IGNORECASE)
+            if m2:
+                sections_per_week = int(m2.group(1))
+            # Find week headings
+            for i in range(1, duration_weeks + 1):
+                pat = re.compile(rf"Week\s*{i}[:\-\s]+([^\n\r]{0,80})", re.IGNORECASE)
+                mm = pat.search(text)
+                if mm:
+                    week_names.append(f"Week {i}: {mm.group(1).strip()}")
+                else:
+                    week_names.append(f"Week {i}")
+            # Title fallback from first heading
+            t = re.search(r"Lesson\s*Plan[:\-\s]*(.+)$", text, re.IGNORECASE)
+            if t:
+                title = t.group(1).strip()[:60]
+            return {
+                "title": title,
+                "duration_weeks": duration_weeks,
+                "sections_per_week": sections_per_week,
+                "week_names": week_names,
+            }
+        else:
+            # Unsupported type
+            plan = {}
+
+        # JSON-based extraction
+        title = _pick(plan, ["lesson_title", "title", "name"], title)
+        duration_weeks = int(_pick(plan, ["total_duration", "weeks", "duration_weeks"], duration_weeks))
+        sections_per_week = int(_pick(plan, ["sections_per_week", "sectionsPerWeek"], sections_per_week))
+        weekly = _pick(plan, ["weekly_schedule", "weeks_schedule", "plan", "weekly"], []) or []
+        if isinstance(weekly, list) and weekly:
+            week_names = []
+            for i, w in enumerate(weekly, start=1):
+                topic = _pick(w, ["topic", "title"], None)
+                label = _pick(w, ["week", "label"], i)
+                if topic:
+                    week_names.append(f"Week {label}: {topic}")
+                else:
+                    week_names.append(f"Week {label}")
+        else:
+            week_names = [f"Week {i}" for i in range(1, duration_weeks + 1)]
+
+        return {
+            "title": title,
+            "duration_weeks": duration_weeks,
+            "sections_per_week": sections_per_week,
+            "week_names": week_names,
+        }
+    except Exception as e:
+        logger.warning("Minimal plan extraction failed, using defaults: %s", e)
+        return {
+            "title": title,
+            "duration_weeks": duration_weeks,
+            "sections_per_week": sections_per_week,
+            "week_names": [f"Week {i}" for i in range(1, duration_weeks + 1)],
+        }
+
+def _overlaps(a_start: dt.datetime, a_end: dt.datetime, b_start: dt.datetime, b_end: dt.datetime) -> bool:
+    return not (a_end <= b_start or a_start >= b_end)
+
+def _next_monday(d: dt.date) -> dt.date:
+    wd = d.weekday()  # Mon=0
+    delta = (7 - wd) % 7
+    if delta == 0:
+        delta = 7
+    return d + dt.timedelta(days=delta)
 
 
 class TimetableAgent:
     def __init__(self, model="openai/gpt-5-chat-latest"):
         self.model = model
 
-    def suggest_lesson_slots(
+    def suggest_consistent_schedule(
         self,
-        days_ahead: int = 7,
-        work_hours: tuple = (9, 17),
+        plan_or_pdf,
+        *,
+        work_hours: tuple[int, int] = (9, 17),
         slot_hours: int = 1,
-        course_name: str | None = None,
-        session_purpose: str | None = None,
+        calendar_id: str = "primary",
         location_hint: str | None = None,
-        attendees: list[str] | None = None,      # NEW: suggest default attendees
-        calendar_id: str = "primary" 
+        attendees: list[str] | None = None,
+        start_from_next_monday: bool = True,
     ) -> dict:
         """
-        Suggest exactly 3 free lesson slots AND include an event title per slot.
-
-        Returns (on success):
-        {
-          "suggested_slots": [
-            {
-              "start": "YYYY-MM-DDTHH:MM",
-              "end":   "YYYY-MM-DDTHH:MM",
-              "title": "Algebra I: Week 2 - Quadratic Basics",
-              "reason":"earliest available on Tue morning; avoids staff mtg",
-              "location": "Room 204"   // optional if model infers from hint
-            }, ...
-          ]
-        }
+        Build a consistent weekly timetable from a lesson plan (JSON or PDF path).
+        - Extract only title, duration_weeks, sections_per_week, week_names.
+        - Scan calendar for duration_weeks * 7 days.
+        - Choose consistent weekday/time combos (sections_per_week distinct slots) across all weeks.
+        - Output format compatible with calendar_orchestrator.
         """
         try:
-            logger.info(
-                "TimetableAgent started (days_ahead=%d, work_hours=%s, slot_hours=%d, course=%s, purpose=%s)",
-                days_ahead, work_hours, slot_hours, course_name, session_purpose
-            )
+            # 1) Minimal plan
+            meta = _extract_minimal_plan(plan_or_pdf)
+            title = meta.get("title") or "Lesson"
+            weeks = int(meta.get("duration_weeks") or 8)
+            sections_per_week = int(meta.get("sections_per_week") or 1)
+            week_names = meta.get("week_names") or [f"Week {i}" for i in range(1, weeks + 1)]
 
+            # 2) Calendar & TZ
+            service = get_google_service("calendar", "v3")
+            tz = get_user_timezone(service, calendar_id)
+            now = dt.datetime.now(dt.timezone.utc).astimezone(dt.timezone(dt.timedelta(0)))  # placeholder tz aware UTC
+            today_local = dt.datetime.now().date()
+            base_monday = _next_monday(today_local) if start_from_next_monday else today_local
+
+            # 3) Fetch events for the whole span
+            days_ahead = max(7, weeks * 7)
             events = fetch_calendar_events(days_ahead=days_ahead)
             if isinstance(events, dict) and events.get("error"):
-                logger.error("Calendar fetch error: %s", events.get("error"))
                 return {"error": events.get("error")}
 
-            context_bits = []
-            if course_name:
-                context_bits.append(f"- Course name: {course_name}")
-            if session_purpose:
-                context_bits.append(f"- Session purpose: {session_purpose}")
-            if location_hint:
-                context_bits.append(f"- Preferred location: {location_hint}")
-            if attendees:
-                context_bits.append(f"- Attendees (FYI): {', '.join(attendees)}")
-            context_text = "\n".join(context_bits) if context_bits else "- No extra context"
+            # normalize events -> list of (start_dt, end_dt) in local date-time terms
+            busy: list[tuple[dt.datetime, dt.datetime]] = []
+            for ev in events or []:
+                s = (ev.get("start") or {})
+                e = (ev.get("end") or {})
+                s_val = s.get("dateTime") or s.get("date")
+                e_val = e.get("dateTime") or e.get("date")
+                if not (s_val and e_val):
+                    continue
+                # Handle all-day (YYYY-MM-DD)
+                if "T" not in s_val:
+                    d = dt.datetime.strptime(s_val, "%Y-%m-%d").date()
+                    start_dt = dt.datetime(d.year, d.month, d.day, 0, 0)
+                else:
+                    # Trim seconds/timezone if present; keep local naive for overlap checks
+                    s_core = s_val.replace("Z", "").split("+", 1)[0]
+                    start_dt = dt.datetime.strptime(s_core[:16], "%Y-%m-%dT%H:%M")
+                if "T" not in e_val:
+                    d2 = dt.datetime.strptime(e_val, "%Y-%m-%d").date()
+                    end_dt = dt.datetime(d2.year, d2.month, d2.day, 23, 59)
+                else:
+                    e_core = e_val.replace("Z", "").split("+", 1)[0]
+                    end_dt = dt.datetime.strptime(e_core[:16], "%Y-%m-%dT%H:%M")
+                busy.append((start_dt, end_dt))
 
-            system_prompt = f"""
-            Respond ONLY in valid JSON. Do NOT include any text outside JSON.
-            You are a teaching assistant that schedules lessons and also names events for the teacher's calendar.
+            # 4) Candidate generator (Mon-Fri, 30-min increments)
+            def candidate_starts():
+                for wd in range(0, 5):  # Mon..Fri
+                    for hh in range(work_hours[0], work_hours[1]):
+                        for mm in (0, 30):
+                            if hh + slot_hours > work_hours[1]:
+                                continue
+                            yield wd, hh, mm
 
-            Use the constraints and upcoming events to suggest exactly 3 free lesson slots.
+            # 5) Check a single weekly timeslot for all weeks
+            def timeslot_is_free(wd: int, hh: int, mm: int) -> bool:
+                for w in range(weeks):
+                    day = base_monday + dt.timedelta(days=wd + 7 * w)
+                    start_dt = dt.datetime(day.year, day.month, day.day, hh, mm)
+                    end_dt = start_dt + dt.timedelta(hours=slot_hours)
+                    for (bs, be) in busy:
+                        if _overlaps(start_dt, end_dt, bs, be):
+                            return False
+                return True
 
-            Constraints:
-            - Weekdays only (Mon–Fri)
-            - Working hours: {work_hours[0]}:00–{work_hours[1]}:00
-            - Slot duration: {slot_hours} hour(s)
-            - Avoid all conflicts with provided events (busy if overlapping or all-day)
-            - Align to 30-minute increments
-            - Prefer earliest available times
-            - Provide a concise, human-friendly event title (<= 60 chars). If course_name/purpose given, include them briefly.
-            - If a location_hint is provided, include it in "location" (optional field).
+            # 6) Pick N distinct consistent timeslots
+            chosen: list[tuple[int, int, int]] = []
+            for wd, hh, mm in candidate_starts():
+                if timeslot_is_free(wd, hh, mm):
+                    chosen.append((wd, hh, mm))
+                    if len(chosen) >= sections_per_week:
+                        break
 
-            Output JSON schema:
-            {{
-              "suggested_slots": [
-                {{
-                  "start": "YYYY-MM-DDTHH:MM",
-                  "end":   "YYYY-MM-DDTHH:MM",
-                  "title": "string",
-                  "reason":"string",
-                  "location":"string (optional)"
-                }},
-                {{...}}, {{...}}
-              ]
-            }}
-            """
+            if len(chosen) < sections_per_week:
+                logger.warning("Only found %d/%d consistent weekly slots", len(chosen), sections_per_week)
 
-            user_prompt = (
-                "Extra context for naming the events:\n"
-                f"{context_text}\n\n"
-                "Here are upcoming Google Calendar events (ISO times as available):\n"
-                + json.dumps(events)
-            )
-
-            raw = chat_completion(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=0.2,
-                max_tokens=1200,
-            )
-
-            try:
-                result = json.loads(raw)
-
-                # minimal validation/sanitization
-                slots = result.get("suggested_slots", []) or []
-                clean = []
-                for s in slots:
-                    if not isinstance(s, dict):
-                        continue
-                    start = (s.get("start") or "").strip()
-                    end = (s.get("end") or "").strip()
-                    title = (s.get("title") or "").strip()
-                    reason = (s.get("reason") or "").strip()
-                    location = (s.get("location") or "").strip() or None
-
-                    # must have start/end/title
-                    if not (start and end and title):
-                        continue
-
-                    # trim overly long titles to be safe
-                    if len(title) > 60:
-                        title = title[:57].rstrip() + "..."
-
-                    clean.append({
-                        "start": start,
-                        "end": end,
-                        "title": title,
+            # 7) Build suggested_slots across weeks
+            weekday_name = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            suggested: list[dict] = []
+            for w in range(weeks):
+                for si, (wd, hh, mm) in enumerate(chosen, start=1):
+                    day = base_monday + dt.timedelta(days=wd + 7 * w)
+                    start_dt = dt.datetime(day.year, day.month, day.day, hh, mm)
+                    end_dt = start_dt + dt.timedelta(hours=slot_hours)
+                    start_str = start_dt.strftime("%Y-%m-%dT%H:%M")
+                    end_str = end_dt.strftime("%Y-%m-%dT%H:%M")
+                    wlabel = week_names[w] if w < len(week_names) else f"Week {w+1}"
+                    # Use only the week/topic label to keep calendar titles short
+                    stitle = f"{wlabel}"
+                    reason = f"Consistent weekly slot on {weekday_name[wd]} {hh:02d}:{mm:02d} avoiding conflicts"
+                    slot = {
+                        "start": start_str,
+                        "end": end_str,
+                        "title": stitle[:60],
                         "reason": reason,
-                        **({"location": location} if location else {})
-                    })
+                    }
+                    if location_hint:
+                        slot["location"] = location_hint
+                    suggested.append(slot)
 
-                result["suggested_slots"] = clean
-                result["metadata"] = {
-                    "course_name": course_name,
-                    "session_purpose": session_purpose,
-                    "location_hint": location_hint,
-                    "attendees": attendees or [],
-                    "calendar_id": calendar_id,
+            result = {
+                "suggested_slots": suggested,
+                "metadata": {
+                    "lesson_title": title,
+                    "duration_weeks": weeks,
+                    "sections_per_week": sections_per_week,
                     "work_hours": list(work_hours),
                     "slot_hours": slot_hours,
-                    "days_ahead": days_ahead
+                    "calendar_id": calendar_id,
+                    "location_hint": location_hint,
+                    "attendees": attendees or [],
+                    "base_monday": base_monday.isoformat(),
                 }
-
-                logger.info("TimetableAgent produced %d suggested slot(s)", len(clean))
-                return result
-
-            except json.JSONDecodeError:
-                logger.error("Model did not return valid JSON. Raw output: %s", raw)
-                return {"error": "Model did not return valid JSON."}
+            }
+            logger.info("Suggested %d slots over %d week(s)", len(suggested), weeks)
+            return result
 
         except Exception as e:
             logger.error("TimetableAgent failed: %s", e, exc_info=True)
