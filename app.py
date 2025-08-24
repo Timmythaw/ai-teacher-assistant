@@ -144,8 +144,6 @@ def save_assessment():
         }
 
         db_res = supabase.table("assessments").insert(row).execute()
-        if getattr(db_res, "error", None):
-            return jsonify({"ok": False, "error": str(db_res.error)}), 500
 
         saved = db_res.data[0] if db_res.data else None
         return jsonify({"ok": True, "id": saved["id"] if saved else None, "saved": saved}), 200
@@ -440,12 +438,24 @@ def save_lesson_plan():
         }
 
         db_res = supabase.table("lesson_plans").insert(row).execute()
-        if getattr(db_res, "error", None):
-            return jsonify({"ok": False, "error": str(db_res.error)}), 500
 
         saved = (db_res.data or [None])[0]
         return jsonify({"ok": True, "id": saved["id"] if saved else None, "saved": saved}), 200
 
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/lesson-plans/<uuid:id>/markdown", methods=["GET"])
+def lesson_plan_markdown(id):
+    try:
+        sel = supabase.table("lesson_plans").select("result").eq("id", str(id)).single().execute()
+        row = sel.data or {}
+        result = row.get("result")
+        if not isinstance(result, dict):
+            return jsonify({"ok": False, "error": "Lesson plan not found or invalid JSON"}), 404
+        md = render_lesson_plan_markdown(result)
+        return jsonify({"ok": True, "markdown": md}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -523,8 +533,9 @@ def create_batch_upload_csv():
 
 
     batch_id = batch_resp.data[0]["id"] if batch_resp.data else None
-    if hasattr(batch_resp, 'error') and batch_resp.error:
-        flash("Failed to create batch: " + str(batch_resp.error), "error")
+    # If insertion failed, data may be empty; handle gracefully
+    if not batch_id:
+        flash("Failed to create batch", "error")
         return redirect(url_for("courses_batches"))
 
     # Prepare list of students to insert

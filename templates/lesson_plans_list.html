@@ -16,6 +16,7 @@
 </div>
 {% endif %}
 
+
 {% if lesson_plans and lesson_plans|length > 0 %}
 <div class="overflow-x-auto bg-white border rounded-xl shadow-sm">
   <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -46,6 +47,7 @@
           <button type="button"
             class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50 preview-btn"
             data-preview-id="lp-{{ lp.id }}"
+            data-lp-id="{{ lp.id }}"
             data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}">
             Preview
           </button>
@@ -217,6 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewBtn = e.target.closest("button[data-preview-id]");
     if (previewBtn) {
       const id = previewBtn.getAttribute("data-preview-id");
+      const lpId = previewBtn.getAttribute("data-lp-id");
       const scriptEl = document.getElementById(id);
       if (!scriptEl) {
         alert("No preview data found.");
@@ -224,6 +227,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       try {
         const obj = JSON.parse(scriptEl.textContent);
+        // Try server-rendered markdown for consistent formatting
+        const serverUrl = lpId ? `/api/lesson-plans/${lpId}/markdown` : null;
+        if (serverUrl) {
+          fetch(serverUrl)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              const md = (data && data.ok && data.markdown) ? data.markdown : jsonToMarkdownFlexibleLP(obj);
+              const title = previewBtn.getAttribute("data-title");
+              openPreviewModal(md, title);
+            })
+            .catch(() => {
+              const md = jsonToMarkdownFlexibleLP(obj);
+              const title = previewBtn.getAttribute("data-title");
+              openPreviewModal(md, title);
+            });
+          return;
+        }
         const md = jsonToMarkdownFlexibleLP(obj);
         const title = previewBtn.getAttribute("data-title");
         openPreviewModal(md, title);

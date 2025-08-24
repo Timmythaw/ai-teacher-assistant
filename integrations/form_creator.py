@@ -27,7 +27,7 @@ def create_google_form(assessment_json, title="Auto Assessment"):
 
         if not isinstance(assessment_json, dict) or "questions" not in assessment_json:
             logger.warning("Invalid assessment JSON: %s", assessment_json)
-            return {"error": "Invalid assessment JSON. Missing 'questions'."}
+            return {"success": False, "error": "Invalid assessment JSON. Missing 'questions'."}
 
         form_title = assessment_json.get("title", title)
         default_points = _default_points_from_rubric(assessment_json.get("rubric", []))
@@ -36,7 +36,7 @@ def create_google_form(assessment_json, title="Auto Assessment"):
         form = service.forms().create(body={"info": {"title": form_title, "documentTitle": form_title}}).execute()
         form_id = form.get("formId")
         if not form_id:
-            return {"error": "Failed to create Google Form."}
+            return {"success": False, "error": "Failed to create Google Form."}
 
         # Configure quiz and email collection (best-effort)
         try:
@@ -60,8 +60,8 @@ def create_google_form(assessment_json, title="Auto Assessment"):
         def _to_list(ans):
             if ans is None:
                 return []
-            if isinstance(ans, str):
-                return [ans]
+            if isinstance(ans, (str, int, float)):
+                return [str(ans)]
             if isinstance(ans, list):
                 return [str(a).strip() for a in ans if str(a).strip()]
             return []
@@ -109,7 +109,8 @@ def create_google_form(assessment_json, title="Auto Assessment"):
                 if s and s not in seen:
                     seen.add(s); clean_opts.append(s)
             is_mcq = len(clean_opts) >= 2
-            item_question = {"required": True}
+            # widen type to allow mixed value types for pylance
+            item_question: dict[str, object] = {"required": True}
             if is_mcq:
                 item_question["choiceQuestion"] = {"type": "RADIO", "options": [{"value": o} for o in clean_opts], "shuffle": True}
             else:
@@ -127,8 +128,10 @@ def create_google_form(assessment_json, title="Auto Assessment"):
 
         # Fetch created items and apply grading
         applied_count = 0
+        responder_uri = None
         try:
             created = service.forms().get(formId=form_id).execute() or {}
+            responder_uri = created.get("responderUri")
             items = [it for it in (created.get("items") or []) if "questionItem" in it]
             update_reqs = []
             for idx, nq in enumerate(norm_questions):
@@ -171,14 +174,21 @@ def create_google_form(assessment_json, title="Auto Assessment"):
             logger.warning("Post-creation grading update failed: %s", e)
 
         edit_url = f"https://docs.google.com/forms/d/{form_id}/edit"
-        return {"form_id": form_id, "edit_url": edit_url, "email_collection": "VERIFIED", "answer_keys_applied": applied_count}
+        return {
+            "success": True,
+            "formId": form_id,
+            "formUrl": responder_uri,  # public responder URL if available
+            "editUrl": edit_url,
+            "email_collection": "VERIFIED",
+            "answer_keys_applied": applied_count,
+        }
 
     except HttpError as e:
         logger.error("Google Forms API error: %s", e)
-        return {"error": f"Google Forms API error: {e}"}
+        return {"success": False, "error": f"Google Forms API error: {e}"}
     except Exception as e:
         logger.error("Form creation failed: %s", e, exc_info=True)
-        return {"error": f"Form creation failed: {e}"}
+        return {"success": False, "error": f"Form creation failed: {e}"}
 
 
 # helpers (same as before)
