@@ -1,176 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}AI Lesson Planner{% endblock %}</title>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}AI Lesson Planner{% endblock %}</title>
-
-  <!-- TailwindCSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: "#f6f8ff",
-              100: "#eef2ff",
-              200: "#e0e7ff",
-              300: "#c7d2fe",
-              400: "#a5b4fc",
-              500: "#818cf8",
-              600: "#6366f1",
-              700: "#4f46e5",
-              800: "#4338ca",
-              900: "#3730a3",
+    <!-- TailwindCSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#f6f8ff",
+                100: "#eef2ff",
+                200: "#e0e7ff",
+                300: "#c7d2fe",
+                400: "#a5b4fc",
+                500: "#818cf8",
+                600: "#6366f1",
+                700: "#4f46e5",
+                800: "#4338ca",
+                900: "#3730a3",
+              },
             },
           },
         },
-      },
-    };
-  </script>
+      };
+    </script>
 
-  {% block head_extra %}{% endblock %}
-  <style>
-    ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
+    {% block head_extra %}{% endblock %}
+    <style>
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
 
-    ::-webkit-scrollbar-thumb {
-      background: #e5e7eb;
-      border-radius: 8px;
-    }
+      ::-webkit-scrollbar-thumb {
+        background: #e5e7eb;
+        border-radius: 8px;
+      }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #d1d5db;
-    }
-  </style>
-  {% block styles %}{% endblock %}
-</head>
+      ::-webkit-scrollbar-thumb:hover {
+        background: #d1d5db;
+      }
+    </style>
+    {% block styles %}{% endblock %}
+  </head>
 
-<body class="min-h-screen bg-gray-50 text-gray-900">
-  <div class="flex min-h-screen">
-    <!-- Sidebar (desktop only) -->
-    <aside class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-gray-200 bg-white">
-      <div class="h-16 flex items-center px-5 border-b border-gray-100">
-        <a href="{{ url_for('index') }}" class="text-lg font-semibold">AI Lesson Planner</a>
-      </div>
-
-      <nav class="flex-1 p-3 space-y-1">
-        <a href="{{ url_for('index') }}"
-          class="block px-3 py-2 rounded-lg hover:bg-gray-100 {{ 'bg-gray-100 font-medium' if request.endpoint == 'index' else '' }}">
-          Dashboard
-        </a>
-        <a href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Batches
-        </a>
-        <a href="{{ url_for('lesson_plans_list') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Lesson Plans
-        </a>
-        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Assessments
-        </a>
-        <a href="{{ url_for('email_page') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">
-          Send Email
-        </a>
-
-        <div class="px-3 pt-6">
-          <p class="text-xs uppercase tracking-wide text-gray-400">
-            v0 UI prototype
-          </p>
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+    <div class="flex min-h-screen">
+      <!-- Sidebar (desktop only) -->
+      <aside
+        class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-gray-200 bg-white"
+      >
+        <div class="h-16 flex items-center px-5 border-b border-gray-100">
+          <a href="{{ url_for('index') }}" class="text-[22px] font-semibold"
+            >AI Teacher Assistant</a
+          >
         </div>
-      </nav>
-    </aside>
 
-    <!-- Main column -->
-    <div class="flex-1 flex flex-col">
-      <!-- Mobile-only header with hamburger -->
-      <header class="md:hidden h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4">
-        <button id="openSidebar" class="inline-flex items-center justify-center p-2 rounded-md border border-gray-200"
-          aria-label="Open menu">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-          </svg>
-        </button>
-        <a href="{{ url_for('index') }}" class="font-semibold">AI Lesson Planner</a>
-        <span class="w-6"></span>
-      </header>
+        <nav class="flex-1 p-3 space-y-1">
+          <a
+            href="{{ url_for('index') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100 {{ 'bg-gray-100 font-medium' if request.endpoint == 'index' else '' }}"
+          >
+            Dashboard
+          </a>
+          <a
+            href="{{ url_for('batches_page') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
+          >
+            Batches
+          </a>
+          <a
+            href="{{ url_for('lesson_plans_list') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
+          >
+            Lesson Plans
+          </a>
+          <a
+            href="{{ url_for('assessments_list') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
+          >
+            Assessments
+          </a>
+          <a
+            href="{{ url_for('email_page') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
+          >
+            Send Email
+          </a>
 
-      <!-- Content -->
-      <main class="flex-1 p-4 md:p-6">
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %}
-        <div class="space-y-2 mb-4">
-          {% for category, message in messages %} {% set color = 'blue' %} {%
-          if category in ['success','ok'] %}{% set color = 'green' %}{% endif
-          %} {% if category in ['warning'] %}{% set color = 'yellow' %}{%
-          endif %} {% if category in ['error','danger'] %}{% set color = 'red'
-          %}{% endif %}
-          <div class="border-l-4 pl-3 py-2 rounded bg-{{ color }}-50 border-{{ color }}-400 text-{{ color }}-800">
-            {{ message }}
+          <div class="px-3 pt-6">
+            <p class="text-xs uppercase tracking-wide text-gray-400">
+              AI Teacher Assistant UI Prototype
+            </p>
           </div>
-          {% endfor %}
-        </div>
-        {% endif %} {% endwith %} {% block content %}{% endblock %}
-      </main>
+        </nav>
+      </aside>
 
-      <!-- Footer -->
-      <footer class="border-t border-gray-200 bg-white text-xs text-gray-500 px-6 py-3">
-        © {{ current_year or 2025 }} AI Lesson Planner
-      </footer>
-    </div>
-  </div>
+      <!-- Main column -->
+      <div class="flex-1 flex flex-col">
+        <!-- Mobile-only header with hamburger -->
+        <header
+          class="md:hidden h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4"
+        >
+          <button
+            id="openSidebar"
+            class="inline-flex items-center justify-center p-2 rounded-md border border-gray-200"
+            aria-label="Open menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"
+              />
+            </svg>
+          </button>
+          <a href="{{ url_for('index') }}" class="font-semibold"
+            >AI Lesson Planner</a
+          >
+          <span class="w-6"></span>
+        </header>
 
-  <!-- Mobile drawer (shown only on small screens when toggled) -->
-  <div id="drawer" class="fixed inset-0 z-40 hidden md:hidden">
-    <div class="absolute inset-0 bg-black/40" data-close></div>
-    <div class="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-gray-200 p-3">
-      <div class="h-14 flex items-center justify-between px-2">
-        <span class="font-semibold">Menu</span>
-        <button class="p-2 rounded-md border" data-close aria-label="Close menu">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <!-- Content -->
+        <main class="flex-1 p-4 md:p-6">
+          <!-- Flash messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div class="space-y-2 mb-4">
+            {% for category, message in messages %} {% set color = 'blue' %} {%
+            if category in ['success','ok'] %}{% set color = 'green' %}{% endif
+            %} {% if category in ['warning'] %}{% set color = 'yellow' %}{%
+            endif %} {% if category in ['error','danger'] %}{% set color = 'red'
+            %}{% endif %}
+            <div
+              class="border-l-4 pl-3 py-2 rounded bg-{{ color }}-50 border-{{ color }}-400 text-{{ color }}-800"
+            >
+              {{ message }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %} {% endwith %} {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer
+          class="border-t border-gray-200 bg-white text-xs text-gray-500 px-6 py-3"
+        >
+          © {{ current_year or 2025 }} AI Lesson Planner
+        </footer>
       </div>
-      <nav class="space-y-1 mt-2">
-        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a> <a
-          href="{{ url_for('batches_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Batches</a>
-        <a href="{{ url_for('lesson_plans_list') }}" class="block px-3 py-2 rounded hover:bg-gray-100">
-          Lesson Plans</a>
-        <a href="{{ url_for('assessments_list') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Assessments</a>
-        <a href="{{ url_for('email_page') }}" class="block px-3 py-2 rounded hover:bg-gray-100">Send Email</a>
-      </nav>
     </div>
-  </div>
 
-  <!-- Tailwind Typography for nicer Markdown -->
-  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-  <!-- Markdown + Sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <!-- Mobile drawer (shown only on small screens when toggled) -->
+    <div id="drawer" class="fixed inset-0 z-40 hidden md:hidden">
+      <div class="absolute inset-0 bg-black/40" data-close></div>
+      <div
+        class="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-gray-200 p-3"
+      >
+        <div class="h-14 flex items-center justify-between px-2">
+          <span class="font-semibold">Menu</span>
+          <button
+            class="p-2 rounded-md border"
+            data-close
+            aria-label="Close menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <nav class="space-y-1 mt-2">
+          <a
+            href="{{ url_for('index') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+            >Dashboard</a
+          >
+          <a
+            href="{{ url_for('batches_page') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+            >Batches</a
+          >
+          <a
+            href="{{ url_for('lesson_plans_list') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+          >
+            Lesson Plans</a
+          >
+          <a
+            href="{{ url_for('assessments_list') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+            >Assessments</a
+          >
+          <a
+            href="{{ url_for('email_page') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+            >Send Email</a
+          >
+        </nav>
+      </div>
+    </div>
 
-  {% block scripts_before %}{% endblock %}
-  <script>
-    // Mobile drawer logic (mobile-only header triggers)
-    const openBtn = document.getElementById("openSidebar");
-    const drawer = document.getElementById("drawer");
-    if (openBtn && drawer) {
-      openBtn.addEventListener("click", () =>
-        drawer.classList.remove("hidden")
-      );
-      drawer
-        .querySelectorAll("[data-close]")
-        .forEach((el) =>
-          el.addEventListener("click", () => drawer.classList.add("hidden"))
+    <!-- Tailwind Typography for nicer Markdown -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Markdown + Sanitizer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
+    {% block scripts_before %}{% endblock %}
+    <script>
+      // Mobile drawer logic (mobile-only header triggers)
+      const openBtn = document.getElementById("openSidebar");
+      const drawer = document.getElementById("drawer");
+      if (openBtn && drawer) {
+        openBtn.addEventListener("click", () =>
+          drawer.classList.remove("hidden")
         );
-    }
-  </script>
-  {% block scripts %}{% endblock %}
-</body>
-
+        drawer
+          .querySelectorAll("[data-close]")
+          .forEach((el) =>
+            el.addEventListener("click", () => drawer.classList.add("hidden"))
+          );
+      }
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
 </html>
