@@ -1,11 +1,11 @@
-{% extends "base.html" %} {% block title %}Lesson Plans — AI Lesson Planner{%
-endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Lesson Plans — AI Lesson Planner{% endblock %}
+
+{% block content %}
 <div class="flex items-center justify-between mb-6">
   <h1 class="text-2xl font-semibold">Lesson Plans</h1>
-  <a
-    href="{{ url_for('lesson_generator_page') }}"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
-  >
+  <a href="{{ url_for('lesson_generator_page') }}"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
     + Generate New
   </a>
 </div>
@@ -14,7 +14,9 @@ endblock %} {% block content %}
 <div class="mb-4 text-sm text-red-600">
   Error loading lesson plans: {{ error }}
 </div>
-{% endif %} {% if lesson_plans and lesson_plans|length > 0 %}
+{% endif %}
+
+{% if lesson_plans and lesson_plans|length > 0 %}
 <div class="overflow-x-auto bg-white border rounded-xl shadow-sm">
   <table class="min-w-full divide-y divide-gray-200 text-sm">
     <thead class="bg-gray-50">
@@ -22,51 +24,46 @@ endblock %} {% block content %}
         <th class="px-4 py-2 text-left font-medium text-gray-700">Title</th>
         <th class="px-4 py-2 text-left font-medium text-gray-700">Created</th>
         <th class="px-4 py-2 text-left font-medium text-gray-700">Weeks</th>
-        <th class="px-4 py-2 text-left font-medium text-gray-700">
-          Sections/Week
-        </th>
+        <th class="px-4 py-2 text-left font-medium text-gray-700">Sections/Week</th>
         <th class="px-4 py-2 w-56"></th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
-      {% for lp in lesson_plans %} {% set r = lp.result or {} %}
+      {% for lp in lesson_plans %}
+      {% set r = lp.result or {} %}
       <tr>
         <td class="px-4 py-2">
           {{ r.title or r.name or lp.original_filename or "Untitled Plan" }}
         </td>
         <td class="px-4 py-2 text-gray-500">{{ lp.created_at|default("") }}</td>
         <td class="px-4 py-2">
-          {{ r.total_duration or r.weeks or r.duration_weeks or
-          (lp.options.weeks if lp.options and lp.options.weeks) or "-" }}
+          {{ r.total_duration or r.weeks or r.duration_weeks or (lp.options.weeks if lp.options and lp.options.weeks) or "-" }}
         </td>
         <td class="px-4 py-2">
-          {{ r.sections_per_week or (lp.options.sections if lp.options and
-          lp.options.sections) or "-" }}
+          {{ r.sections_per_week or (lp.options.sections if lp.options and lp.options.sections) or "-" }}
         </td>
         <td class="px-4 py-2 text-right space-x-2">
-          <button
-            type="button"
-            class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-            data-preview="{{ r|tojson|e }}"
-            data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}"
-          >
+          <button type="button"
+            class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50 preview-btn"
+            data-preview-id="lp-{{ lp.id }}"
+            data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}">
             Preview
           </button>
-
-          <details class="inline-block align-top">
-            <summary
-              class="cursor-pointer px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-            >
-              View JSON
-            </summary>
-            <pre
-              class="mt-2 p-2 bg-gray-50 border rounded max-w-lg overflow-x-auto text-xs"
-            >
-{{ r | tojson(indent=2) }}</pre
-            >
-          </details>
+          <button type="button"
+            class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50 json-btn"
+            data-json-id="lp-json-{{ lp.id }}"
+            data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan JSON' }}">
+            View JSON
+          </button>
         </td>
       </tr>
+      <!-- Hidden JSON data for preview -->
+      <script id="lp-{{ lp.id }}" type="application/json">
+        {{ r | tojson }}
+      </script>
+      <script id="lp-json-{{ lp.id }}" type="application/json">
+        {{ r | tojson(indent=2) }}
+      </script>
       {% endfor %}
     </tbody>
   </table>
@@ -74,306 +71,224 @@ endblock %} {% block content %}
 {% else %}
 <div class="p-6 bg-white border rounded-xl shadow-sm text-center text-gray-500">
   No lesson plans saved yet.<br />
-  <a
-    href="{{ url_for('lesson_generator_page') }}"
-    class="text-blue-600 hover:underline"
-  >
+  <a href="{{ url_for('lesson_generator_page') }}" class="text-blue-600 hover:underline">
     Generate your first lesson plan
   </a>
 </div>
 {% endif %}
 
 <!-- Preview Modal -->
-<div id="lp-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/40"></div>
-  <div class="relative mx-auto my-8 w-full max-w-3xl">
-    <div class="bg-white rounded-xl shadow-xl border overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-2 border-b">
-        <h3 id="lp-modal-title" class="font-semibold text-sm sm:text-base">
-          Preview
-        </h3>
-        <button
-          id="lp-modal-close"
-          class="p-1.5 rounded hover:bg-gray-100"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-      </div>
-      <div class="max-h-[75vh] overflow-auto">
-        <article
-          id="lp-modal-body"
-          class="prose prose-slate max-w-none p-4"
-        ></article>
-      </div>
-      <div class="flex justify-end gap-2 px-4 py-2 border-t">
-        <button
-          id="lp-modal-copy"
-          class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        >
-          Copy Markdown
-        </button>
-        <button
-          id="lp-modal-close2"
-          class="px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black"
-        >
-          Close
-        </button>
-      </div>
+<div id="lp-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+  <div class="relative mx-auto my-8 w-full max-w-3xl bg-white rounded-xl shadow-xl border overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-2 border-b">
+      <h3 id="lp-modal-title" class="font-semibold text-sm sm:text-base">Preview</h3>
+      <button id="lp-modal-close" class="p-1.5 rounded hover:bg-gray-100" aria-label="Close">✕</button>
+    </div>
+    <div class="max-h-[75vh] overflow-auto p-4">
+      <article id="lp-modal-body" class="prose prose-slate max-w-none"></article>
+    </div>
+    <div class="flex justify-end gap-2 px-4 py-2 border-t">
+      <button id="lp-modal-copy" class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50">Copy Markdown</button>
+      <button id="lp-modal-close2" class="px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black">Close</button>
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+
+<!-- JSON Modal -->
+<div id="json-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+  <div class="relative mx-auto my-8 w-full max-w-3xl bg-white rounded-xl shadow-xl border overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-2 border-b">
+      <h3 id="json-modal-title" class="font-semibold text-sm sm:text-base">JSON Preview</h3>
+      <button id="json-modal-close" class="p-1.5 rounded hover:bg-gray-100" aria-label="Close">✕</button>
+    </div>
+    <div class="max-h-[75vh] overflow-auto p-4">
+      <pre id="json-modal-body" class="bg-gray-50 rounded p-3 max-w-none whitespace-pre-wrap break-words text-xs"></pre>
+    </div>
+    <div class="flex justify-end gap-2 px-4 py-2 border-t">
+      <button id="json-modal-copy" class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50">Copy JSON</button>
+      <button id="json-modal-close2" class="px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black">Close</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("lp-modal");
-    const bodyEl = document.getElementById("lp-modal-body");
-    const titleEl = document.getElementById("lp-modal-title");
-    const closeBtn = document.getElementById("lp-modal-close");
-    const closeBtn2 = document.getElementById("lp-modal-close2");
-    const copyBtn = document.getElementById("lp-modal-copy");
+document.addEventListener("DOMContentLoaded", () => {
+  // Modal elements
+  const previewModal = document.getElementById("lp-modal");
+  const previewTitle = document.getElementById("lp-modal-title");
+  const previewBody = document.getElementById("lp-modal-body");
+  const previewClose = document.getElementById("lp-modal-close");
+  const previewClose2 = document.getElementById("lp-modal-close2");
+  const previewCopy = document.getElementById("lp-modal-copy");
 
-    let lastMarkdown = "";
+  const jsonModal = document.getElementById("json-modal");
+  const jsonTitle = document.getElementById("json-modal-title");
+  const jsonBody = document.getElementById("json-modal-body");
+  const jsonClose = document.getElementById("json-modal-close");
+  const jsonClose2 = document.getElementById("json-modal-close2");
+  const jsonCopy = document.getElementById("json-modal-copy");
 
-    // Helpers reused from generator page
-    const toArray = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]);
-    const pick = (obj, keys) => {
-      for (const k of keys) {
-        if (
-          obj &&
-          Object.prototype.hasOwnProperty.call(obj, k) &&
-          obj[k] != null
-        )
-          return obj[k];
+  let lastMarkdown = "";
+  let lastJson = "";
+
+  // Helper functions
+  const pick = (obj, keys) => {
+    for (const key of keys) {
+      if (obj && Object.prototype.hasOwnProperty.call(obj, key) && obj[key] != null) {
+        return obj[key];
       }
-      return undefined;
-    };
-
-    function jsonToMarkdownFlexibleLP(data) {
-      if (!data || typeof data !== "object")
-        return "### Error\n\nInvalid data.";
-      const lines = [];
-      const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
-      const totalWeeks = pick(data, [
-        "total_duration",
-        "weeks",
-        "duration_weeks",
-      ]);
-      const classSize = pick(data, ["class_size", "students", "num_students"]);
-      const sectionsPerWeek = pick(data, [
-        "sections_per_week",
-        "sectionsPerWeek",
-      ]);
-      lines.push(`# ${title}`, "");
-
-      const meta = [];
-      if (totalWeeks != null)
-        meta.push(`Total duration: ${totalWeeks} week(s)`);
-      if (classSize != null) meta.push(`Class size: ${classSize}`);
-      if (sectionsPerWeek != null)
-        meta.push(`Sections per week: ${sectionsPerWeek}`);
-      if (meta.length) lines.push(...meta.map((m) => `- ${m}`));
-
-      const overview = pick(data, ["overview", "summary"]);
-      if (overview) {
-        lines.push(
-          "",
-          "## Overview",
-          "",
-          typeof overview === "string"
-            ? overview
-            : JSON.stringify(overview, null, 2)
-        );
-      }
-
-      const vocabulary = pick(data, ["vocabulary", "key_terms"]);
-      if (vocabulary) {
-        lines.push("", "## Key Vocabulary", "");
-        toArray(vocabulary).forEach((v) =>
-          lines.push(
-            `- ${typeof v === "object" ? JSON.stringify(v) : String(v)}`
-          )
-        );
-      }
-
-      const weekly = pick(data, [
-        "weekly_schedule",
-        "weeks_schedule",
-        "plan",
-        "weekly",
-      ]);
-      if (Array.isArray(weekly) && weekly.length) {
-        lines.push("", "## Weekly Schedule", "");
-        weekly.forEach((w, i) => {
-          const label = pick(w, ["week", "label"]) ?? i + 1;
-          const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
-          lines.push(`### Week ${label}: ${topic}`);
-
-          const objectives = pick(w, [
-            "objectives",
-            "goals",
-            "learning_objectives",
-          ]);
-          if (objectives) {
-            lines.push("", "**Objectives**");
-            toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
-          }
-
-          const sections = pick(w, [
-            "sections",
-            "lessons",
-            "parts",
-            "sessions",
-          ]);
-          if (Array.isArray(sections) && sections.length) {
-            sections.forEach((s, idx) => {
-              lines.push("", `#### Section ${idx + 1}`);
-              const activities = pick(s, ["activities", "activity", "tasks"]);
-              if (activities) {
-                lines.push("", "- Activities:");
-                toArray(activities).forEach((a) =>
-                  lines.push(
-                    ` - ${
-                      typeof a === "object" ? JSON.stringify(a) : String(a)
-                    }`
-                  )
-                );
-              }
-              const materials = pick(s, ["materials", "resources"]);
-              if (materials) {
-                lines.push("", "- Materials/Resources:");
-                toArray(materials).forEach((m) =>
-                  lines.push(
-                    ` - ${
-                      typeof m === "object" ? JSON.stringify(m) : String(m)
-                    }`
-                  )
-                );
-              }
-              const differentiation = pick(s, [
-                "differentiation",
-                "adaptations",
-              ]);
-              if (differentiation) {
-                lines.push("", "- Differentiation:");
-                toArray(differentiation).forEach((d) =>
-                  lines.push(
-                    ` - ${
-                      typeof d === "object" ? JSON.stringify(d) : String(d)
-                    }`
-                  )
-                );
-              }
-              const assessment = pick(s, [
-                "assessment",
-                "checks",
-                "evaluation",
-              ]);
-              if (assessment) {
-                lines.push("", "- Assessment:");
-                toArray(assessment).forEach((a) =>
-                  lines.push(
-                    ` - ${
-                      typeof a === "object" ? JSON.stringify(a) : String(a)
-                    }`
-                  )
-                );
-              }
-              const homework = pick(s, ["homework", "extension"]);
-              if (homework) {
-                lines.push("", "- Homework/Extension:");
-                toArray(homework).forEach((h) =>
-                  lines.push(
-                    ` - ${
-                      typeof h === "object" ? JSON.stringify(h) : String(h)
-                    }`
-                  )
-                );
-              }
-            });
-          }
-
-          const resources = pick(w, ["resources", "links", "reference"]);
-          if (resources) {
-            lines.push("", "**Weekly Resources**");
-            toArray(resources).forEach((r) =>
-              lines.push(
-                `- ${typeof r === "object" ? JSON.stringify(r) : String(r)}`
-              )
-            );
-          }
-          lines.push("");
-        });
-      }
-
-      const external = pick(data, ["external_resources", "references"]);
-      if (external) {
-        lines.push("## External Resources", "");
-        toArray(external).forEach((r) =>
-          lines.push(
-            `- ${typeof r === "object" ? JSON.stringify(r) : String(r)}`
-          )
-        );
-      }
-
-      const md = lines.join("\n").trim();
-      return md || "```json\n" + JSON.stringify(data, null, 2) + "\n```";
     }
+    return undefined;
+  };
 
-    function openModal(markdown, title) {
-      lastMarkdown = markdown || "";
-      titleEl.textContent = title || "Preview";
-      const html =
-        typeof marked !== "undefined" ? marked.parse(markdown) : markdown;
-      const safe =
-        typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
-      bodyEl.innerHTML = safe;
-      modal.classList.remove("hidden");
+  function jsonToMarkdownFlexibleLP(data) {
+    if (!data || typeof data !== "object") return "### Error\n\nInvalid data.";
+    const lines = [];
+    const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
+    const totalWeeks = pick(data, ["total_duration", "weeks", "duration_weeks"]);
+    const classSize = pick(data, ["class_size", "students", "num_students"]);
+    const sectionsPerWeek = pick(data, ["sections_per_week", "sectionsPerWeek"]);
+
+    lines.push(`# ${title}`, "");
+    const meta = [];
+    if (totalWeeks != null) meta.push(`Total duration: ${totalWeeks} week(s)`);
+    if (classSize != null) meta.push(`Class size: ${classSize}`);
+    if (sectionsPerWeek != null) meta.push(`Sections per week: ${sectionsPerWeek}`);
+    if (meta.length) lines.push(...meta.map((m) => `- ${m}`));
+
+    const overview = pick(data, ["overview", "summary"]);
+    if (overview)
+      lines.push(
+        "",
+        "## Overview",
+        "",
+        typeof overview === "string" ? overview : JSON.stringify(overview, null, 2)
+      );
+
+    const weekly = pick(data, ["weekly_schedule", "weeks_schedule", "plan", "weekly"]);
+    if (Array.isArray(weekly)) {
+      lines.push("", "## Weekly Schedule", "");
+      weekly.forEach((w, i) => {
+        const label = pick(w, ["week", "label"]) ?? i + 1;
+        const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
+        lines.push(`### Week ${label}: ${topic}`);
+      });
     }
-    function closeModal() {
-      modal.classList.add("hidden");
-      bodyEl.innerHTML = "";
-      lastMarkdown = "";
-    }
+    return lines.join("\n").trim();
+  }
 
-    // Wire up buttons in table
-    document.body.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-preview]");
-      if (!btn) return;
+  // Open Preview modal
+  function openPreviewModal(markdown, title) {
+    lastMarkdown = markdown;
+    previewTitle.textContent = title || "Preview";
+    const html = typeof marked !== "undefined" ? marked.parse(markdown) : markdown;
+    const safeHtml = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+    previewBody.innerHTML = safeHtml;
+    previewModal.classList.remove("hidden");
+  }
 
+  function closePreviewModal() {
+    previewModal.classList.add("hidden");
+    previewBody.innerHTML = "";
+    lastMarkdown = "";
+  }
+
+  // Open JSON modal
+  function openJsonModal(jsonText, title) {
+    lastJson = jsonText;
+    jsonTitle.textContent = title || "JSON Preview";
+    jsonBody.textContent = jsonText;
+    jsonModal.classList.remove("hidden");
+  }
+
+  function closeJsonModal() {
+    jsonModal.classList.add("hidden");
+    jsonBody.textContent = "";
+    lastJson = "";
+  }
+
+  // Handle clicking buttons
+  document.body.addEventListener("click", (e) => {
+    const previewBtn = e.target.closest("button[data-preview-id]");
+    if (previewBtn) {
+      const id = previewBtn.getAttribute("data-preview-id");
+      const scriptEl = document.getElementById(id);
+      if (!scriptEl) {
+        alert("No preview data found.");
+        return;
+      }
       try {
-        const raw = btn.getAttribute("data-preview");
-        const obj = JSON.parse(raw);
+        const obj = JSON.parse(scriptEl.textContent);
         const md = jsonToMarkdownFlexibleLP(obj);
-        const title = btn.getAttribute("data-title") || "Preview";
-        openModal(md, title);
+        const title = previewBtn.getAttribute("data-title");
+        openPreviewModal(md, title);
       } catch (err) {
-        alert("Failed to render preview: " + (err?.message || err));
+        alert("Failed to render preview: " + err.message);
       }
-    });
+      return;
+    }
 
-    // Modal controls
-    closeBtn?.addEventListener("click", closeModal);
-    document
-      .getElementById("lp-modal-close2")
-      ?.addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    // Copy markdown
-    copyBtn?.addEventListener("click", async () => {
+    const jsonBtn = e.target.closest("button[data-json-id]");
+    if (jsonBtn) {
+      const id = jsonBtn.getAttribute("data-json-id");
+      const scriptEl = document.getElementById(id);
+      if (!scriptEl) {
+        alert("No JSON data found.");
+        return;
+      }
       try {
-        await navigator.clipboard.writeText(lastMarkdown || "");
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => (copyBtn.textContent = "Copy Markdown"), 900);
-      } catch {
-        copyBtn.textContent = "Failed";
-        setTimeout(() => (copyBtn.textContent = "Copy Markdown"), 900);
+        const jsonText = scriptEl.textContent;
+        const title = jsonBtn.getAttribute("data-title");
+        openJsonModal(jsonText, title);
+      } catch (err) {
+        alert("Failed to render JSON: " + err.message);
       }
-    });
+      return;
+    }
   });
+
+  // Modal close handlers
+  previewClose.addEventListener("click", closePreviewModal);
+  previewClose2.addEventListener("click", closePreviewModal);
+  previewModal.addEventListener("click", e => {
+    if (e.target === previewModal) closePreviewModal();
+  });
+
+  jsonClose.addEventListener("click", closeJsonModal);
+  jsonClose2.addEventListener("click", closeJsonModal);
+  jsonModal.addEventListener("click", e => {
+    if (e.target === jsonModal) closeJsonModal();
+  });
+
+  // Copy to clipboard buttons
+  previewCopy.addEventListener("click", async () => {
+    if (!lastMarkdown) return;
+    try {
+      await navigator.clipboard.writeText(lastMarkdown);
+      previewCopy.textContent = "Copied!";
+      setTimeout(() => (previewCopy.textContent = "Copy Markdown"), 1500);
+    } catch {
+      previewCopy.textContent = "Failed";
+      setTimeout(() => (previewCopy.textContent = "Copy Markdown"), 1500);
+    }
+  });
+
+  jsonCopy.addEventListener("click", async () => {
+    if (!lastJson) return;
+    try {
+      await navigator.clipboard.writeText(lastJson);
+      jsonCopy.textContent = "Copied!";
+      setTimeout(() => (jsonCopy.textContent = "Copy JSON"), 1500);
+    } catch {
+      jsonCopy.textContent = "Failed";
+      setTimeout(() => (jsonCopy.textContent = "Copy JSON"), 1500);
+    }
+  });
+});
 </script>
 {% endblock %}

@@ -4,24 +4,13 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
 %}
 <h1 class="text-xl font-semibold mb-4">Generate Assessment from PDF</h1>
 
-<form
-  id="upload-form"
-  action="{{ url_for('generate_assessment') }}"
-  method="post"
-  enctype="multipart/form-data"
-  class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5"
->
+<form id="upload-form" action="{{ url_for('generate_assessment') }}" method="post" enctype="multipart/form-data"
+  class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5">
   <!-- PDF Upload -->
   <div>
     <label for="pdf" class="block text-sm font-medium mb-1">Course PDF</label>
-    <input
-      id="pdf"
-      name="pdf"
-      type="file"
-      accept="application/pdf"
-      required
-      class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5"
-    />
+    <input id="pdf" name="pdf" type="file" accept="application/pdf" required
+      class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
   </div>
 
   <!-- Options -->
@@ -36,14 +25,8 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     </div>
 
     <div>
-      <label for="difficulty" class="block text-sm font-medium mb-1"
-        >Difficulty</label
-      >
-      <select
-        id="difficulty"
-        name="difficulty"
-        class="w-full border rounded-md p-2"
-      >
+      <label for="difficulty" class="block text-sm font-medium mb-1">Difficulty</label>
+      <select id="difficulty" name="difficulty" class="w-full border rounded-md p-2">
         <option>Easy</option>
         <option selected>Medium</option>
         <option>Hard</option>
@@ -51,18 +34,8 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
     </div>
 
     <div>
-      <label for="count" class="block text-sm font-medium mb-1"
-        >Questions</label
-      >
-      <input
-        id="count"
-        name="count"
-        type="number"
-        min="1"
-        max="50"
-        value="5"
-        class="w-full border rounded-md p-2"
-      />
+      <label for="count" class="block text-sm font-medium mb-1">Questions</label>
+      <input id="count" name="count" type="number" min="1" max="50" value="3" class="w-full border rounded-md p-2" />
     </div>
   </div>
 
@@ -84,20 +57,11 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
 
   <!-- Submit -->
   <div class="flex items-center gap-3">
-    <button
-      type="submit"
-      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
-    >
+    <button id="assessment-generate-btn" type="submit"
+      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed">
       Generate
     </button>
-    <button
-      id="save-btn"
-      type="button"
-      class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50 hidden"
-      title="Save to database"
-    >
-      Save
-    </button>
+
     <span id="save-status" class="text-xs text-gray-500"></span>
 
     <span class="text-xs text-gray-500">
@@ -111,36 +75,29 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
   <div class="flex items-center justify-between mb-2">
     <div class="text-sm text-gray-500">Preview</div>
     <div class="flex items-center gap-2">
-      <button
-        id="copy-md-btn"
-        type="button"
+      <button id="copy-md-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Markdown"
-      >
+        title="Copy Markdown">
         Copy Markdown
       </button>
-      <button
-        id="copy-plain-btn"
-        type="button"
+      <button id="copy-plain-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Visible Text"
-      >
+        title="Copy Visible Text">
         Copy Text
       </button>
-      <button
-        id="download-pdf-btn"
-        type="button"
+      <button id="download-pdf-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black"
-        title="Download as PDF"
-      >
+        title="Download as PDF">
         Download PDF
+      </button>
+      <button id="save-btn" type="button"
+        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-emerald-600 text-white hover:bg-emerald-700 hidden"
+        title="Save to database">
+        Save
       </button>
     </div>
   </div>
-  <article
-    id="result"
-    class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"
-  ></article>
+  <article id="result" class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"></article>
 </section>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -198,6 +155,13 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      // 🔹 Disable the Generate button
+      const generateBtn = document.getElementById("assessment-generate-btn");
+      generateBtn.disabled = true;
+      const originalBtnText = generateBtn.textContent;
+      generateBtn.textContent = "Generating...";
+
       resultWrapper.classList.add("hidden");
       resultEl.innerHTML = "";
       lastMarkdown = "";
@@ -260,6 +224,10 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
         lastMarkdown = `### Error\n\n${err.message}`;
         resultEl.innerText = lastMarkdown;
         resultWrapper.classList.remove("hidden");
+      } finally {
+        // 🔹 Restore button
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalBtnText;
       }
     });
 

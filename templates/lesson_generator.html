@@ -2,25 +2,13 @@
 Planner{% endblock %} {% block content %}
 <h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
 
-<form
-  id="lesson-form"
-  action="{{ url_for('generate_lesson_plan') }}"
-  method="post"
-  enctype="multipart/form-data"
-  class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5"
->
+<form id="lesson-form" action="{{ url_for('generate_lesson_plan') }}" method="post" enctype="multipart/form-data"
+  class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5">
   <div class="grid sm:grid-cols-2 gap-4">
     <div>
-      <label for="course_outline" class="block text-sm font-medium mb-1"
-        >Course Outline (PDF)</label
-      >
-      <input
-        id="course_outline"
-        name="course_outline"
-        type="file"
-        accept="application/pdf"
-        class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5"
-      />
+      <label for="course_outline" class="block text-sm font-medium mb-1">Course Outline (PDF)</label>
+      <input id="course_outline" name="course_outline" type="file" accept="application/pdf"
+        class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:bg-gray-50 file:text-gray-700 border rounded-md p-1.5" />
       <p class="text-xs text-gray-500 mt-1">
         Optional. Provide at least one of Course Outline or Lecture Notes.
       </p>
@@ -29,54 +17,21 @@ Planner{% endblock %} {% block content %}
 
   <div class="grid sm:grid-cols-3 gap-4">
     <div>
-      <label for="weeks" class="block text-sm font-medium mb-1"
-        >Study Duration (weeks)</label
-      >
-      <input
-        id="weeks"
-        name="weeks"
-        type="number"
-        min="1"
-        max="52"
-        step="1"
-        value="8"
-        class="w-full border rounded-md p-2"
-        required
-      />
+      <label for="weeks" class="block text-sm font-medium mb-1">Study Duration (weeks)</label>
+      <input id="weeks" name="weeks" type="number" min="1" max="52" step="1" value="8"
+        class="w-full border rounded-md p-2" required />
     </div>
 
     <div>
-      <label for="students" class="block text-sm font-medium mb-1"
-        >Class Size (students)</label
-      >
-      <input
-        id="students"
-        name="students"
-        type="number"
-        min="1"
-        max="500"
-        step="1"
-        value="30"
-        class="w-full border rounded-md p-2"
-        required
-      />
+      <label for="students" class="block text-sm font-medium mb-1">Class Size (students)</label>
+      <input id="students" name="students" type="number" min="1" max="500" step="1" value="30"
+        class="w-full border rounded-md p-2" required />
     </div>
 
     <div>
-      <label for="sections" class="block text-sm font-medium mb-1"
-        >Sections per week</label
-      >
-      <input
-        id="sections"
-        name="sections"
-        type="number"
-        min="1"
-        max="10"
-        step="1"
-        value="1"
-        class="w-full border rounded-md p-2"
-        required
-      />
+      <label for="sections" class="block text-sm font-medium mb-1">Sections per week</label>
+      <input id="sections" name="sections" type="number" min="1" max="10" step="1" value="1"
+        class="w-full border rounded-md p-2" required />
       <p class="text-xs text-gray-500 mt-1">
         Enter how many sessions you run each week.
       </p>
@@ -84,15 +39,11 @@ Planner{% endblock %} {% block content %}
   </div>
 
   <div class="flex items-center gap-3">
-    <button
-      type="submit"
-      class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
-    >
+    <button id="lp-generate-btn" type="submit" class="px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black 
+         disabled:opacity-50 disabled:cursor-not-allowed">
       Generate Plan
     </button>
-    <span id="hint" class="text-xs text-gray-500"
-      >Upload at least one PDF.</span
-    >
+    <span id="hint" class="text-xs text-gray-500">Upload at least one PDF.</span>
   </div>
 </form>
 
@@ -101,45 +52,29 @@ Planner{% endblock %} {% block content %}
   <div class="flex items-center justify-between mb-2">
     <div class="text-sm text-gray-500">Preview</div>
     <div class="flex items-center gap-2">
-      <button
-        id="lp-copy-md-btn"
-        type="button"
+      <button id="lp-copy-md-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Markdown"
-      >
+        title="Copy Markdown">
         Copy Markdown
       </button>
-      <button
-        id="lp-copy-plain-btn"
-        type="button"
+      <button id="lp-copy-plain-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-        title="Copy Visible Text"
-      >
+        title="Copy Visible Text">
         Copy Text
       </button>
-      <button
-        id="lp-download-pdf-btn"
-        type="button"
+      <button id="lp-download-pdf-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-gray-900 text-white hover:bg-black"
-        title="Download as PDF"
-      >
+        title="Download as PDF">
         Download PDF
       </button>
-      <button
-        id="lp-save-btn"
-        type="button"
+      <button id="lp-save-btn" type="button"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Save to database"
-        disabled
-      >
+        title="Save to database" disabled>
         Save
       </button>
     </div>
   </div>
-  <article
-    id="lp-result"
-    class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"
-  ></article>
+  <article id="lp-result" class="prose prose-slate max-w-none bg-white border rounded-xl p-6 shadow-sm"></article>
 </section>
 {% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -266,8 +201,7 @@ Planner{% endblock %} {% block content %}
                 lines.push("", "- Activities:");
                 toArray(activities).forEach((a) =>
                   lines.push(
-                    ` - ${
-                      typeof a === "object" ? JSON.stringify(a) : String(a)
+                    ` - ${typeof a === "object" ? JSON.stringify(a) : String(a)
                     }`
                   )
                 );
@@ -277,8 +211,7 @@ Planner{% endblock %} {% block content %}
                 lines.push("", "- Materials/Resources:");
                 toArray(materials).forEach((m) =>
                   lines.push(
-                    ` - ${
-                      typeof m === "object" ? JSON.stringify(m) : String(m)
+                    ` - ${typeof m === "object" ? JSON.stringify(m) : String(m)
                     }`
                   )
                 );
@@ -291,8 +224,7 @@ Planner{% endblock %} {% block content %}
                 lines.push("", "- Differentiation:");
                 toArray(differentiation).forEach((d) =>
                   lines.push(
-                    ` - ${
-                      typeof d === "object" ? JSON.stringify(d) : String(d)
+                    ` - ${typeof d === "object" ? JSON.stringify(d) : String(d)
                     }`
                   )
                 );
@@ -306,8 +238,7 @@ Planner{% endblock %} {% block content %}
                 lines.push("", "- Assessment:");
                 toArray(assessment).forEach((a) =>
                   lines.push(
-                    ` - ${
-                      typeof a === "object" ? JSON.stringify(a) : String(a)
+                    ` - ${typeof a === "object" ? JSON.stringify(a) : String(a)
                     }`
                   )
                 );
@@ -317,8 +248,7 @@ Planner{% endblock %} {% block content %}
                 lines.push("", "- Homework/Extension:");
                 toArray(homework).forEach((h) =>
                   lines.push(
-                    ` - ${
-                      typeof h === "object" ? JSON.stringify(h) : String(h)
+                    ` - ${typeof h === "object" ? JSON.stringify(h) : String(h)
                     }`
                   )
                 );
@@ -384,7 +314,14 @@ Planner{% endblock %} {% block content %}
     // Submit: generate plan
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      resultWrapper.classList.add("hidden");
+
+      // 🔹 Disable the Generate button
+      const generateBtn = document.getElementById("lp-generate-btn");
+      generateBtn.disabled = true;
+      const originalBtnText = generateBtn.textContent;
+      generateBtn.textContent = "Generating...";
+
+
       resultEl.innerHTML = "";
       lastMarkdown = "";
       suggestedFileName = "lesson_plan";
@@ -439,6 +376,10 @@ Planner{% endblock %} {% block content %}
         lastMarkdown = `### Error\n\n${err.message}`;
         resultEl.innerText = lastMarkdown;
         resultWrapper.classList.remove("hidden");
+      } finally {
+        // 🔹 Restore button
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalBtnText;
       }
     });
 
