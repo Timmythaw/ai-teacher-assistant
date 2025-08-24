@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from agents.assessment_agent import AssessmentAgent  # your existing 
 from agents.lesson_plan_agent import LessonPlanAgent
+from core.md_render import render_assessment_markdown, render_lesson_plan_markdown
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -29,8 +30,8 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
+url: str = os.environ.get("SUPABASE_URL") or ""
+key: str = os.environ.get("SUPABASE_KEY") or ""
 supabase: Client = create_client(url, key)
 
 def allowed_file(filename: str) -> bool:
@@ -61,13 +62,13 @@ def generate_assessment():
     if "pdf" not in request.files:
         abort(400, description="Missing file field 'pdf'")
     f = request.files["pdf"]
-    if f.filename == "":
+    if (f.filename or "") == "":
         abort(400, description="No file selected")
-    if not allowed_file(f.filename):
+    if not allowed_file(f.filename or ""):
         abort(400, description="Only .pdf files are allowed")
 
     # Save file
-    safe_name = secure_filename(f.filename)
+    safe_name = secure_filename(f.filename or "")
     dest = UPLOAD_DIR / safe_name
     i = 1
     while dest.exists():
@@ -100,8 +101,17 @@ def generate_assessment():
             mimetype="application/json"
         )
 
+    # Add rendered Markdown into response payload without changing storage shape
+    try:
+        assessment_md = render_assessment_markdown(assessment)
+        # non-destructive: place under a reserved key unlikely to collide
+        assessment_with_md = dict(assessment)
+        assessment_with_md["_markdown"] = assessment_md
+    except Exception:
+        assessment_with_md = assessment
+
     return app.response_class(
-        response=json.dumps(assessment, ensure_ascii=False, indent=2),
+        response=json.dumps(assessment_with_md, ensure_ascii=False, indent=2),
         status=200,
         mimetype="application/json"
     )
@@ -350,13 +360,13 @@ def generate_lesson_plan():
     if "course_outline" not in request.files:
         abort(400, description="Missing file field 'pdf'")
     f = request.files["course_outline"]
-    if f.filename == "":
+    if (f.filename or "") == "":
         abort(400, description="No file selected")
-    if not allowed_file(f.filename):
+    if not allowed_file(f.filename or ""):
         abort(400, description="Only .pdf files are allowed")
 
     # Save file
-    safe_name = secure_filename(f.filename)
+    safe_name = secure_filename(f.filename or "")
     dest = UPLOAD_DIR / safe_name
     i = 1
     while dest.exists():
@@ -371,11 +381,18 @@ def generate_lesson_plan():
 
     lp_agent = LessonPlanAgent()
     plan = lp_agent.generate_plan({"course_outline":dest.as_posix()}, weeks, num_stu, section_per_week)
-    print(plan)
+    # Attach rendered markdown for convenience (clients may drop it before saving)
+    try:
+        plan_md = render_lesson_plan_markdown(plan) if isinstance(plan, dict) and not plan.get("error") else None
+        plan_with_md = dict(plan)
+        if plan_md is not None:
+            plan_with_md["_markdown"] = plan_md
+    except Exception:
+        plan_with_md = plan
 
     # Return JSON response
     return app.response_class(
-        response=json.dumps(plan, ensure_ascii=False, indent=2),
+        response=json.dumps(plan_with_md, ensure_ascii=False, indent=2),
         status=200,
         mimetype="application/json"
     )

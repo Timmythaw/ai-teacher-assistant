@@ -339,7 +339,7 @@ Planner{% endblock %} {% block content %}
         const res = await fetch(form.action, { method: "POST", body: fd });
         const contentType = res.headers.get("Content-Type") || "";
 
-        let md = "";
+  let md = "";
         if (contentType.includes("application/json")) {
           const obj = await res.json();
 
@@ -355,7 +355,8 @@ Planner{% endblock %} {% block content %}
             lastUploadInfo.pdf_path = null; // set later if you return it from server
 
             saveBtn.disabled = false;
-            md = jsonToMarkdownFlexibleLP(obj || {});
+            // Prefer server-rendered markdown if present
+            md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
           } else {
             md = `### Error\n\n${obj?.error || "Unknown error"}`;
           }
@@ -387,12 +388,13 @@ Planner{% endblock %} {% block content %}
       if (!lastRawJson) return;
       saveBtn.disabled = true;
       saveBtn.textContent = "Saving...";
-      try {
+    try {
         const payload = {
           original_filename: lastUploadInfo.original_filename,
           pdf_path: lastUploadInfo.pdf_path,
           options: lastUploadInfo.options,
-          result: lastRawJson,
+      // Store pure JSON only (remove any preview helper keys)
+      result: (() => { const c = JSON.parse(JSON.stringify(lastRawJson || {})); delete c._markdown; return c; })(),
         };
         const res = await fetch("/api/lesson-plans", {
           method: "POST",
