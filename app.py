@@ -1,3 +1,5 @@
+# Orchestrator agent import
+from agents.orchestra import Orchestrator
 # app.py
 import os
 import io
@@ -8,7 +10,7 @@ from pathlib import Path
 from flask import Flask, request, render_template, abort, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from integrations.form_response import get_form_full_info
-from datetime import datetime, timezone
+#from datetime import datetime, timezone
 
 # --- Email routes ---
 from agents.email_agent import EmailAgent
@@ -45,6 +47,89 @@ def allowed_file(filename: str) -> bool:
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
+
+# Orchestrator Chat page
+# Orchestrator Chat page
+@app.route("/chat", methods=["GET"])
+def chat():
+    return render_template("chat.html")
+
+# Orchestrator Chat API
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """
+    Accepts: multipart/form-data with 'prompt' and optional 'file' (.pdf)
+    Returns: { ok, assistant_markdown, ... }
+    """
+    try:
+        prompt = request.form.get('prompt', '').strip()
+        file = request.files.get('file')
+        options = {}
+        file_path = None
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                return jsonify({"ok": False, "error": "Only .pdf files are allowed"}), 400
+            # Save uploaded file
+            safe_name = secure_filename(file.filename)
+            dest = UPLOAD_DIR / safe_name
+            i = 1
+            while dest.exists():
+                dest = UPLOAD_DIR / f"{dest.stem}_{i}{dest.suffix}"
+                i += 1
+            file.save(dest.as_posix())
+            file_path = dest.as_posix()
+            # Heuristic: inject file as lesson/assessment input
+            if 'lesson' in prompt.lower():
+                options['lesson_input'] = {'sources': {'course_outline': file_path}}
+            elif 'assessment' in prompt.lower():
+                options['assessment_input'] = {'source': file_path, 'spec': {'type': 'MCQ', 'difficulty': 'Medium', 'count': 5, 'rubric': True}}
+        # Feature flag to use AutoGen orchestrator when available
+        use_autogen = os.environ.get('USE_AUTOGEN', 'false').lower() in {'1','true','yes','on'}
+        if use_autogen:
+            try:
+                from agents.autogen_manager import run_session as ag_run
+                ag_state = ag_run(prompt, options=options, persist=False)
+                output_md = ag_state.get('assistant_markdown') or 'No output.'
+                return jsonify({'ok': True, 'assistant_markdown': output_md, 'state': ag_state}), 200
+            except Exception as e:
+                # fall through to classic orchestrator if AutoGen fails
+                pass
+
+        # Classic orchestrator path; resume across checkpoints to finish
+        orch = Orchestrator()
+        orch.register_defaults()
+        plan = orch.plan(prompt, options=options)
+        state = orch.run(plan)
+        # Auto-resume if paused to reach render steps
+        loops = 0
+        while isinstance(state, dict) and (state.get('state') or {}).get('status') == 'paused' and loops < 4:
+            state = orch.run(state)
+            loops += 1
+        # Find markdown output
+        md = None
+        summary = None
+        for t in state.get('tasks', []):
+            if t.get('action','').startswith('render_') and isinstance(t.get('result'), str):
+                md = t['result']
+        for t in state.get('tasks', []):
+            if t.get('action') == 'generate_assessment' and isinstance(t.get('result'), dict):
+                qn = len(t['result'].get('questions') or [])
+                summary = f"### Assessment generated\n\nQuestions: {qn}"
+                # If markdown not found, try to render it now
+                if not md:
+                    from core.md_render import render_assessment_markdown
+                    md = render_assessment_markdown(t['result'])
+        # Compose output: summary + markdown
+        output_md = ''
+        if summary:
+            output_md += summary + '\n\n'
+        if md:
+            output_md += md
+        if not output_md:
+            output_md = 'No output.'
+        return jsonify({'ok': True, 'assistant_markdown': output_md, 'state': state}), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
 
 @app.route("/assessments")
 def assessments_list():
@@ -200,8 +285,6 @@ def create_form_for_assessment(id):
         return jsonify({"ok": False, "error": str(e)}), 500
     
 # --- Assessment detail page + helpers ---
-
-from flask import jsonify
 
 @app.route("/assessments/<uuid:assessment_id>", methods=["GET"])
 def assessment_detail(assessment_id):
@@ -640,8 +723,8 @@ def create_batch_upload_csv():
         })
 
     # Insert students if any
-    if students_to_insert:
-        students_resp = supabase.table("students").insert(students_to_insert).execute()
+    #if students_to_insert:
+        #students_resp = supabase.table("students").insert(students_to_insert).execute()
     
 
     return redirect(url_for("batches_page"))

@@ -6,8 +6,14 @@ import json
 import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from pathlib import Path
 
 from core.logger import logger
+try:
+    # Optional persistence across runs
+    from core.autogen.state_store import StateStore  # type: ignore
+except Exception:  # pragma: no cover - optional
+    StateStore = None  # type: ignore
 
 
 def validate_json_schema(output_str: Any, schema_keys: List[str]) -> Tuple[bool, Optional[Dict[str, Any]]]:
@@ -16,7 +22,7 @@ def validate_json_schema(output_str: Any, schema_keys: List[str]) -> Tuple[bool,
     Accepts a JSON string or dict, ensures required top-level keys.
     Returns (ok, data_dict_or_none).
     """
-    raw = output_str
+    #raw = output_str
     try:
         if isinstance(output_str, str):
             data = json.loads(output_str)
@@ -43,11 +49,18 @@ class Orchestrator:
     - HIL: pause at checkpoints for approval
     """
 
-    def __init__(self, model: str = "openai/gpt-5-chat-latest", max_retries: int = 2):
+    def __init__(self, model: str = "openai/gpt-5-chat-latest", max_retries: int = 2, *, persist_root: str | None = None):
         self.model = model
         self.max_retries = max_retries
         self.tools: Dict[str, Callable[[Dict[str, Any]], Any]] = {}
         self.validators: Dict[str, Callable[[Any], bool]] = {}
+        # Optional state persistence
+        self.state_store = None
+        if persist_root and StateStore:
+            try:
+                self.state_store = StateStore(root_dir=Path(persist_root))
+            except Exception:
+                self.state_store = None
 
     # -------- Registry --------
 
@@ -193,8 +206,22 @@ class Orchestrator:
     # -------- Planning --------
 
     def plan(self, teacher_request: str, options: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Create a deterministic plan structure from the request.
+        Idempotent and safe to call repeatedly: if options contains an existing
+        job_id and a persisted plan is found, that plan is returned unchanged.
+        """
         options = options or {}
-        job_id = str(uuid.uuid4())
+        # If caller supplies a job_id and we have persistence, return existing plan
+        provided_job_id = options.get("job_id") if isinstance(options, dict) else None
+        if provided_job_id and self.state_store:
+            try:
+                existing = self.state_store.load_plan(provided_job_id)
+                if isinstance(existing, dict) and existing.get("job_id") == provided_job_id:
+                    return existing
+            except Exception:
+                pass
+
+        job_id = provided_job_id or str(uuid.uuid4())
         tasks: List[Dict[str, Any]] = []
         checkpoints: List[str] = []
 
@@ -236,7 +263,7 @@ class Orchestrator:
             tasks = []
             checkpoints = []
 
-        return {
+        plan = {
             "job_id": job_id,
             "request": teacher_request,
             "tasks": tasks,
@@ -245,11 +272,28 @@ class Orchestrator:
             "state": {"status": "pending"},
             "logs": [],
         }
+        # Persist initial plan if a state store is configured
+        if self.state_store:
+            try:
+                self.state_store.save_plan(job_id, plan)
+            except Exception:
+                pass
+        return plan
 
     # -------- Execution --------
 
     def run(self, plan: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute pending/failed tasks in the plan.
+        Idempotent and safe to re-run: succeeded tasks are skipped, and the
+        function can resume from paused checkpoints.
+        """
         job = json.loads(json.dumps(plan))  # deep copy
+        current_status = (job.get("state") or {}).get("status")
+        if current_status in {"succeeded", "failed"}:
+            return job
+        # Clear pause marker when re-entering run()
+        if current_status == "paused":
+            job["state"].pop("wait_for", None)
         job["state"]["status"] = "running"
         tasks_by_id = {t["id"]: t for t in job["tasks"]}
         completed: Dict[str, Dict[str, Any]] = {}
@@ -293,15 +337,31 @@ class Orchestrator:
                     if tid in (job.get("checkpoints") or []):
                         job["state"]["status"] = "paused"
                         job["state"]["wait_for"] = tid
+                        # Persist paused snapshot
+                        if self.state_store:
+                            try:
+                                self.state_store.save_plan(job.get("job_id"), job)
+                            except Exception:
+                                pass
                         return job
                 remaining.discard(tid)
                 progressed = True
             if not progressed:
                 job["state"]["status"] = "failed"
                 job["logs"].append({"ts": int(time.time()), "level": "error", "message": "Execution stalled. Check dependencies/errors."})
+                if self.state_store:
+                    try:
+                        self.state_store.save_plan(job.get("job_id"), job)
+                    except Exception:
+                        pass
                 return job
 
         job["state"]["status"] = "succeeded"
+        if self.state_store:
+            try:
+                self.state_store.save_plan(job.get("job_id"), job)
+            except Exception:
+                pass
         return job
 
     def _run_task(self, action: str, inp: Dict[str, Any]) -> Tuple[Optional[Any], Optional[Exception], int]:
@@ -350,3 +410,25 @@ class Orchestrator:
             "failed": [t["id"] for t in tasks if t.get("status") == "failed"],
             "paused_after": results.get("state", {}).get("wait_for"),
         }
+
+    # -------- Resume from persisted state --------
+
+    def resume(self, job_id: str) -> Dict[str, Any]:
+        """Load a paused plan from the state store and continue execution.
+        If the plan isn't paused, it's returned unchanged or advanced if safe.
+        """
+        if not self.state_store:
+            return {"error": "No state_store configured", "job_id": job_id}
+        try:
+            plan = self.state_store.load_plan(job_id)
+        except Exception as e:
+            return {"error": f"Failed to load plan: {e}", "job_id": job_id}
+
+        # Ensure we clear pause marker and re-enter run()
+        if isinstance(plan, dict):
+            st = (plan.get("state") or {}).get("status")
+            if st == "paused":
+                plan["state"].pop("wait_for", None)
+                plan["state"]["status"] = "pending"
+            return self.run(plan)
+        return {"error": "Invalid plan format", "job_id": job_id}

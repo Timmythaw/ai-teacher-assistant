@@ -9,7 +9,8 @@ from core.pdf_tool import extract_text_from_pdf
 from core.logger import logger
 
 class AssessmentAgent:
-    def __init__(self, model="openai/gpt-5-chat-latest"):
+    gpt_model = os.getenv("GPT_MODEL", "openai/gpt-5-chat-latest")
+    def __init__(self, model=gpt_model):
         self.model = model
 
     def generate_assessment(self, course_material: str, options: dict) -> dict:

@@ -92,6 +92,12 @@
           >
             Send Email
           </a>
+          <a
+            href="{{ url_for('chat') }}"
+            class="block px-3 py-2 rounded-lg hover:bg-gray-100"
+          >
+            Orchestrator Chat
+          </a>
 
           <div class="px-3 pt-6">
             <p class="text-xs uppercase tracking-wide text-gray-400">
@@ -218,6 +224,11 @@
             href="{{ url_for('email_page') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
             >Send Email</a
+          >
+          <a
+            href="{{ url_for('chat') }}"
+            class="block px-3 py-2 rounded hover:bg-gray-100"
+            >Orchestrator Chat</a
           >
         </nav>
       </div>

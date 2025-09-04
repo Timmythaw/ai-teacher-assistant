@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from core.logger import logger
 from integrations.email_writer import parse_prompt_to_fields, draft_email
 from integrations.gmail_tool import (
@@ -20,7 +20,8 @@ class EmailAgent:
     Follows the project's agent pattern with proper error handling and logging.
     """
 
-    def __init__(self, model="openai/gpt-5-chat-latest"):
+    llama_model = os.getenv("LLAMA_MODEL", "meta-llama/Llama-3.3-70B-Instruct-Turbo")
+    def __init__(self, model=llama_model):
         self.model = model
         self.service = None
         self.sender = None

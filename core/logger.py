@@ -25,9 +25,8 @@ def setup_logger(name="agent", log_file=None, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
-    # Avoid duplicate handlers if called multiple times
-    if logger.hasHandlers():
-        logger.handlers.clear()
+    # Avoid duplicate handlers if called multiple times; don't clear existing external handlers
+    existing_handlers = {(type(h), getattr(h, 'baseFilename', None)) for h in logger.handlers}
 
     # File handler
     fh = logging.FileHandler(log_file, mode="a")
@@ -45,11 +44,18 @@ def setup_logger(name="agent", log_file=None, level=logging.INFO):
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
 
-    # Add handlers
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    # Add handlers only if not already attached
+    if (type(fh), getattr(fh, 'baseFilename', None)) not in existing_handlers:
+        logger.addHandler(fh)
+    if (type(ch), None) not in existing_handlers:
+        logger.addHandler(ch)
 
     return logger
 
 # Default logger for project
 logger = setup_logger()
+
+# Dedicated logger channel for autogen traces
+autogen_logger = setup_logger(name="autogen")
+
+__all__ = ["logger", "autogen_logger", "setup_logger"]

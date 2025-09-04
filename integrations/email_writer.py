@@ -10,7 +10,7 @@ from typing import Dict, Any
 from core.ai_client import chat_completion
 from core.logger import logger
 
-
+llama_model = os.getenv("LLAMA_MODEL", "meta-llama/Llama-3.3-70B-Instruct-Turbo")
 def parse_prompt_to_fields(prompt: str) -> Dict[str, str]:
     """
     Parse user prompt to extract email fields using AI.
@@ -35,7 +35,7 @@ def parse_prompt_to_fields(prompt: str) -> Dict[str, str]:
         )
 
         response = chat_completion(
-            model="openai/gpt-5-chat-latest",
+            model=llama_model,
             messages=[
                 {"role": "system", "content": system_prompt}, 
                 {"role": "user", "content": prompt}
@@ -108,7 +108,7 @@ Length: 120-180 words. Avoid flowery language.
 """
         
         response = chat_completion(
-            model="openai/gpt-5-chat-latest",
+            model=llama_model,
             messages=[
                 {"role": "system", "content": system_prompt}, 
                 {"role": "user", "content": user_prompt}
@@ -148,7 +148,7 @@ Length: 120-180 words. Avoid flowery language.
 
 
 # Test code - only run if this file is executed directly
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     try:
         # Test parsing
         test_prompt = "Send an email to john@example.com about the meeting tomorrow"
@@ -160,4 +160,4 @@ if __name__ == "__main__":
         print("Drafted email:", drafted)
         
     except Exception as e:
-        print(f"Error testing email writer: {e}")
+        print(f"Error testing email writer: {e}")"""

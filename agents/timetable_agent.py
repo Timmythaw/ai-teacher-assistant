@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import json
 import datetime as dt
 from core.logger import logger
 from integrations.calendar_tool import fetch_calendar_events
@@ -107,7 +106,8 @@ def _next_monday(d: dt.date) -> dt.date:
 
 
 class TimetableAgent:
-    def __init__(self, model="openai/gpt-5-chat-latest"):
+    llama_model = os.getenv("LLAMA_MODEL", "meta-llama/Llama-3.3-70B-Instruct-Turbo")
+    def __init__(self, model=llama_model):
         self.model = model
 
     def suggest_consistent_schedule(
@@ -138,8 +138,8 @@ class TimetableAgent:
 
             # 2) Calendar & TZ
             service = get_google_service("calendar", "v3")
-            tz = get_user_timezone(service, calendar_id)
-            now = dt.datetime.now(dt.timezone.utc).astimezone(dt.timezone(dt.timedelta(0)))  # placeholder tz aware UTC
+            #tz = get_user_timezone(service, calendar_id)
+            #now = dt.datetime.now(dt.timezone.utc).astimezone(dt.timezone(dt.timedelta(0)))  # placeholder tz aware UTC
             today_local = dt.datetime.now().date()
             base_monday = _next_monday(today_local) if start_from_next_monday else today_local
 
