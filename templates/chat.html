@@ -1,27 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Orchestrator Chat{% endblock %}
 {% block content %}
-<div class="max-w-xl mx-auto mt-10">
-  <h1 class="text-2xl font-semibold mb-4">Orchestrator Chat</h1>
-  <div class="bg-white rounded-xl shadow p-4 mb-4">
-    <form id="chat-form" enctype="multipart/form-data" class="flex flex-col gap-3">
-      <textarea name="prompt" id="prompt" rows="2" class="border rounded p-2" placeholder="Type your prompt..."></textarea>
-      <div class="flex items-center gap-2">
-        <input type="file" name="file" id="file" accept="application/pdf" class="hidden">
-        <button type="button" id="attach-btn" class="px-3 py-1 rounded border bg-gray-100 hover:bg-gray-200 text-sm">Attach PDF</button>
-        <span id="file-pill" class="hidden px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs font-medium">
+<div class="mx-auto max-w-5xl lg:max-w-6xl">
+  <!-- Header -->
+  <div class="mb-4">
+    <h1 class="text-2xl md:text-3xl font-semibold">Orchestrator Chat</h1>
+    <p class="text-sm text-gray-500 mt-1">Chat with your teaching assistant. Attach a PDF if you want it to reference your syllabus or lecture notes.</p>
+  </div>
+
+  <!-- Example prompts -->
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+    <button type="button" data-example class="text-left rounded-xl border border-gray-200 bg-white p-4 hover:shadow transition">
+      <span class="block font-medium">Generate a lesson plan on SRAS</span>
+      <span class="block text-xs text-gray-500 mt-1">Lesson plan • sections • objectives • activities</span>
+    </button>
+    <button type="button" data-example class="text-left rounded-xl border border-gray-200 bg-white p-4 hover:shadow transition">
+      <span class="block font-medium">Create a 5‑question quiz (MCQ + short answers)</span>
+      <span class="block text-xs text-gray-500 mt-1">Assessment • rubric • answer key</span>
+    </button>
+  </div>
+
+  <!-- Chat surface -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col h-[70vh]">
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
+      <!-- Messages will stream here -->
+    </div>
+
+    <!-- Composer -->
+    <form id="chat-form" enctype="multipart/form-data" class="border-t border-gray-100 p-3 md:p-4">
+      <input type="file" name="file" id="file" accept="application/pdf" class="hidden" />
+      <div class="relative">
+        <!-- File chip -->
+        <span id="file-pill" class="hidden absolute -top-3 left-4 translate-y-[-100%] text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium shadow">
           <span id="file-name"></span>
-          <button type="button" id="remove-file" class="ml-1 text-indigo-600 hover:text-red-600">&times;</button>
+          <button type="button" id="remove-file" class="ml-1 hover:text-red-600" aria-label="Remove file">×</button>
         </span>
+
+        <!-- Light pill composer (white) -->
+        <div class="w-full rounded-full bg-white text-gray-900 px-2 py-1.5 flex items-center gap-2 border border-gray-300 shadow-sm">
+          <!-- Plus (attach) -->
+          <button type="button" id="attach-btn" class="w-10 h-10 rounded-full border border-gray-300 bg-white hover:bg-gray-50 inline-flex items-center justify-center" title="Attach PDF">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12M6 12h12"/></svg>
+          </button>
+
+          <!-- Textarea -->
+          <textarea id="prompt" name="prompt" rows="1" class="flex-1 bg-transparent border-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none resize-none max-h-48 py-2" placeholder="Type your prompt... (Shift+Enter for new line)"></textarea>
+
+          <!-- Send (arrow facing right) -->
+          <button type="submit" id="send-btn" class="w-10 h-10 rounded-full bg-white border border-gray-300 text-gray-900 inline-flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" title="Send">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6-6m6 6-6 6"/></svg>
+          </button>
+        </div>
       </div>
-      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Send</button>
     </form>
   </div>
-  <div class="bg-white rounded-xl shadow p-4">
-    <div id="chat-messages" class="flex flex-col gap-3"></div>
-  </div>
 </div>
+
 <script>
+// Elements
 const form = document.getElementById('chat-form');
 const promptEl = document.getElementById('prompt');
 const fileInput = document.getElementById('file');
@@ -30,7 +66,18 @@ const filePill = document.getElementById('file-pill');
 const fileNameSpan = document.getElementById('file-name');
 const removeFileBtn = document.getElementById('remove-file');
 const chatMessages = document.getElementById('chat-messages');
+const sendBtn = document.getElementById('send-btn');
+const exampleBtns = document.querySelectorAll('[data-example]');
 let attachedFile = null;
+let pendingAssistantDiv = null;
+
+// Example prompts inject into textarea
+exampleBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    promptEl.value = btn.querySelector('span.font-medium').textContent;
+    promptEl.focus();
+  });
+});
 
 attachBtn.onclick = () => fileInput.click();
 fileInput.onchange = () => {
@@ -40,49 +87,87 @@ fileInput.onchange = () => {
     filePill.classList.remove('hidden');
   }
 };
-removeFileBtn.onclick = () => {
-  attachedFile = null;
-  fileInput.value = '';
-  filePill.classList.add('hidden');
-};
+if (removeFileBtn) {
+  removeFileBtn.onclick = () => {
+    attachedFile = null;
+    fileInput.value = '';
+    filePill.classList.add('hidden');
+  };
+}
 
-form.onsubmit = async (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const prompt = promptEl.value.trim();
+  const prompt = (promptEl.value || '').trim();
   if (!prompt) return;
+
+  // Lock UI
+  sendBtn.disabled = true;
+
   const fd = new FormData();
   fd.append('prompt', prompt);
   if (attachedFile) fd.append('file', attachedFile);
-  // Show user message
+
+  // Render user message immediately
   addMsg(prompt, 'user');
   promptEl.value = '';
   attachedFile = null;
   fileInput.value = '';
   filePill.classList.add('hidden');
-  // Send to backend
-  const res = await fetch('/api/chat', { method: 'POST', body: fd });
-  const data = await res.json();
-  if (data.assistant_markdown) {
-    addMsg(data.assistant_markdown, 'assistant', true);
-  } else if (data.error) {
-    addMsg(data.error, 'error');
-  } else {
-    addMsg('No response', 'error');
-  }
-};
 
-function addMsg(text, who, isMarkdown=false) {
-  const div = document.createElement('div');
-  div.className = who === 'user' ? 'self-end bg-indigo-50 text-indigo-900 px-3 py-2 rounded-lg max-w-[80%]' :
-    who === 'assistant' ? 'self-start bg-gray-50 text-gray-900 px-3 py-2 rounded-lg max-w-[80%] prose prose-sm' :
-    'self-center text-red-600 px-3 py-2';
-  if (isMarkdown && window.marked && window.DOMPurify) {
-    div.innerHTML = DOMPurify.sanitize(marked.parse(text));
-  } else {
-    div.textContent = text;
+  // Show assistant typing placeholder
+  pendingAssistantDiv = addMsg('Thinking…', 'assistant', false, true);
+
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', body: fd });
+    const data = await res.json();
+    // Replace placeholder with real content
+    if (pendingAssistantDiv) pendingAssistantDiv.remove();
+    if (data.assistant_markdown) {
+      addMsg(data.assistant_markdown, 'assistant', true);
+    } else if (data.error) {
+      addMsg(data.error, 'error');
+    } else {
+      addMsg('No response', 'error');
+    }
+  } catch (err) {
+    if (pendingAssistantDiv) pendingAssistantDiv.remove();
+    addMsg('Failed to reach the server. Please try again.', 'error');
+  } finally {
+    sendBtn.disabled = false;
   }
-  chatMessages.appendChild(div);
+});
+
+function addMsg(text, who, isMarkdown = false, isTyping=false) {
+  const wrap = document.createElement('div');
+  wrap.className = who === 'user' ? 'self-end' : 'self-start';
+
+  const bubble = document.createElement('div');
+  bubble.className = (
+    who === 'user'
+      ? 'bg-indigo-600 text-white'
+      : 'bg-gray-50 text-gray-900 border border-gray-200'
+  ) + ' px-4 py-3 rounded-2xl max-w-[90%] md:max-w-[80%] prose prose-sm break-words';
+
+  if (isTyping) {
+    bubble.innerHTML = '<span class="inline-flex gap-1 items-center"><span class="w-2 h-2 rounded-full bg-gray-300 animate-bounce"></span><span class="w-2 h-2 rounded-full bg-gray-300 animate-bounce [animation-delay:.15s]"></span><span class="w-2 h-2 rounded-full bg-gray-300 animate-bounce [animation-delay:.3s]"></span></span>';
+  } else if (isMarkdown && window.marked && window.DOMPurify) {
+    bubble.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  } else {
+    bubble.textContent = text;
+  }
+
+  wrap.appendChild(bubble);
+  chatMessages.appendChild(wrap);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  return wrap;
 }
+
+// Quality of life: submit on Enter, newline with Shift+Enter
+promptEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
 </script>
 {% endblock %}

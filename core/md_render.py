@@ -196,8 +196,38 @@ def render_lesson_plan_markdown(plan: Dict[str, Any]) -> str:
     return content.strip() or "# Lesson Plan\n_No content_"
 
 def render_assessment_markdown(assessment: Dict[str, Any]) -> str:
+    # Accept dict or stringified JSON; try to parse strings into dict
     if not isinstance(assessment, dict):
-        return "### Error\nInvalid assessment payload."
+        if isinstance(assessment, str) and assessment.strip():
+            import json, re
+            raw = assessment
+            parsed = None
+            try:
+                parsed = json.loads(raw)
+            except Exception:
+                # Try to extract a JSON object from fences or substring
+                fence = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", raw)
+                candidate = fence.group(1) if fence else None
+                if not candidate:
+                    s = raw.find('{')
+                    e = raw.rfind('}')
+                    if s != -1 and e != -1 and e > s:
+                        candidate = raw[s:e+1]
+                if candidate:
+                    norm = candidate
+                    # normalize smart quotes and trailing commas
+                    norm = norm.replace('\u201c', '"').replace('\u201d', '"').replace('\u2019', "'")
+                    norm = re.sub(r",\s*([}\]])", r"\1", norm)
+                    try:
+                        parsed = json.loads(norm)
+                    except Exception:
+                        parsed = None
+            if isinstance(parsed, dict):
+                assessment = parsed
+            else:
+                return "### Error\nInvalid assessment payload."
+        else:
+            return "### Error\nInvalid assessment payload."
     if assessment.get("error"):
         return f"### Error\n{_as_str(assessment.get('error'))}"
 

@@ -43,12 +43,41 @@ def parse_prompt_to_fields(prompt: str) -> Dict[str, str]:
             temperature=0
         )
         
+        # Try strict JSON first, then fallback to fenced extraction, then minimal defaults
+        data: Dict[str, Any]
         try:
             data = json.loads(response)
             logger.debug("AI parsing successful: %s", data)
-        except json.JSONDecodeError as e:
-            logger.error("Failed to parse AI response as JSON: %s", e)
-            raise ValueError(f"AI response parsing failed: {e}")
+        except Exception:
+            # Try to extract JSON from fenced/code-like content
+            txt = (response or "").strip()
+            m = re.search(r"\{[\s\S]*\}$", txt)
+            if not m:
+                m = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", txt, re.IGNORECASE)
+                if m:
+                    candidate = m.group(1)
+                else:
+                    candidate = ""
+            else:
+                candidate = m.group(0)
+            try:
+                data = json.loads(candidate) if candidate else {}
+                if data:
+                    logger.info("AI parsing recovered from fenced JSON")
+                else:
+                    raise ValueError("Empty candidate")
+            except Exception:
+                logger.warning("AI parsing failed; using minimal defaults and regex fallbacks")
+                data = {
+                    "to_email": "",
+                    "to_name": "",
+                    "tone": "professional, friendly",
+                    "cc": "",
+                    "bcc": "",
+                    "action": "send",
+                    "subject_override": "",
+                    "notes": prompt or "",
+                }
 
         # Fallback: regex email extraction if AI missed it
         if not data.get("to_email"):
@@ -116,12 +145,27 @@ Length: 120-180 words. Avoid flowery language.
             temperature=0.4
         )
         
+        # Robust parse: allow fenced JSON or plain text fallbacks
         try:
             data = json.loads(response)
             logger.debug("AI email drafting successful")
-        except json.JSONDecodeError as e:
-            logger.error("Failed to parse AI email response as JSON: %s", e)
-            raise ValueError(f"AI email response parsing failed: {e}")
+        except Exception:
+            txt = (response or "").strip()
+            m = re.search(r"\{[\s\S]*\}$", txt)
+            if not m:
+                m = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", txt, re.IGNORECASE)
+                candidate = m.group(1) if m else ""
+            else:
+                candidate = m.group(0)
+            try:
+                data = json.loads(candidate) if candidate else {}
+            except Exception:
+                logger.warning("AI drafting returned non-JSON; building minimal email from instruction")
+                data = {
+                    "subject": "Message",
+                    "plain": instruction,
+                    "html": "",
+                }
 
         # Ensure all required fields are present with fallbacks
         result = {
@@ -129,16 +173,16 @@ Length: 120-180 words. Avoid flowery language.
             "plain": data.get("plain") or data.get("body", ""),
             "html": data.get("html", ""),
         }
-        
+
         # Validate content
         if not result["plain"].strip():
             logger.warning("AI generated empty plain text, using fallback")
             result["plain"] = f"Hello {to_name or 'there'},\n\n{instruction}\n\nBest regards"
-            
+
         if not result["subject"].strip():
             logger.warning("AI generated empty subject, using fallback")
             result["subject"] = "Message from AI Teacher Assistant"
-            
+
         logger.info("Email content drafted successfully with subject: %s", result["subject"])
         return result
         

@@ -64,8 +64,9 @@ def api_chat():
     try:
         prompt = request.form.get('prompt', '').strip()
         file = request.files.get('file')
-        options = {}
-        file_path = None
+        options: dict = {}
+        file_path: str | None = None
+
         if file and file.filename:
             if not allowed_file(file.filename):
                 return jsonify({"ok": False, "error": "Only .pdf files are allowed"}), 400
@@ -78,11 +79,27 @@ def api_chat():
                 i += 1
             file.save(dest.as_posix())
             file_path = dest.as_posix()
+
             # Heuristic: inject file as lesson/assessment input
-            if 'lesson' in prompt.lower():
+            low = prompt.lower()
+            if 'lesson' in low:
                 options['lesson_input'] = {'sources': {'course_outline': file_path}}
-            elif 'assessment' in prompt.lower():
-                options['assessment_input'] = {'source': file_path, 'spec': {'type': 'MCQ', 'difficulty': 'Medium', 'count': 5, 'rubric': True}}
+            elif any(k in low for k in ['assessment', 'quiz', 'exam', 'test', 'mcq', 'multiple choice']):
+                options['assessment_input'] = {
+                    'source': file_path,
+                    'spec': {'type': 'MCQ', 'difficulty': 'Medium', 'count': 5, 'rubric': True},
+                }
+        else:
+            # No file: pass prompt text to agents as raw source where applicable
+            low = prompt.lower()
+            if 'lesson' in low:
+                options['lesson_input'] = {'raw_text': prompt}
+            elif any(k in low for k in ['assessment', 'quiz', 'exam', 'test', 'mcq', 'multiple choice']):
+                options['assessment_input'] = {
+                    'source': prompt,
+                    'spec': {'type': 'MCQ', 'difficulty': 'Medium', 'count': 5, 'rubric': True},
+                }
+
         # Feature flag to use AutoGen orchestrator when available
         use_autogen = os.environ.get('USE_AUTOGEN', 'false').lower() in {'1','true','yes','on'}
         if use_autogen:
@@ -91,7 +108,7 @@ def api_chat():
                 ag_state = ag_run(prompt, options=options, persist=False)
                 output_md = ag_state.get('assistant_markdown') or 'No output.'
                 return jsonify({'ok': True, 'assistant_markdown': output_md, 'state': ag_state}), 200
-            except Exception as e:
+            except Exception:
                 # fall through to classic orchestrator if AutoGen fails
                 pass
 
@@ -100,34 +117,134 @@ def api_chat():
         orch.register_defaults()
         plan = orch.plan(prompt, options=options)
         state = orch.run(plan)
+
         # Auto-resume if paused to reach render steps
         loops = 0
         while isinstance(state, dict) and (state.get('state') or {}).get('status') == 'paused' and loops < 4:
             state = orch.run(state)
             loops += 1
-        # Find markdown output
-        md = None
-        summary = None
+
+        # Build full markdown output
+        md_parts: list[str] = []
+        # 1) All pre-rendered markdown sections
         for t in state.get('tasks', []):
-            if t.get('action','').startswith('render_') and isinstance(t.get('result'), str):
-                md = t['result']
+            if t.get('action', '').startswith('render_'):
+                res = t.get('result')
+                if isinstance(res, str) and res.strip():
+                    md_parts.append(res.strip())
+
+        # 2) If nothing rendered OR rendered content looks like an error, render from JSON
+        def _looks_bad(md: str) -> bool:
+            s = (md or "").strip().lower()
+            if not s:
+                return True
+            if s.startswith("### error"):
+                return True
+            if "invalid assessment payload" in s:
+                return True
+            # extremely short output is not helpful
+            return len(s) <= 20
+
+        pre_render_combined = "\n\n".join([m for m in md_parts if isinstance(m, str) and m.strip()])
+        if not md_parts or _looks_bad(pre_render_combined):
+            lesson_json = None
+            assess_json = None
+            tt_json = None
+            for t in state.get('tasks', []):
+                if t.get('action') == 'generate_lesson_plan' and isinstance(t.get('result'), dict):
+                    lesson_json = t.get('result')
+                elif t.get('action') == 'generate_assessment' and isinstance(t.get('result'), dict):
+                    assess_json = t.get('result')
+                elif t.get('action') == 'suggest_timetable' and isinstance(t.get('result'), dict):
+                    tt_json = t.get('result')
+            rebuilt_any = False
+            if assess_json is not None:
+                try:
+                    md = render_assessment_markdown(assess_json)
+                    if isinstance(md, str) and md.strip() and not _looks_bad(md):
+                        md_parts = [md]
+                        rebuilt_any = True
+                    else:
+                        # keep original error if rebuild did not improve
+                        md_parts = [md]
+                except Exception:
+                    pass
+            if lesson_json is not None:
+                try:
+                    md = render_lesson_plan_markdown(lesson_json)
+                    if isinstance(md, str) and md.strip():
+                        if rebuilt_any:
+                            md_parts.append(md)
+                        else:
+                            md_parts = [md]
+                            rebuilt_any = True
+                except Exception:
+                    pass
+            if tt_json is not None:
+                # Simple timetable markdown
+                try:
+                    slots = tt_json.get('suggested_slots') or []
+                    lines = ["# Timetable Suggestions"]
+                    for s in slots:
+                        if isinstance(s, dict):
+                            title = s.get('title') or 'Session'
+                            start = s.get('start') or ''
+                            end = s.get('end') or ''
+                            location = s.get('location') or ''
+                            reason = s.get('reason') or ''
+                            lines.append(f"- {title}: {start} → {end}{(' · ' + location) if location else ''}")
+                            if reason:
+                                lines.append(f"  - {reason}")
+                    if len(lines) > 1:
+                        if rebuilt_any:
+                            md_parts.append("\n".join(lines))
+                        else:
+                            md_parts = ["\n".join(lines)]
+                            rebuilt_any = True
+                except Exception:
+                    pass
+
+        # If output looks too minimal (e.g., only a heading), rebuild from JSON plan
+        combined = "\n\n".join([m for m in md_parts if isinstance(m, str) and m.strip()])
+        if len(combined.strip()) <= 20 or combined.strip().lower() in {"# lesson plan", "lesson plan"}:
+            try:
+                lesson_json = None
+                for t in state.get('tasks', []):
+                    if t.get('action') == 'generate_lesson_plan' and isinstance(t.get('result'), dict):
+                        lesson_json = t.get('result')
+                        break
+                if lesson_json is not None:
+                    rebuilt = render_lesson_plan_markdown(lesson_json)
+                    if rebuilt and rebuilt.strip():
+                        combined = rebuilt
+            except Exception:
+                pass
+        output_md = combined or 'No output.'
+
+        # Build JSON artifacts for saving without affecting rendered markdown
+        json_by_action = {}
         for t in state.get('tasks', []):
-            if t.get('action') == 'generate_assessment' and isinstance(t.get('result'), dict):
-                qn = len(t['result'].get('questions') or [])
-                summary = f"### Assessment generated\n\nQuestions: {qn}"
-                # If markdown not found, try to render it now
-                if not md:
-                    from core.md_render import render_assessment_markdown
-                    md = render_assessment_markdown(t['result'])
-        # Compose output: summary + markdown
-        output_md = ''
-        if summary:
-            output_md += summary + '\n\n'
-        if md:
-            output_md += md
-        if not output_md:
-            output_md = 'No output.'
-        return jsonify({'ok': True, 'assistant_markdown': output_md, 'state': state}), 200
+            if t.get('status') == 'succeeded' and 'result' in t:
+                res = t.get('result')
+                if isinstance(res, (dict, list)):
+                    json_by_action[t.get('action') or 'task'] = res
+        primary = None
+        for key in [
+            'generate_assessment', 'generate_lesson_plan', 'suggest_timetable',
+            'create_google_form', 'schedule_calendar', 'draft_email', 'send_email'
+        ]:
+            if key in json_by_action:
+                primary = json_by_action[key]
+                break
+        return jsonify({
+            'ok': True,
+            'assistant_markdown': output_md,
+            'state': state,
+            'json_outputs': {
+                'primary': primary,
+                'by_action': json_by_action,
+            }
+        }), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 

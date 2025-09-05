@@ -30,6 +30,12 @@ class LessonPlanAgent:
                             inputs["lecture_notes"], len(text))
                 combined_text += text + "\n"
 
+            # Fallback: if caller provides raw_text, use it as source
+            if (not combined_text.strip()) and inputs.get("raw_text"):
+                rt = str(inputs.get("raw_text") or "").strip()
+                if rt:
+                    combined_text += rt + "\n"
+
             if not combined_text.strip():
                 logger.warning("No valid text extracted from provided PDFs")
                 return {"error": "No valid text extracted from provided PDFs."}

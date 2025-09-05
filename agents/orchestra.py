@@ -3,6 +3,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import json
+import re
 import time
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -109,7 +110,16 @@ class Orchestrator:
             return lp_agent.generate_plan(sources, dw, cs, spw)
 
         def _render_lp_md(inp: Dict[str, Any]) -> str:
-            return render_lesson_plan_markdown(inp.get("plan") or {})
+            plan_obj = inp.get("plan")
+            # Accept JSON string or dict; fallback to empty dict to avoid hard error
+            if isinstance(plan_obj, str):
+                try:
+                    plan_obj = json.loads(plan_obj)
+                except Exception:
+                    plan_obj = {}
+            if not isinstance(plan_obj, dict):
+                plan_obj = {}
+            return render_lesson_plan_markdown(plan_obj)
 
         def _suggest_timetable(inp: Dict[str, Any]) -> Dict[str, Any]:
             plan = inp.get("plan") or {}
@@ -236,27 +246,48 @@ class Orchestrator:
 
         # Lesson flow
         if any(k in req for k in ["lesson", "plan", "weekly", "syllabus"]):
+            wants_timetable = any(k in req for k in ["timetable", "schedule", "calendar"])  # suggest slots
+            wants_schedule = any(k in req for k in ["schedule", "calendar"])  # push to calendar
             t1 = {"id": _tid(), "action": "generate_lesson_plan", "input": options.get("lesson_input", {}), "depends_on": [], "status": "pending"}
             t2 = {"id": _tid(), "action": "render_lesson_markdown", "input": {"plan": f"${t1['id']}.result"}, "depends_on": [t1["id"]], "status": "pending"}
-            t3 = {"id": _tid(), "action": "suggest_timetable", "input": {"plan": f"${t1['id']}.result", **options.get("timetable_opts", {})}, "depends_on": [t1["id"]], "status": "pending"}
-            t4 = {"id": _tid(), "action": "schedule_calendar", "input": {"timetable": f"${t3['id']}.result"}, "depends_on": [t3["id"]], "status": "pending"}
-            tasks += [t1, t2, t3, t4]
-            checkpoints += [t1["id"], t3["id"]]
+            tasks += [t1, t2]
+            checkpoints += [t1["id"]]
+            if wants_schedule:
+                # ensure we have a timetable before scheduling
+                t3 = {"id": _tid(), "action": "suggest_timetable", "input": {"plan": f"${t1['id']}.result", **options.get("timetable_opts", {})}, "depends_on": [t1["id"]], "status": "pending"}
+                t4 = {"id": _tid(), "action": "schedule_calendar", "input": {"timetable": f"${t3['id']}.result"}, "depends_on": [t3["id"]], "status": "pending"}
+                tasks += [t3, t4]
+                checkpoints += [t3["id"]]
+            elif wants_timetable:
+                t3 = {"id": _tid(), "action": "suggest_timetable", "input": {"plan": f"${t1['id']}.result", **options.get("timetable_opts", {})}, "depends_on": [t1["id"]], "status": "pending"}
+                tasks += [t3]
+                checkpoints += [t3["id"]]
 
         # Assessment flow
-        if any(k in req for k in ["assessment", "quiz", "exam", "test"]):
+        if any(k in req for k in ["assessment", "quiz", "exam", "test", "mcq", "multiple choice"]):
             a1 = {"id": _tid(), "action": "generate_assessment", "input": options.get("assessment_input", {}), "depends_on": [], "status": "pending"}
             a2 = {"id": _tid(), "action": "render_assessment_markdown", "input": {"assessment": f"${a1['id']}.result"}, "depends_on": [a1["id"]], "status": "pending"}
-            a3 = {"id": _tid(), "action": "create_google_form", "input": {"assessment": f"${a1['id']}.result"}, "depends_on": [a1["id"]], "status": "pending"}
-            tasks += [a1, a2, a3]
+            tasks += [a1, a2]
             checkpoints += [a1["id"]]
+            # Create a Google Form only if explicitly requested
+            if any(k in req for k in ["form", "google form", "quiz form", "gform"]):
+                a3 = {"id": _tid(), "action": "create_google_form", "input": {"assessment": f"${a1['id']}.result"}, "depends_on": [a1["id"]], "status": "pending"}
+                tasks += [a3]
 
-        # Email flow
+        # Email flow (gate on heuristics to avoid empty/invalid prompts)
         if "email" in req:
-            e1 = {"id": _tid(), "action": "draft_email", "input": options.get("email_input", {}), "depends_on": [], "status": "pending"}
-            e2 = {"id": _tid(), "action": "send_email", "input": options.get("email_input", {}), "depends_on": [e1["id"]], "status": "pending"}
-            tasks += [e1, e2]
-            checkpoints += [e1["id"]]
+            # Decide if we have enough signal to run the email agent
+            email_opts = options.get("email_input") if isinstance(options, dict) else None
+            has_addr = bool(re.search(r"[\w\.-]+@[\w\.-]+\.[A-Za-z]{2,}", teacher_request or ""))
+            has_to_prefix = ("to:" in req) or ("send to" in req)
+            should_email = bool(email_opts or has_addr or has_to_prefix)
+
+            if should_email:
+                inp = email_opts or {"prompt": teacher_request}
+                e1 = {"id": _tid(), "action": "draft_email", "input": inp, "depends_on": [], "status": "pending"}
+                e2 = {"id": _tid(), "action": "send_email", "input": inp, "depends_on": [e1["id"]], "status": "pending"}
+                tasks += [e1, e2]
+                checkpoints += [e1["id"]]
 
         # Default: if no known intent, leave tasks empty so the UI can prompt the user clearly
         if not tasks:

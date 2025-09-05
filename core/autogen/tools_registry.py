@@ -177,7 +177,15 @@ def _t_create_google_form(inp: Dict[str, Any]) -> Dict[str, Any]:
 
 def _t_email_draft(inp: Dict[str, Any]) -> Dict[str, Any]:
     ag = _get_email_agent()
+    # allow either 'prompt' or minimal fields to be converted into a prompt
     prompt = inp.get("prompt") or ""
+    if not prompt:
+        # attempt to synthesize prompt from fields
+        to = inp.get("to") or inp.get("to_email") or ""
+        subj = inp.get("subject") or inp.get("subject_override") or ""
+        notes = inp.get("notes") or ""
+        if to or subj or notes:
+            prompt = f"to: {to}\nsubject: {subj}\nnotes: {notes}"
     if ag and hasattr(ag, "run"):
         return ag.run(prompt)
     return {"ok": False, "error": "Email agent unavailable"}
@@ -186,6 +194,12 @@ def _t_email_draft(inp: Dict[str, Any]) -> Dict[str, Any]:
 def _t_email_send(inp: Dict[str, Any]) -> Dict[str, Any]:
     ag = _get_email_agent()
     prompt = inp.get("prompt") or ""
+    if not prompt:
+        to = inp.get("to") or inp.get("to_email") or ""
+        subj = inp.get("subject") or inp.get("subject_override") or ""
+        notes = inp.get("notes") or ""
+        if to or subj or notes:
+            prompt = f"to: {to}\nsubject: {subj}\nnotes: {notes}"
     if ag and hasattr(ag, "run"):
         return ag.run(prompt)
     return {"ok": False, "error": "Email agent unavailable"}

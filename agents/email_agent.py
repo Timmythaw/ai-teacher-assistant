@@ -25,7 +25,11 @@ class EmailAgent:
         self.model = model
         self.service = None
         self.sender = None
-        self._initialize_gmail_service()
+
+    # Lazy init guard to avoid side-effects unless we actually send/draft
+    def _ensure_gmail(self):
+        if self.service is None or self.sender is None:
+            self._initialize_gmail_service()
 
     def _initialize_gmail_service(self):
         """Initialize Gmail service with error handling."""
@@ -100,7 +104,9 @@ class EmailAgent:
                 logger.warning("Invalid action '%s', defaulting to 'send'", action)
                 action = "send"
 
-            # Create the email message
+            # Create the email message (initialize Gmail lazily now)
+            self._ensure_gmail()
+            # Reconfirm sender (initialized during ensure)
             msg = create_message(
                 to=to_email,
                 subject=subject,
@@ -129,6 +135,7 @@ class EmailAgent:
     def _create_draft(self, msg: Dict[str, Any], to_email: str, subject: str, body_text: str) -> Dict[str, Any]:
         """Create a draft email."""
         try:
+            self._ensure_gmail()
             res = create_draft(self.service, message=msg)
             logger.info("Draft created successfully with ID: %s", res.get("id"))
             return {
@@ -146,6 +153,7 @@ class EmailAgent:
     def _send_message(self, msg: Dict[str, Any], to_email: str, subject: str, body_text: str) -> Dict[str, Any]:
         """Send an email."""
         try:
+            self._ensure_gmail()
             res = send_message(self.service, message=msg)
             logger.info("Email sent successfully with ID: %s", res.get("id"))
             return {

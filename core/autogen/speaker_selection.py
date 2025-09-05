@@ -38,6 +38,8 @@ ALIASES = {
     "quiz": "assessment",
     "exam": "assessment",
     "test": "assessment",
+    "mcq": "assessment",
+    "multiple choice": "assessment",
     "assessment_agent": "assessment",
     # Timetable/Calendar
     "timetable": "timetable",

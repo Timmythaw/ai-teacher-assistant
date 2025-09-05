@@ -15,7 +15,7 @@ class AssessmentAgent:
 
     def generate_assessment(self, course_material: str, options: dict) -> dict:
         try:
-            logger.info("LessonPlanAgent started with inputs: %s", options)
+            logger.info("AssessmentAgent started with inputs: %s", options)
             # PDF or raw text
             if course_material.endswith(".pdf"):
                 material_text = extract_text_from_pdf(course_material)
