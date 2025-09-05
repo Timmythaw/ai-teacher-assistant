@@ -77,7 +77,7 @@ DEFAULT_TEMPS: Dict[str, float] = {
 DEFAULT_MAX_TOKENS: Dict[str, int] = {
     "orchestra": int(os.getenv("ORCHESTRA_MAX_TOKENS", "2000")),
     "lesson": int(os.getenv("LESSON_MAX_TOKENS", "4000")),
-    "assessment": int(os.getenv("ASSESSMENT_MAX_TOKENS", "3000")),
+    "assessment": int(os.getenv("ASSESSMENT_MAX_TOKENS", "5000")),
     "timetable": int(os.getenv("TIMETABLE_MAX_TOKENS", "1000")),
     "email": int(os.getenv("EMAIL_MAX_TOKENS", "1200")),
 }

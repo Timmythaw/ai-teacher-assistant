@@ -84,7 +84,11 @@ def _v_lesson(plan: Any) -> bool:
 
 
 def _v_assessment(a: Any) -> bool:
-    return isinstance(a, dict) and isinstance(a.get("questions"), list) and len(a["questions"]) > 0
+    if not isinstance(a, dict):
+        return False
+    if a.get("error"):
+        return True
+    return isinstance(a.get("questions"), list) and len(a["questions"]) > 0
 
 
 def _v_form(res: Any) -> bool:

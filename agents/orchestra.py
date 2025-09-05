@@ -177,7 +177,13 @@ class Orchestrator:
             return isinstance(md, str) and md.strip() != ""
 
         def v_asmt(a: Any) -> bool:
-            return isinstance(a, dict) and isinstance(a.get("questions"), list) and len(a["questions"]) > 0
+            # Accept a valid assessment or an error payload to avoid hard failure;
+            # the renderer will show a clear error message to the user.
+            if not isinstance(a, dict):
+                return False
+            if a.get("error"):
+                return True
+            return isinstance(a.get("questions"), list) and len(a["questions"]) > 0
 
         def v_form(res: Any) -> bool:
             if not isinstance(res, dict):

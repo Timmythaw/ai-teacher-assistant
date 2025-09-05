@@ -55,7 +55,8 @@ class AssessmentAgent:
                     {"role": "user", "content": material_text},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0.4
+                temperature=0.4,
+                max_tokens=1800
             )
             print(raw)
             # Try strict JSON parse first, then attempt sanitization
@@ -80,8 +81,109 @@ class AssessmentAgent:
                     try:
                         parsed = json.loads(norm)
                     except json.JSONDecodeError:
-                        logger.error("Sanitized JSON still invalid. Raw: %s", raw)
-                        return {"error": "Model did not return valid JSON.", "raw": raw}
+                        # Best-effort repair: balance braces/brackets by appending closers at end
+                        def _balance_repair(s: str) -> str:
+                            opens = []
+                            out = []
+                            in_str = False
+                            esc = False
+                            for ch in s:
+                                out.append(ch)
+                                if esc:
+                                    esc = False
+                                    continue
+                                if ch == '\\':
+                                    esc = True
+                                    continue
+                                if ch == '"' and not esc:
+                                    in_str = not in_str
+                                    continue
+                                if in_str:
+                                    continue
+                                if ch in '{[':
+                                    opens.append(ch)
+                                elif ch in '}]':
+                                    if opens and ((opens[-1] == '{' and ch == '}') or (opens[-1] == '[' and ch == ']')):
+                                        opens.pop()
+                                    else:
+                                        # ignore unmatched closers
+                                        pass
+                            # append missing closers
+                            closing = []
+                            for op in reversed(opens):
+                                closing.append('}' if op == '{' else ']')
+                            return ''.join(out) + ''.join(closing)
+
+                        repaired = _balance_repair(norm)
+                        try:
+                            parsed = json.loads(repaired)
+                        except Exception:
+                            # Last-resort salvage: extract fields by pattern and rebuild a minimal object
+                            def _normalize(s: str) -> str:
+                                return (
+                                    s.replace('\u201c', '"').replace('\u201d', '"').replace('\u2019', "'")
+                                    .replace("\u2014", "-")
+                                )
+                            txt = _normalize(raw)
+                            try:
+                                import itertools
+                                q_key = '"questions"'
+                                q_idx = txt.find(q_key)
+                                questions = []
+                                if q_idx != -1:
+                                    # find first '[' after key
+                                    lb = txt.find('[', q_idx)
+                                    if lb != -1:
+                                        depth = 0
+                                        arr_chars = []
+                                        in_str = False
+                                        esc = False
+                                        for ch in txt[lb:]:
+                                            arr_chars.append(ch)
+                                            if esc:
+                                                esc = False
+                                                continue
+                                            if ch == '\\':
+                                                esc = True
+                                                continue
+                                            if ch == '"':
+                                                in_str = not in_str
+                                                continue
+                                            if in_str:
+                                                continue
+                                            if ch == '[':
+                                                depth += 1
+                                            elif ch == ']':
+                                                depth -= 1
+                                                if depth == 0:
+                                                    break
+                                        arr_text = ''.join(arr_chars)
+                                        # remove trailing commas in elements
+                                        arr_text = re.sub(r",\s*([}\]])", r"\1", arr_text)
+                                        try:
+                                            questions = json.loads(arr_text)
+                                        except Exception:
+                                            questions = []
+                                # Extract simple scalars
+                                def _rx(key: str, default: str = "") -> str:
+                                    m = re.search(rf'"{key}"\s*:\s*"([^"]+)"', txt)
+                                    return m.group(1) if m else default
+                                title = _rx("title", "Assessment")
+                                atype = _rx("type", options.get("type", "MCQ"))
+                                diff = _rx("difficulty", options.get("difficulty", "Medium"))
+                                if isinstance(questions, list) and questions:
+                                    parsed = {
+                                        "title": title,
+                                        "type": atype,
+                                        "difficulty": diff,
+                                        "questions": questions,
+                                    }
+                                else:
+                                    logger.error("Sanitized JSON still invalid. Raw: %s", raw)
+                                    return {"error": "Model did not return valid JSON.", "raw": raw}
+                            except Exception:
+                                logger.error("Sanitized JSON still invalid. Raw: %s", raw)
+                                return {"error": "Model did not return valid JSON.", "raw": raw}
                 else:
                     logger.error("No JSON object could be extracted. Raw: %s", raw)
                     return {"error": "Model did not return valid JSON.", "raw": raw}
