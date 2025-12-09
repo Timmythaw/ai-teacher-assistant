@@ -24,6 +24,8 @@
                 800: "#4338ca",
                 900: "#3730a3",
               },
+              primary: "#E0F1FF",
+              secondary: "#CDE1FA",
             },
           },
         },
@@ -49,13 +51,13 @@
     {% block styles %}{% endblock %}
   </head>
 
-  <body class="min-h-screen bg-gray-50 text-gray-900">
+  <body class="min-h-screen bg-primary text-gray-900">
     <div class="flex min-h-screen">
       <!-- Sidebar (desktop only) -->
       <aside
-        class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-gray-200 bg-white"
+        class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-gray-200 bg-secondary"
       >
-        <div class="h-16 flex items-center px-5 border-b border-gray-100">
+        <div class="h-24 flex items-center px-5 border-b border-gray-100">
           <a href="{{ url_for('index') }}" class="text-[22px] font-semibold"
             >AI Teacher Assistant</a
           >
