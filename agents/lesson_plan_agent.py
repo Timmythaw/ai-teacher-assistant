@@ -34,28 +34,115 @@ class LessonPlanAgent:
                 return {"error": "No valid text extracted from provided PDFs."}
 
             system_prompt = (
-                "Respond ONLY in valid JSON.\n"
-                "You are an expert pedagogy designer. Create a practical, well-structured lesson plan series using the provided source content.\n\n"
-                "Return ONLY a JSON object with these keys (omit keys that are not applicable):\n"
-                "- title (string)\n"
-                "- metadata (object) with optional fields: course, chapter, instructor, academic_year, school\n"
-                "- lesson_title (string)\n"
-                f"- total_duration (number of weeks, default {study_duration_weeks})\n"
-                f"- class_size (number of students, default {num_students})\n"
-                f"- sections_per_week (number, default {sections_per_week})\n"
-                "- learning_objectives (array of strings)\n"
-                "- key_concepts (object) including optional fields such as: definition, role_in_sdlc, goals, importance, reference_resources (array of links/strings)\n"
-                "- teaching_strategies (array of strings, e.g., Lecture with Diagram, Class Discussion, Think-Pair-Share)\n"
-                "- teaching_activities (array of objects). Each activity object: \n"
-                "  { title, duration_minutes (number), description (string, optional), steps (array of strings) }\n"
-                "- assessment_evaluation (string or array of strings)\n"
-                "- materials_needed (array of strings)\n"
-                "- weekly_schedule (array of week objects). Each week object should have: \n"
-                "  - week (number)\n  - topic (string)\n  - learning_objectives (array of strings)\n  - vocabulary (array of strings, optional)\n"
-                "  - activities (array of strings or objects)\n  - materials (array of strings)\n  - differentiation (array of strategies)\n  - assessment (string or array)\n  - homework (string or array)\n  - sections (array of objects, length exactly sections_per_week, each with title, activities, materials, assessment)\n"
-                "- external_resources (array of strings or objects: books, websites, videos)\n\n"
-                "Constraints:\n- Keep strings concise and actionable.\n- Use only double quotes.\n- Do NOT include any prose, explanations, code fences, or markdown—return a single JSON object only."
-            )
+    "You are an expert CurriculumArchitect agent. You have just completed detailed lesson planning. "
+    "Now structure your comprehensive lesson plan into a standardized JSON format for storage and rendering.\n\n"
+    
+    "Respond ONLY in valid JSON.\n\n"
+    
+    "Return a JSON object with these keys:\n\n"
+    
+    "- title (string): Course title\n"
+    "- metadata (object): {\n"
+    "    course: string,\n"
+    "    instructor: string (optional),\n"
+    "    academic_year: string (optional),\n"
+    "    grade_level: string (optional),\n"
+    "    curriculum_standards: array of strings (optional)\n"
+    "  }\n"
+    
+    f"- total_duration (number): {study_duration_weeks} weeks\n"
+    f"- class_size (number): {num_students} students\n"
+    f"- sections_per_week (number): {sections_per_week}\n"
+    "- teaching_approach (string): e.g., 'Mixed', 'Inquiry-Based', 'Project-Based'\n"
+    
+    "- learning_objectives (array of strings): 2-4 measurable objectives using action verbs\n"
+    
+    "- key_concepts (object): {\n"
+    "    definition: string (optional),\n"
+    "    core_topics: array of strings,\n"
+    "    prerequisites: array of strings (optional),\n"
+    "    importance: string (optional),\n"
+    "    reference_resources: array of objects [{ title, url, type }] (optional)\n"
+    "  }\n"
+    
+    "- teaching_strategies (array of strings): e.g., ['Direct Instruction', 'Think-Pair-Share', 'Hands-on Lab']\n"
+    
+    "- teaching_activities (array of objects): [{\n"
+    "    title: string,\n"
+    "    duration_minutes: number,\n"
+    "    description: string,\n"
+    "    steps: array of strings,\n"
+    "    learning_outcomes: array of strings,\n"
+    "    materials: array of strings (optional)\n"
+    "  }]\n"
+    
+    "- materials_needed (array of objects): [{\n"
+    "    item: string,\n"
+    "    quantity: string or number (optional),\n"
+    "    source: string (optional),\n"
+    "    page_reference: string (optional)\n"
+    "  }]\n"
+    
+    "- weekly_schedule (array of week objects): [{\n"
+    "    week: number,\n"
+    "    topic: string,\n"
+    "    learning_objectives: array of strings,\n"
+    "    vocabulary: array of strings (optional),\n"
+    "    activities: array of objects [{ name, duration_minutes, type }],\n"
+    "    timeline: array of objects [{ time_range, activity, instructor_notes }],\n"
+    "    materials: array of strings,\n"
+    "    differentiation: {\n"
+    "      support_strategies: array of strings,\n"
+    "      challenge_strategies: array of strings,\n"
+    "      accommodations: array of strings (optional)\n"
+    "    },\n"
+    "    assessment: {\n"
+    "      type: string (Formative/Summative/Diagnostic),\n"
+    "      questions_or_tasks: array of strings,\n"
+    "      rubric: object or string,\n"
+    "      duration_minutes: number\n"
+    "    },\n"
+    "    homework: {\n"
+    "      tasks: array of strings,\n"
+    "      estimated_time_minutes: number,\n"
+    "      due_date_offset_days: number\n"
+    "    },\n"
+    "    sections: array of objects [{\n"
+    "      section_number: number,\n"
+    "      title: string,\n"
+    "      activities: array of strings,\n"
+    "      materials: array of strings,\n"
+    "      assessment: string\n"
+    "    }] (length exactly sections_per_week)\n"
+    "  }]\n"
+    
+    "- supplementary_resources (array of objects): [{\n"
+    "    title: string,\n"
+    "    url: string,\n"
+    "    type: string (video/article/simulation/dataset),\n"
+    "    duration_minutes: number (optional),\n"
+    "    description: string (optional),\n"
+    "    grade_appropriate: boolean (optional)\n"
+    "  }]\n"
+    
+    "- quality_checklist (object): {\n"
+    "    realistic_timing: boolean,\n"
+    "    diverse_activities: boolean,\n"
+    "    clear_assessments: boolean,\n"
+    "    differentiation_included: boolean,\n"
+    "    standards_aligned: boolean\n"
+    "  }\n\n"
+    
+    "CONSTRAINTS:\n"
+    "- Use ONLY double quotes for strings\n"
+    "- Keep descriptions concise but informative (50-200 words)\n"
+    "- Ensure all URLs are valid and accessible\n"
+    "- Timeline entries must be realistic (total should match lecture duration)\n"
+    "- Each week must have exactly {sections_per_week} sections\n"
+    "- Assessment rubrics should be specific and measurable\n"
+    "- Do NOT include prose, explanations, code fences, or markdown\n"
+    "- Return ONLY a single valid JSON object\n"
+)
 
             raw = chat_completion(
                 model=self.model,
@@ -64,7 +151,7 @@ class LessonPlanAgent:
                     {"role": "user", "content": combined_text}
                 ],
                 temperature=0.4,
-                max_tokens=4000
+                max_tokens=8000
             )
 
             # Parse strictly first, then sanitize if needed

@@ -218,3 +218,6 @@ token.json
 
 
 uploads/
+
+.static/
+.upload/
