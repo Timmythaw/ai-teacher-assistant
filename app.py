@@ -461,9 +461,24 @@ def generate_lesson_plan():
     f.save(dest.as_posix())
 
     # Parse options from form
-    weeks = 8
-    num_stu = 20
-    section_per_week = 1
+    # weeks = 8
+    # num_stu = 20
+    # section_per_week = 1
+
+     # Parse options from request (form or JSON), with defaults
+    data = request.form or request.get_json(silent=True) or {}
+
+    def _int_param(name, default):
+        raw = data.get(name)
+        try:
+            return int(raw) if raw not in (None, "") else default
+        except ValueError:
+            return default
+
+    weeks = _int_param("weeks", 8)
+    num_stu = _int_param("students", 20)
+    section_per_week = _int_param("sections", 1)
+
 
     lp_agent = LessonPlanAgent()
     plan = lp_agent.generate_plan({"course_outline":dest.as_posix()}, weeks, num_stu, section_per_week)
