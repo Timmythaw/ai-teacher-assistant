@@ -1,0 +1,16 @@
+1. create routes and utils folder
+2. create db.py (for db instance creation func) and file helper (file type check and file save function) in utils folder
+3. create main route and set index route ("/")
+4. app.py (limit file upload size, setup directory request, create main blueprint, main method)
+5. create assessment_routes.py
+6. add assessment_routes blueprint in app.py
+7. create lesson_plan_routes.py
+8. add lesson_plan_routes blueprint in app.py
+9. create batch_routes.py
+10. add batch_routes blueprint in app.py
+11. create email_routes.py
+12. add email_routes blueprint in app.py
+13. create timetable_routes.py
+14. add timetable_routes blueprint in app.py
+15. change url from path to main.path
+16. some endpoints function names are changes and endpoints strings are changed. Therefore sync them.   

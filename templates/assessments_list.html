@@ -3,7 +3,7 @@ endblock %} {% block content %}
 <div class="flex items-center justify-between mb-6">
   <h1 class="text-2xl font-semibold">Assessments</h1>
   <a
-    href="{{ url_for('assessment_page') }}"
+    href="{{ url_for('assessments.assessment_page') }}"
     class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
   >
     + Generate New
@@ -28,7 +28,7 @@ endblock %} {% block content %}
       {% for asmt in assessments %} {% set qcount = asmt.result.questions|length
       if asmt.result and asmt.result.questions else 0 %} {% set has_form =
       asmt.google_form and asmt.google_form.formUrl %} {% set detail_url =
-      url_for('assessment_detail', assessment_id=asmt.id) %}
+      url_for('assessments.assessment_detail', assessment_id=asmt.id) %}
 
       <tr
         class="hover:bg-gray-50 cursor-pointer"
@@ -73,7 +73,7 @@ endblock %} {% block content %}
             {% if not has_form %}
             <form
               method="post"
-              action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
+              action="{{ url_for('assessments.create_form_for_assessment', id=asmt.id) }}"
               data-create-form
               onclick="event.stopPropagation();"
             >
@@ -130,7 +130,7 @@ endblock %} {% block content %}
 <div class="p-6 bg-white border rounded-xl shadow-sm text-center text-gray-500">
   No assessments saved yet.<br />
   <a
-    href="{{ url_for('assessment_page') }}"
+    href="{{ url_for('assessments.assessment_page') }}"
     class="text-blue-600 hover:underline"
   >
     Generate your first assessment
@@ -354,7 +354,7 @@ endblock %} {% block content %}
       selBatch.innerHTML = `<option value="">Loading…</option>`;
       batchHint.textContent = "";
       try {
-        const res = await fetch("/api/batches");
+        const res = await fetch("/batches/api");
         const data = await res.json();
         if (!res.ok || !data.ok)
           throw new Error(data.error || `HTTP ${res.status}`);
@@ -371,7 +371,7 @@ endblock %} {% block content %}
           : "No batches yet.";
       } catch (e) {
         selBatch.innerHTML = `<option value="">Failed to load</option>`;
-        batchHint.textContent = `Error: ${e.message}`;
+        batchHint.textContent = `Errorss: ${e.message}`;
       }
     }
 
@@ -402,7 +402,7 @@ endblock %} {% block content %}
           ? `[Assessment ID: ${asmtId}] ` + notes
           : notes;
 
-        const res = await fetch("/api/email/send-batch", {
+        const res = await fetch("/email/api/send-batch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

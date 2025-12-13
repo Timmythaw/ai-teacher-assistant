@@ -48,14 +48,14 @@ block content %}
       <div class="mt-4 flex items-center gap-2">
         <!-- Link back to this page section; replace with a dedicated page if you have one -->
         <a
-          href="{{ url_for('batch_show', batch_id=batch.id) }}"
+          href="{{ url_for('batches.batch_show', batch_id=batch.id) }}"
           class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
         >
           View
         </a>
 
         <a
-          href="{{ url_for('assessments_list') }}"
+          href="{{ url_for('assessments.list_assessments') }}"
           class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
         >
           Assign Assessments
@@ -180,7 +180,7 @@ block content %}
 
       try {
         const fd = new FormData(form);
-        const res = await fetch("{{ url_for('create_batch_upload_csv') }}", {
+        const res = await fetch("{{ url_for('batches.create_batch_upload_csv') }}", {
           method: "POST",
           body: fd,
         });

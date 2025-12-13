@@ -2,7 +2,7 @@
 Planner{% endblock %} {% block content %}
 <h1 class="text-xl font-semibold mb-4">Generate Lesson Plan from PDFs</h1>
 
-<form id="lesson-form" action="{{ url_for('generate_lesson_plan') }}" method="post" enctype="multipart/form-data"
+<form id="lesson-form" action="{{ url_for('lesson_plans.generate_lesson_plan') }}" method="post" enctype="multipart/form-data"
   class="max-w-3xl grid gap-4 bg-white border rounded-xl p-5">
   <div class="grid sm:grid-cols-2 gap-4">
     <div>
@@ -487,7 +487,7 @@ Planner{% endblock %} {% block content %}
           calendar_id: "primary",
           location_hint: "Room 101",
         };
-        const r = await fetch('/api/timetable/suggest', {
+        const r = await fetch('/timetable/suggest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(payload)
@@ -533,7 +533,7 @@ Planner{% endblock %} {% block content %}
       ttModalConfirm.disabled = true;
       ttModalConfirm.textContent = 'Inserting...';
       try {
-        const r = await fetch('/api/timetable/schedule', {
+        const r = await fetch('/timetable/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ timetable: lastTimetable })
@@ -565,7 +565,7 @@ Planner{% endblock %} {% block content %}
       const original = ttInsertBtn.textContent;
       ttInsertBtn.textContent = 'Inserting...';
       try {
-        const r = await fetch('/api/timetable/schedule', {
+        const r = await fetch('/timetable/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ timetable: lastTimetable })
@@ -601,7 +601,7 @@ Planner{% endblock %} {% block content %}
       // Store pure JSON only (remove any preview helper keys)
       result: (() => { const c = JSON.parse(JSON.stringify(lastRawJson || {})); delete c._markdown; return c; })(),
         };
-        const res = await fetch("/api/lesson-plans", {
+        const res = await fetch("/lesson-plans/api", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

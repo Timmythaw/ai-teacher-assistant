@@ -4,7 +4,7 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <h1 class="text-2xl font-semibold">Lesson Plans</h1>
-  <a href="{{ url_for('lesson_generator_page') }}"
+  <a href="{{ url_for('lesson_plans.lesson_generator_page') }}"
     class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black">
     + Generate New
   </a>
@@ -73,7 +73,7 @@
 {% else %}
 <div class="p-6 bg-white border rounded-xl shadow-sm text-center text-gray-500">
   No lesson plans saved yet.<br />
-  <a href="{{ url_for('lesson_generator_page') }}" class="text-blue-600 hover:underline">
+  <a href="{{ url_for('lesson_plans.lesson_generator_page') }}" class="text-blue-600 hover:underline">
     Generate your first lesson plan
   </a>
 </div>
@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const obj = JSON.parse(scriptEl.textContent);
         // Try server-rendered markdown for consistent formatting
-        const serverUrl = lpId ? `/api/lesson-plans/${lpId}/markdown` : null;
+        const serverUrl = lpId ? `/lesson-plans/api/${lpId}/markdown` : null;
         if (serverUrl) {
           fetch(serverUrl)
             .then(r => r.ok ? r.json() : null)

@@ -58,38 +58,38 @@
         class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-gray-200 bg-secondary"
       >
         <div class="h-24 flex items-center px-5 border-b border-gray-100">
-          <a href="{{ url_for('index') }}" class="text-[22px] font-semibold"
+          <a href="{{ url_for('main.index') }}" class="text-[22px] font-semibold"
             >AI Teacher Assistant</a
           >
         </div>
 
         <nav class="flex-1 p-3 space-y-1">
           <a
-            href="{{ url_for('index') }}"
+            href="{{ url_for('main.index') }}"
             class="block px-3 py-2 rounded-lg hover:bg-gray-100 {{ 'bg-gray-100 font-medium' if request.endpoint == 'index' else '' }}"
           >
             Dashboard
           </a>
           <a
-            href="{{ url_for('batches_page') }}"
+            href="{{ url_for('batches.batches_page') }}"
             class="block px-3 py-2 rounded-lg hover:bg-gray-100"
           >
             Batches
           </a>
           <a
-            href="{{ url_for('lesson_plans_list') }}"
+            href="{{ url_for('lesson_plans.list_lesson_plans') }}"
             class="block px-3 py-2 rounded-lg hover:bg-gray-100"
           >
             Lesson Plans
           </a>
           <a
-            href="{{ url_for('assessments_list') }}"
+            href="{{ url_for('assessments.list_assessments') }}"
             class="block px-3 py-2 rounded-lg hover:bg-gray-100"
           >
             Assessments
           </a>
           <a
-            href="{{ url_for('email_page') }}"
+            href="{{ url_for('email.email_page') }}"
             class="block px-3 py-2 rounded-lg hover:bg-gray-100"
           >
             Send Email
@@ -129,7 +129,7 @@
               />
             </svg>
           </button>
-          <a href="{{ url_for('index') }}" class="font-semibold"
+          <a href="{{ url_for('main.index') }}" class="font-semibold"
             >AI Lesson Planner</a
           >
           <span class="w-6"></span>
@@ -196,28 +196,28 @@
         </div>
         <nav class="space-y-1 mt-2">
           <a
-            href="{{ url_for('index') }}"
+            href="{{ url_for('main.index') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
             >Dashboard</a
           >
           <a
-            href="{{ url_for('batches_page') }}"
+            href="{{ url_for('batches.batches_page') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
             >Batches</a
           >
           <a
-            href="{{ url_for('lesson_plans_list') }}"
+            href="{{ url_for('lesson_plans.list_lesson_plans') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
           >
             Lesson Plans</a
           >
           <a
-            href="{{ url_for('assessments_list') }}"
+            href="{{ url_for('assessments.list_assessments') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
             >Assessments</a
           >
           <a
-            href="{{ url_for('email_page') }}"
+            href="{{ url_for('email.email_page') }}"
             class="block px-3 py-2 rounded hover:bg-gray-100"
             >Send Email</a
           >

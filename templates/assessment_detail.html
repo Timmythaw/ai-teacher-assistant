@@ -22,7 +22,7 @@ endblock %} {% block content %}
   </div>
 
   <a
-    href="{{ url_for('assessments_list') }}"
+    href="{{ url_for('assessments.list_assessments') }}"
     class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
   >
     ← Back to Assessments
@@ -259,7 +259,7 @@ endblock %} {% block content %}
       fd.set("action", action);
       fd.set("cc", cc || "");
       fd.set("bcc", bcc || "");
-      const res = await fetch("{{ url_for('email_compose') }}", {
+      const res = await fetch("{{ url_for('email.email_compose') }}", {
         method: "POST",
         body: fd,
       });
@@ -315,7 +315,7 @@ endblock %} {% block content %}
 
       try {
         const url =
-          "{{ url_for('api_assessment_responses', assessment_id=assessment.id) }}";
+          "{{ url_for('assessments.api_assessment_responses', assessment_id=assessment.id) }}";
         const res = await fetch(url, {
           headers: { Accept: "application/json" },
         });

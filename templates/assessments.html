@@ -1,10 +1,10 @@
 {% extends "base.html" %} {% set breadcrumbs = [ {'label': 'Dashboard', 'url':
-url_for('index')}, {'label': 'Generate Assessment', 'url': None} ] %} {% block
+url_for('main.index')}, {'label': 'Generate Assessment', 'url': None} ] %} {% block
 title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
 %}
 <h1 class="text-xl font-semibold mb-4">Generate Assessment from PDF</h1>
 
-<form id="upload-form" action="{{ url_for('generate_assessment') }}" method="post" enctype="multipart/form-data"
+<form id="upload-form" action="{{ url_for('assessments.generate_assessment') }}" method="post" enctype="multipart/form-data"
   class="max-w-2xl grid gap-4 bg-white border rounded-xl p-5">
   <!-- PDF Upload -->
   <div>
@@ -245,7 +245,7 @@ title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block content
       result: (() => { const c = JSON.parse(JSON.stringify(lastAssessmentObj || {})); delete c._markdown; return c; })(),
           google_form: null, // we create this later in the table UI
         };
-        const resp = await fetch("/api/assessments", {
+        const resp = await fetch("/assessments/api", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

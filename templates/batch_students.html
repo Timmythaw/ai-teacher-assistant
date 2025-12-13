@@ -15,7 +15,7 @@ block content %}
       ✉️ Send to All
     </button>
     <a
-      href="{{ url_for('batches_page') }}"
+      href="{{ url_for('batches.batches_page') }}"
       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
     >
       ← Back to Batches
@@ -343,7 +343,7 @@ block content %}
       fd.set("cc", cc);
       fd.set("bcc", bcc);
 
-      const res = await fetch("{{ url_for('email_compose') }}", {
+      const res = await fetch("{{ url_for('email.email_compose') }}", {
         method: "POST",
         body: fd,
       });
