@@ -1,3 +1,4 @@
+code refactoring
 1. create routes and utils folder
 2. create db.py (for db instance creation func) and file helper (file type check and file save function) in utils folder
 3. create main route and set index route ("/")
@@ -14,3 +15,15 @@
 14. add timetable_routes blueprint in app.py
 15. change url from path to main.path
 16. some endpoints function names are changes and endpoints strings are changed. Therefore sync them.   
+
+Oauth refactoring
+1. install 3 packages
+2. create auth routes
+3. add in app.py
+4. add client_secret.json to gitignore
+5. remove token.json and token.pickle
+6. change localhost 8080 redirect url in gmail_tool.py
+7. edit credentials.json path to client_secret.json
+
+
+set GOOGLE_CLIENT_ID=840970484260-h2rmsrj3obau562fg7ngg1131o6ne3bt.apps.googleusercontent.com

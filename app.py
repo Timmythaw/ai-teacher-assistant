@@ -1,6 +1,9 @@
 import os 
 from pathlib import Path
+import token
 from flask import Flask
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -21,7 +24,8 @@ def create_app():
     from routes.lesson_plan_routes import lesson_plan_bp
     from routes.batch_routes import batch_bp
     from routes.email_routes import email_bp
-    from routes.timetable_routes import timetable_bp    
+    from routes.timetable_routes import timetable_bp  
+    from routes.auth_routes import auth_bp  
 
 
     app.register_blueprint(main_bp)
@@ -30,9 +34,18 @@ def create_app():
     app.register_blueprint(batch_bp, url_prefix="/batches")
     app.register_blueprint(email_bp, url_prefix="/email")
     app.register_blueprint(timetable_bp, url_prefix="/timetable")
+    app.register_blueprint(auth_bp, url_prefix="/auth")
 
     return app
 
 if __name__ == "__main__":
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    if not google_client_id:
+        raise RuntimeError("GOOGLE_CLIENT_ID is not set")
+
+    print("GOOGLE_CLIENT_ID =", google_client_id)
+
     app = create_app()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")), debug=True)

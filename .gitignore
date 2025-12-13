@@ -221,3 +221,5 @@ uploads/
 
 .static/
 .upload/
+
+client_secret.json

@@ -67,7 +67,7 @@ def get_gmail_service(
         # If still no paths, use defaults in project root
         if client_secret_path is None:
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            client_secret_path = os.path.join(project_root, "credentials.json")
+            client_secret_path = os.path.join(project_root, "client_secret.json")
         
         if token_path is None:
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -98,7 +98,7 @@ def get_gmail_service(
                 
                 logger.info("Starting OAuth flow for Gmail authentication")
                 flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, scopes)
-                creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=8080)
                 logger.info("Gmail OAuth flow completed successfully")
 
             # Save token for reuse
