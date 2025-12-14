@@ -137,7 +137,6 @@ python-dotenv==1.1.1
 python-json-logger==3.3.0
 python-pptx==1.0.2
 pytz==2025.2
-pywin32==311
 pywinpty==3.0.0
 pyyaml==6.0.2
 pyzmq==27.0.1
