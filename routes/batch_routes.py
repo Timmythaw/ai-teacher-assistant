@@ -34,11 +34,13 @@ def batch_show(batch_id):
         return render_template("404.html"), 404
 
     # Get students in batch
-    sres = supabase.table("students") \
-        .select("student_id,name,email") \
-        .eq("batch_id", batch_id) \
-        .order("name") \
+    sres =(
+         supabase.table("students") 
+        .select("student_id,name,email") 
+        .eq("batch_id", batch_id) 
+        .order("name") 
         .execute()
+    )
     students = sres.data or []
 
     return render_template("batch_students.html", batch=batch, students=students)
