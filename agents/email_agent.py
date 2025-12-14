@@ -35,10 +35,7 @@ class EmailAgent:
             token_path = os.path.join(project_root, "token.json")
             
             logger.info("Initializing Gmail service with credentials: %s", credentials_path)
-            self.service = get_gmail_service(
-                client_secret_path=credentials_path,
-                token_path=token_path
-            )
+            self.service = get_gmail_service()
             self.sender = get_sender_address(self.service)
             logger.info("Gmail service initialized successfully. Sender: %s", self.sender)
             

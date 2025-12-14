@@ -26,6 +26,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/forms.body",
     "https://www.googleapis.com/auth/calendar",
     "openid",
+    "https://www.googleapis.com/auth/gmail.modify",
+
 ]
 
 def get_flow():
