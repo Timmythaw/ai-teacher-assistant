@@ -7,12 +7,7 @@ endblock %} {% block content %}
     {% if form_url %}
     <p class="text-sm mt-1">
       Google Form:
-      <a
-        href="{{ form_url }}"
-        target="_blank"
-        class="text-blue-600 hover:underline"
-        >Open form</a
-      >
+      <a href="{{ form_url }}" target="_blank" class="text-blue-600 hover:underline">Open form</a>
     </p>
     {% else %}
     <p class="text-sm text-amber-700 mt-1">
@@ -21,10 +16,8 @@ endblock %} {% block content %}
     {% endif %}
   </div>
 
-  <a
-    href="{{ url_for('assessments.list_assessments') }}"
-    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
-  >
+  <a href="{{ url_for('assessments.list_assessments') }}"
+    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm">
     ← Back to Assessments
   </a>
 </div>
@@ -33,20 +26,8 @@ endblock %} {% block content %}
   <div class="flex items-center justify-between">
     <h2 class="text-lg font-medium">Responses</h2>
     <div class="flex items-center gap-2">
-      <button
-        id="btn-fetch"
-        class="px-3 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black text-sm"
-        {%
-        if
-        not
-        form_url
-        and
-        not
-        form_id
-        %}disabled{%
-        endif
-        %}
-      >
+      <button id="btn-fetch" class="px-3 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black text-sm" {% if
+        not form_url and not form_id %}disabled{% endif %}>
         Generate Results
       </button>
     </div>
@@ -85,18 +66,12 @@ endblock %} {% block content %}
 <div id="email-modal" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-black/50"></div>
   <div class="relative mx-auto mt-10 w-full max-w-lg px-4 sm:px-0">
-    <div
-      class="bg-white rounded-lg shadow-xl border max-h-[90vh] overflow-y-auto"
-    >
+    <div class="bg-white rounded-lg shadow-xl border max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between px-4 py-3 border-b">
         <h3 class="font-semibold text-base" id="email-modal-title">
           Compose Email
         </h3>
-        <button
-          id="email-close"
-          class="p-1.5 rounded hover:bg-gray-100"
-          aria-label="Close"
-        >
+        <button id="email-close" class="p-1.5 rounded hover:bg-gray-100" aria-label="Close">
           ✕
         </button>
       </div>
@@ -105,55 +80,32 @@ endblock %} {% block content %}
         <input type="hidden" id="email-student-name" />
         <div class="space-y-2">
           <label class="block text-sm font-medium">To</label>
-          <input
-            id="email-to"
-            type="email"
-            class="w-full border rounded-md p-2"
-            placeholder="student@example.com"
-            required
-          />
+          <input id="email-to" type="email" class="w-full border rounded-md p-2" placeholder="student@example.com"
+            required />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
             <label class="block text-sm font-medium">CC</label>
-            <input
-              id="email-cc"
-              type="text"
-              class="w-full border rounded-md p-2"
-              placeholder="cc1@example.com, cc2@example.com"
-            />
+            <input id="email-cc" type="text" class="w-full border rounded-md p-2"
+              placeholder="cc1@example.com, cc2@example.com" />
           </div>
           <div class="space-y-2">
             <label class="block text-sm font-medium">BCC</label>
-            <input
-              id="email-bcc"
-              type="text"
-              class="w-full border rounded-md p-2"
-              placeholder="bcc1@example.com, bcc2@example.com"
-            />
+            <input id="email-bcc" type="text" class="w-full border rounded-md p-2"
+              placeholder="bcc1@example.com, bcc2@example.com" />
           </div>
         </div>
 
         <div class="space-y-2">
           <label class="block text-sm font-medium">Subject</label>
-          <input
-            id="email-subject"
-            type="text"
-            class="w-full border rounded-md p-2"
-            placeholder="Subject"
-            required
-          />
+          <input id="email-subject" type="text" class="w-full border rounded-md p-2" placeholder="Subject" required />
         </div>
 
         <div class="space-y-2">
           <label class="block text-sm font-medium">Notes / Instructions</label>
-          <textarea
-            id="email-notes"
-            rows="5"
-            class="w-full border rounded-md p-2"
-            placeholder="Tell the assistant what to write (agenda, links, tone hints, etc.)"
-          ></textarea>
+          <textarea id="email-notes" rows="5" class="w-full border rounded-md p-2"
+            placeholder="Tell the assistant what to write (agenda, links, tone hints, etc.)"></textarea>
           <p class="text-xs text-gray-500">
             The assistant drafts the message based on these notes and your tone
             below.
@@ -187,18 +139,11 @@ endblock %} {% block content %}
         <div id="email-progress" class="hidden text-xs text-gray-600"></div>
 
         <div class="flex items-center justify-end gap-2 pt-2 border-t">
-          <button
-            type="button"
-            id="email-cancel"
-            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
-          >
+          <button type="button" id="email-cancel" class="px-3 py-1.5 rounded-md border hover:bg-gray-50">
             Cancel
           </button>
-          <button
-            type="submit"
-            id="email-submit"
-            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
-          >
+          <button type="submit" id="email-submit"
+            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black">
             Send
           </button>
         </div>
@@ -323,9 +268,8 @@ endblock %} {% block content %}
         if (!res.ok || !data.ok)
           throw new Error(data.error || `HTTP ${res.status}`);
 
-        summaryEl.textContent = `${
-          data.num_responses
-        } response(s) fetched from “${data.form_title || "Form"}”.`;
+        summaryEl.textContent = `${data.num_responses
+          } response(s) fetched from “${data.form_title || "Form"}”.`;
         summaryEl.classList.remove("hidden");
         hintEl.classList.add("hidden");
 
@@ -351,22 +295,23 @@ endblock %} {% block content %}
             const scoreText = r.fraction
               ? r.fraction
               : r.score != null && r.max_score
-              ? `${r.score}/${r.max_score}`
-              : r.score != null
-              ? String(r.score)
-              : "";
+                ? `${r.score}/${r.max_score}`
+                : r.score != null
+                  ? String(r.score)
+                  : "";
 
             const tr = document.createElement("tr");
+            const rawScoreText = scoreText || "0";  // show 0 if empty
+
             tr.innerHTML = `
               <td class="px-4 py-2">${escapeHtml(r.email || "")}</td>
               <td class="px-4 py-2 text-gray-600">${escapeHtml(
-                r.submitted || ""
-              )}</td>
+              r.submitted || ""
+            )}</td>
               <td class="px-4 py-2">
                 <span class="${isLow ? "text-red-600 font-medium" : ""}">
-                  ${escapeHtml(scoreText)}${
-              typeof percent === "number" ? ` (${percent}%)` : ""
-            }
+                  ${escapeHtml(rawScoreText)}${typeof percent === "number" ? ` (${percent}%)` : ""
+              }
                 </span>
               </td>
               <td class="px-4 py-2 text-right">

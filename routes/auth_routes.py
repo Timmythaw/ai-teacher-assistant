@@ -23,11 +23,11 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/forms.body",
-    "https://www.googleapis.com/auth/calendar",
-    "openid",
     "https://www.googleapis.com/auth/gmail.modify",
-
+    "https://www.googleapis.com/auth/forms.body",
+    "https://www.googleapis.com/auth/forms.responses.readonly",
+    "https://www.googleapis.com/auth/calendar",
+    "openid",   
 ]
 
 def get_flow():
