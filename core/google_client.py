@@ -2,75 +2,69 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pickle
+from flask import session
 from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from core.logger import logger
 
-SCOPES = [
-    "https://www.googleapis.com/auth/forms.body",
-    "https://www.googleapis.com/auth/forms.responses.readonly",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/calendar.readonly",
-    "https://www.googleapis.com/auth/calendar",
-    "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/gmail.compose",
-    "https://www.googleapis.com/auth/gmail.modify",
-]
 
-def get_google_service(api: str, version: str,
-                       credentials_path=None,
-                       token_path=None):
+def get_google_service(api: str, version: str):
     """
-    Authenticate and return a Google API service client with error handling.
+    Build and return a Google API service client using OAuth credentials
+    obtained from the web OAuth flow (stored in Flask session).
+    
+    This replaces the old local OAuth flow with session-based web OAuth.
+    
+    Args:
+        api: Google API name (e.g., "gmail", "calendar", "forms")
+        version: API version (e.g., "v1", "v3")
+        
+    Returns:
+        Google API service client
+        
+    Raises:
+        RuntimeError: If no credentials in session or authentication fails
     """
-    # Set default paths if none provided
-    if credentials_path is None:
-        credentials_path = os.environ.get("CREDENTIALS_PATH")
-    
-    if token_path is None:
-        token_path = os.environ.get("TOKEN_PATH")
-    
-    # If still no paths, use defaults in project root
-    if credentials_path is None:
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        credentials_path = os.path.join(project_root, "credentials.json")
-    
-    if token_path is None:
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        token_path = os.path.join(project_root, "token.pickle")
-    
-    creds = None
     try:
-        if os.path.exists(token_path):
-            with open(token_path, "rb") as token:
-                creds = pickle.load(token)
+        # Get credentials from session (set in auth_routes.callback)
+        sess_creds = session.get("credentials")
+        if not sess_creds:
+            raise RuntimeError("No OAuth credentials in session; user must log in first.")
 
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
+        # Reconstruct Credentials object
+        creds = Credentials(
+            token=sess_creds.get("token"),
+            refresh_token=sess_creds.get("refresh_token"),
+            token_uri=sess_creds.get("token_uri"),
+            client_id=sess_creds.get("client_id"),
+            client_secret=sess_creds.get("client_secret"),
+            scopes=sess_creds.get("scopes"),
+        )
+
+        # Refresh if expired
+        if not creds.valid:
+            if creds.expired and creds.refresh_token:
                 creds.refresh(Request())
-                logger.info("Google credentials refreshed successfully.")
+                logger.info("%s credentials refreshed successfully", api.capitalize())
+
+                # Save refreshed token back to session
+                session["credentials"] = {
+                    "token": creds.token,
+                    "refresh_token": creds.refresh_token,
+                    "token_uri": creds.token_uri,
+                    "client_id": creds.client_id,
+                    "client_secret": creds.client_secret,
+                    "scopes": creds.scopes,
+                }
             else:
-                if not os.path.exists(credentials_path):
-                    raise FileNotFoundError(
-                        f"Missing {credentials_path}. Please download from Google Cloud Console."
-                    )
-                flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-                creds = flow.run_local_server(port=8080)
-                logger.info("Google OAuth flow completed successfully.")
+                raise RuntimeError(f"Invalid {api} credentials and no refresh token available.")
 
-            # Save token for reuse
-            with open(token_path, "wb") as token:
-                pickle.dump(creds, token)
-                logger.info("Google credentials cached at %s", token_path)
+        service = build(api, version, credentials=creds)
+        logger.info("%s service initialized successfully (session-based)", api.capitalize())
+        return service
 
-        return build(api, version, credentials=creds)
-
-    except HttpError as e:
-        logger.error("Google API HttpError: %s", e)
-        raise
     except Exception as e:
-        logger.error("Google auth failed: %s", e, exc_info=True)
-        raise
+        logger.error("%s authentication failed (session-based): %s", api.capitalize(), e, exc_info=True)
+        raise RuntimeError(f"{api.capitalize()} authentication failed: {e}")
