@@ -1,150 +1,179 @@
-{% extends "base.html" %} {% block title %}Courses & Batches{% endblock %} {%
-block content %}
-<!-- Header -->
+{% extends "base.html" %} 
+{% block title %}Courses & Batches{% endblock %} 
+
+{% block content %}
+
 <div class="flex items-center justify-between mb-8">
-  <h1 class="text-2xl font-semibold">Batches</h1>
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Batches</h1>
+    <p class="text-sm text-slate-500 mt-1">Manage your student groups and course rosters.</p>
+  </div>
+  
   <button
     id="open-create"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
+    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
   >
-    + Create Batch
+    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+    Create Batch
   </button>
 </div>
 
-<!-- Existing Batches -->
-<div class="bg-white rounded-xl shadow-md p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-lg font-medium">Existing Batches</h2>
-    <span class="text-sm text-gray-500">{{ (batches|length) or 0 }} total</span>
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-lg font-semibold text-slate-800">Existing Batches</h2>
+    <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+      {{ (batches|length) or 0 }} Total
+    </span>
   </div>
 
   {% if batches and batches|length > 0 %}
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    {% for batch in batches %} {% set count = 0 %} {% if batch.students and
-    batch.students|length > 0 %} {% set count = batch.students[0].count or 0 %}
-    {% endif %}
-    <div class="border rounded-lg p-4 hover:shadow-sm transition">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for batch in batches %} 
+        {% set count = 0 %} 
+        {% if batch.students and batch.students|length > 0 %} 
+            {% set count = batch.students[0].count or 0 %}
+        {% endif %}
+    
+    <div class="group relative flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1">
+      
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-base font-semibold">
+          <div class="text-base font-semibold text-slate-800 group-hover:text-blue-700 transition-colors">
             {{ batch.name or "Untitled Batch" }}
           </div>
-          <div class="mt-1 text-sm text-gray-500">
+          <div class="mt-1 flex items-center gap-2 text-sm text-slate-500">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
             {{ count }} student{{ '' if count == 1 else 's' }}
           </div>
           {% if batch.created_at %}
-          <div class="mt-1 text-xs text-gray-400">
+          <div class="mt-1 text-xs text-slate-400">
             Created: {{ batch.created_at }}
           </div>
           {% endif %}
         </div>
+        
         <div
-          class="shrink-0 rounded-full bg-gray-100 text-gray-600 h-10 w-10 grid place-items-center font-semibold"
+          class="shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 font-bold ring-1 ring-blue-100 group-hover:bg-blue-600 group-hover:text-white transition-colors"
         >
           {{ (batch.name or 'B')[:1] | upper }}
         </div>
       </div>
 
-      <div class="mt-4 flex items-center gap-2">
-        <!-- Link back to this page section; replace with a dedicated page if you have one -->
+      <div class="mt-6 flex items-center gap-2 pt-4 border-t border-slate-100">
         <a
           href="{{ url_for('batches.batch_show', batch_id=batch.id) }}"
-          class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+          class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          View
+          View Details
         </a>
 
         <a
           href="{{ url_for('assessments.list_assessments') }}"
-          class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
+          class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:text-blue-600"
+          title="Assign Assessments"
         >
-          Assign Assessments
+           Assign
         </a>
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="text-center text-gray-500 py-8">No batches found.</div>
+  <div class="flex flex-col items-center justify-center py-12 text-center">
+    <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+    </div>
+    <h3 class="text-sm font-medium text-slate-900">No batches created</h3>
+    <p class="mt-1 text-sm text-slate-500">Get started by creating a new batch.</p>
+  </div>
   {% endif %}
 </div>
 
-<!-- Create Batch Modal -->
-<div id="create-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/50"></div>
-  <div class="relative mx-auto mt-20 w-full max-w-lg">
-    <div class="bg-white rounded-xl shadow-xl border">
-      <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 class="font-semibold">Create New Batch</h3>
-        <button
-          id="close-create"
-          class="p-1.5 rounded hover:bg-gray-100"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-      </div>
+<div id="create-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+  
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+            
+            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-base font-semibold leading-6 text-slate-800">Create New Batch</h3>
+                <button
+                id="close-create"
+                class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors"
+                aria-label="Close"
+                >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
 
-      <form
-        id="create-form"
-        class="p-4 grid gap-4"
-        enctype="multipart/form-data"
-      >
-        <div>
-          <label class="block text-sm font-medium mb-1" for="batch_name"
-            >Batch name</label
-          >
-          <input
-            id="batch_name"
-            name="batch_name"
-            type="text"
-            required
-            placeholder="e.g., CS101 - Fall 2025"
-            class="w-full rounded border border-gray-300 px-3 py-2 text-base focus:border-gray-900 focus:ring"
-          />
+            <form
+                id="create-form"
+                class="p-6 space-y-4"
+                enctype="multipart/form-data"
+            >
+                <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1" for="batch_name"
+                    >Batch Name</label
+                >
+                <input
+                    id="batch_name"
+                    name="batch_name"
+                    type="text"
+                    required
+                    placeholder="e.g., CS101 - Fall 2025"
+                    class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+                </div>
+
+                <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1" for="students_csv"
+                    >Upload Students (CSV)</label
+                >
+                <input
+                    id="students_csv"
+                    name="students_csv"
+                    type="file"
+                    accept=".csv"
+                    required
+                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    CSV must include columns <span class="font-mono bg-slate-100 px-1 rounded text-slate-600">name</span> and
+                    <span class="font-mono bg-slate-100 px-1 rounded text-slate-600">email</span>.
+                </p>
+                </div>
+
+                <div id="create-status" class="text-xs font-medium text-blue-600"></div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-2">
+                <button
+                    type="button"
+                    id="cancel-create"
+                    class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    id="submit-create"
+                    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Create Batch
+                </button>
+                </div>
+            </form>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-1" for="students_csv"
-            >Students CSV</label
-          >
-          <input
-            id="students_csv"
-            name="students_csv"
-            type="file"
-            accept=".csv"
-            required
-            class="w-full rounded border border-gray-300 px-3 py-2 text-base"
-          />
-          <p class="text-xs text-gray-500 mt-1">
-            CSV must include columns <span class="font-mono">name</span> and
-            <span class="font-mono">email</span>.
-          </p>
-        </div>
-
-        <div id="create-status" class="text-xs text-gray-500"></div>
-
-        <div class="flex items-center justify-end gap-2 pt-2 border-t">
-          <button
-            type="button"
-            id="cancel-create"
-            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            id="submit-create"
-            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
-          >
-            Create Batch
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+
+{% endblock %} 
+
+{% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("create-modal");
@@ -165,18 +194,33 @@ block content %}
       statusEl.textContent = "";
     }
 
-    openBtn?.addEventListener("click", openModal);
-    closeBtn?.addEventListener("click", closeModal);
-    cancelBtn?.addEventListener("click", closeModal);
+    if(openBtn) openBtn.addEventListener("click", openModal);
+    if(closeBtn) closeBtn.addEventListener("click", closeModal);
+    if(cancelBtn) cancelBtn.addEventListener("click", closeModal);
+    
+    // Close when clicking backdrop
     modal.addEventListener("click", (e) => {
-      // click outside panel to close
-      if (e.target === modal) closeModal();
+        // The modal container inside is technically the 'target' if clicked directly
+        // but often clicks bubble. We want to close if the user clicks the 
+        // grey backdrop, not the white panel.
+        // The backdrop is covered by the .fixed.inset-0 flex container.
+        // We need to check if the click target is the overlay container.
+        const overlay = modal.querySelector('.fixed.inset-0.z-10'); 
+        if (e.target === overlay || e.target.classList.contains('backdrop-blur-sm')) {
+            // This is a bit tricky with nested divs, simpler check:
+            // If the closest .bg-white panel wasn't clicked
+            if (!e.target.closest('.bg-white')) {
+                 closeModal();
+            }
+        }
     });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      statusEl.textContent = "Uploading and creating batch…";
+      statusEl.textContent = "Uploading and creating batch...";
+      statusEl.className = "text-xs font-medium text-blue-600 animate-pulse";
       submitBtn.disabled = true;
+      submitBtn.classList.add("opacity-50", "cursor-not-allowed");
 
       try {
         const fd = new FormData(form);
@@ -185,20 +229,21 @@ block content %}
           body: fd,
         });
 
-        // Regardless of redirect/HTML response, we just refresh the page to show fresh data
         if (!res.ok) {
           const text = await res.text();
           throw new Error(`Failed (${res.status}). ${text.slice(0, 200)}`);
         }
 
-        statusEl.textContent = "Success. Reloading…";
-        // small delay for UX
+        statusEl.textContent = "Success! Reloading...";
+        statusEl.className = "text-xs font-medium text-green-600";
         setTimeout(() => {
           location.reload();
-        }, 400);
+        }, 500);
       } catch (err) {
         statusEl.textContent = "Error: " + (err.message || err);
+        statusEl.className = "text-xs font-medium text-red-600";
         submitBtn.disabled = false;
+        submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
       }
     });
   });
