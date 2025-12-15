@@ -16,7 +16,7 @@ lesson_plan_bp = Blueprint("lesson_plans", __name__)
 
 
 @lesson_plan_bp.route("/")
-@login_required  # ✅ Added: Require login
+@login_required 
 def list_lesson_plans():
     """
     List current user's lesson plans
@@ -25,7 +25,7 @@ def list_lesson_plans():
     try:
         supabase = get_supabase_client()
         
-        # 🔥 RLS handles filtering - no .eq('user_id') needed!
+        # RLS handles filtering - no .eq('user_id') needed!
         res = (
             supabase.table("lesson_plans")
             .select("*")
@@ -35,7 +35,6 @@ def list_lesson_plans():
         )
         lesson_plans = res.data or []
         
-        # ✅ Added: Pass user to template
         return render_template("lesson_plans_list.html", lesson_plans=lesson_plans, user=g.current_user)
     except Exception as e:
         return (
@@ -45,16 +44,50 @@ def list_lesson_plans():
 
 
 @lesson_plan_bp.route("/generator", methods=["GET"])
-@login_required  # ✅ Added: Require login
+@login_required
 def lesson_generator_page():
     """Lesson plan generator page"""
-    return render_template("lesson_generator.html", user=g.current_user)
+    # 1. Fetch fresh credit data to ensure UI is accurate
+    try:
+        user_id = get_current_user_id()
+        supabase = get_supabase_client()
+        # Query just the credits column
+        res = supabase.table("users").select("credits").eq("id", user_id).single().execute()
+        current_credits = (res.data or {}).get("credits", 0)
+    except Exception:
+        current_credits = 0
+
+    # 2. Pass 'credits' explicitly so {{ credits }} works in your HTML
+    return render_template("lesson_generator.html", user=g.current_user, credits=current_credits)
 
 
 @lesson_plan_bp.route("/generate", methods=["POST"])
-@login_required  # ✅ Added: Require login
+@login_required 
 def generate_lesson_plan():
     """Generate lesson plan from course outline"""
+    COST = 2
+
+    # --- 1. CREDIT CHECK ---
+    try:
+        user_id = get_current_user_id()
+        supabase = get_supabase_client()
+        
+        # Fetch current credits
+        profile_res = supabase.table("users").select("credits").eq("id", user_id).single().execute()
+        profile = profile_res.data
+        
+        current_credits = profile.get("credits", 0) if profile else 0
+
+        if current_credits < COST:
+            return jsonify({
+                "ok": False, 
+                "error": f"Insufficient credits. You have {current_credits}, but need {COST}."
+            }), 402  # 402 Payment Required
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Failed to check credits: {str(e)}"}), 500
+    
+    # --- 2. VALIDATION & FILE SAVING ---
     if "course_outline" not in request.files:
         abort(400, description="Missing file field 'course_outline'")
 
@@ -65,7 +98,6 @@ def generate_lesson_plan():
     if not allowed_file(f.filename or ""):
         abort(400, description="Only .pdf files are allowed")
 
-    # Save file
     upload_dir = current_app.config["UPLOAD_DIR"]
     dest = save_uploaded_file(f, upload_dir)
 
@@ -83,13 +115,25 @@ def generate_lesson_plan():
     num_stu = _int_param("students", 20)
     section_per_week = _int_param("sections", 1)
 
-    # Generate lesson plan
+    # --- 3. AI GENERATION ---
     lp_agent = LessonPlanAgent()
     plan = lp_agent.generate_plan(
         {"course_outline": dest.as_posix()}, weeks, num_stu, section_per_week
     )
 
-    # Attach rendered markdown
+    # --- 4. DEDUCT CREDITS ---
+    # Only deduct if generation was successful
+    if isinstance(plan, dict) and not plan.get("error"):
+        try:
+            new_balance = current_credits - COST
+            # Update the database
+            supabase.table("users").update({"credits": new_balance}).eq("id", user_id).execute()
+            # Send new balance to frontend for instant update
+            plan["new_credit_balance"] = new_balance
+        except Exception as e:
+            current_app.logger.error(f"Failed to deduct credits for user {user_id}: {e}")
+
+    # --- 5. RENDER MARKDOWN ---
     try:
         plan_md = (
             render_lesson_plan_markdown(plan)
@@ -106,14 +150,14 @@ def generate_lesson_plan():
 
 
 @lesson_plan_bp.route("/api", methods=["POST"])
-@login_required  # ✅ Added: Require login
+@login_required 
 def save_lesson_plan():
     """
     Save lesson plan to database with user ownership
     Sets user_id automatically
     """
     try:
-        user_id = get_current_user_id()  # ✅ Added: Get current user
+        user_id = get_current_user_id() 
         supabase = get_supabase_client()
         payload = request.get_json(silent=True) or {}
         result = payload.get("result")
@@ -127,7 +171,7 @@ def save_lesson_plan():
             )
 
         row = {
-            "user_id": user_id,  # ✅ Added: Set ownership
+            "user_id": user_id, 
             "original_filename": payload.get("original_filename"),
             "pdf_path": payload.get("pdf_path"),
             "options": payload.get("options"),
@@ -147,7 +191,7 @@ def save_lesson_plan():
 
 
 @lesson_plan_bp.route("/api", methods=["GET"])
-@login_required  # ✅ Added: Require login
+@login_required 
 def api_list_lesson_plans():
     """
     API endpoint to list current user's lesson plans
@@ -156,7 +200,7 @@ def api_list_lesson_plans():
     try:
         supabase = get_supabase_client()
         
-        # 🔥 RLS handles filtering
+        # RLS handles filtering
         res = (
             supabase.table("lesson_plans")
             .select("*")
@@ -170,8 +214,8 @@ def api_list_lesson_plans():
 
 
 @lesson_plan_bp.route("/<uuid:lesson_plan_id>")
-@login_required  # ✅ Added: Require login
-@require_user_owns_resource('lesson_plans', 'lesson_plan_id')  # ✅ Added: Verify ownership
+@login_required 
+@require_user_owns_resource('lesson_plans', 'lesson_plan_id') 
 def lesson_plan_detail(lesson_plan_id):
     """
     Lesson plan detail page
@@ -179,7 +223,7 @@ def lesson_plan_detail(lesson_plan_id):
     """
     supabase = get_supabase_client()
     
-    # 🔥 RLS + decorator handle filtering
+    # RLS + decorator handle filtering
     sel = (
         supabase.table("lesson_plans")
         .select("*")
@@ -218,8 +262,8 @@ def lesson_plan_detail(lesson_plan_id):
 
 
 @lesson_plan_bp.route("/api/<uuid:id>/markdown", methods=["GET"])
-@login_required  # ✅ Added: Require login
-@require_user_owns_resource('lesson_plans', 'id')  # ✅ Added: Verify ownership
+@login_required 
+@require_user_owns_resource('lesson_plans', 'id') 
 def lesson_plan_markdown(id):
     """
     Get lesson plan as markdown
@@ -228,7 +272,7 @@ def lesson_plan_markdown(id):
     try:
         supabase = get_supabase_client()
         
-        # 🔥 RLS + decorator handle filtering
+        # RLS + decorator handle filtering
         sel = (
             supabase.table("lesson_plans")
             .select("result")
@@ -254,8 +298,8 @@ def lesson_plan_markdown(id):
 
 
 @lesson_plan_bp.route("/api/<uuid:id>", methods=["DELETE"])
-@login_required  # ✅ Added: Require login
-@require_user_owns_resource('lesson_plans', 'id')  # ✅ Added: Verify ownership
+@login_required 
+@require_user_owns_resource('lesson_plans', 'id') 
 def api_delete_lesson_plan(id):
     """
     Delete a lesson plan
@@ -264,7 +308,7 @@ def api_delete_lesson_plan(id):
     try:
         supabase = get_supabase_client()
         
-        # 🔥 RLS handles filtering
+        # RLS handles filtering
         res = supabase.table("lesson_plans")\
             .delete()\
             .eq("id", str(id))\

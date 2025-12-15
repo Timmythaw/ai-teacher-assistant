@@ -91,7 +91,7 @@
           >
         </div>
 
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           <a
             href="{{ url_for('main.index') }}"
             class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'index' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
@@ -123,7 +123,23 @@
             Send Email
           </a>
 
-          <div class="px-3 pt-8">
+          {% if user %}
+    <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+    <div class="text-right">
+        <span class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Credits Left</span>
+        <span id="credit-display" class="text-2xl font-bold text-indigo-700 leading-none">
+            {{ credits if credits is defined else (user.credits if user else 0) }}
+        </span>
+    </div>
+    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+        </svg>
+    </div>
+</div>
+          {% endif %}
+
+          <div class="px-3 pt-4">
             <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
               Prototype v1.0
             </p>
@@ -216,6 +232,13 @@
                         <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50">Lesson Plans</a>
                         <a href="{{ url_for('assessments.list_assessments') }}" class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50">Assessments</a>
                          <a href="{{ url_for('email.email_page') }}" class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50">Send Email</a>
+                         
+                         {% if user %}
+                         <div class="mt-4 px-3 py-3 bg-indigo-50 border border-indigo-100 rounded-md flex items-center justify-between">
+                            <span class="text-sm font-semibold text-indigo-900">Credits Available</span>
+                            <span class="text-base font-bold text-indigo-700">{{ user.credits if user.credits is defined else 0 }}</span>
+                         </div>
+                         {% endif %}
                     </nav>
                 </div>
             </div>

@@ -33,6 +33,15 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 ALTER TABLE public.assessments 
 ADD COLUMN IF NOT EXISTS user_id TEXT REFERENCES public.users(id) ON DELETE CASCADE;
 
+-- for credit. Add credits column to your existing 'users' table
+ALTER TABLE public.users 
+ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 10;
+
+-- 2. (Optional) If you want to make sure no one has NULL credits
+UPDATE public.users 
+SET credits = 10 
+WHERE credits IS NULL;
+
 -- Add user_id column to lesson_plans table (if exists)
 DO $$ 
 BEGIN

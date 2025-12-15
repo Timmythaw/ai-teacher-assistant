@@ -291,77 +291,112 @@
     }
 
     // Submit: generate plan
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const generateBtn = document.getElementById("lp-generate-btn");
-      const originalBtnText = generateBtn.innerHTML;
+    // Submit: generate plan
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const generateBtn = document.getElementById("lp-generate-btn");
+  const originalBtnText = generateBtn.innerHTML;
 
-      // UI Loading State
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+  // UI Loading State
+  generateBtn.disabled = true;
+  generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
 
-      resultEl.innerHTML = "";
-      lastMarkdown = "";
-      suggestedFileName = "lesson_plan";
-      lastRawJson = null;
-      saveBtn.disabled = true;
-      suggestTtBtn.disabled = true; // Disable until success
-      ttPreview.classList.add("hidden");
+  resultEl.innerHTML = "";
+  lastMarkdown = "";
+  suggestedFileName = "lesson_plan";
+  lastRawJson = null;
+  saveBtn.disabled = true;
+  suggestTtBtn.disabled = true; 
+  ttPreview.classList.add("hidden");
 
-      const file = document.getElementById("course_outline");
-      if (file.files && file.files.length > 0) {
-        const base = file.files[0].name.replace(/\.[^.]+$/, "");
-        suggestedFileName = `lesson_plan_${base}`;
-      }
+  const file = document.getElementById("course_outline");
+  if (file.files && file.files.length > 0) {
+    const base = file.files[0].name.replace(/\.[^.]+$/, "");
+    suggestedFileName = `lesson_plan_${base}`;
+  }
 
-      const fd = new FormData(form);
-      try {
-        const res = await fetch(form.action, { method: "POST", body: fd });
-        const contentType = res.headers.get("Content-Type") || "";
+  const fd = new FormData(form);
+  try {
+    const res = await fetch(form.action, { method: "POST", body: fd });
+    const contentType = res.headers.get("Content-Type") || "";
 
-        let md = "";
-        if (contentType.includes("application/json")) {
-          const obj = await res.json();
-          if (obj && typeof obj === "object" && !obj.error) {
-            lastRawJson = obj;
-            suggestTtBtn.disabled = false; // Enable Timetable
-            
-            lastUploadInfo.options = {
-              weeks: Number(document.getElementById("weeks").value || 0),
-              students: Number(document.getElementById("students").value || 0),
-              sections: Number(document.getElementById("sections").value || 0),
-            };
-            lastUploadInfo.original_filename = file?.files?.[0]?.name || "manual_entry";
-            
-            saveBtn.disabled = false;
-            md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
-          } else {
-            md = `### Error\n\n${obj?.error || "Unknown error"}`;
-          }
-        } else {
-          md = await res.text();
-        }
+    let md = "";
+    if (contentType.includes("application/json")) {
+      const obj = await res.json();
 
-        lastMarkdown = md;
-        const html = typeof marked !== "undefined" ? marked.parse(md) : md;
-        const safe = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
-        resultEl.innerHTML = safe;
-        resultWrapper.classList.remove("hidden");
+      // 1. HANDLE ERRORS (Like insufficient credits)
+      if (res.status === 402) {
+         showToast(obj.error, 'error');
+         generateBtn.disabled = false;
+         generateBtn.innerHTML = originalBtnText;
+         return; 
+      }
+
+      if (obj && typeof obj === "object" && !obj.error) {
         
-        // Smooth scroll to result
-        setTimeout(() => resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        // --- START UPDATE CREDITS ---
+        if (obj.new_credit_balance !== undefined) {
+            
+            // Update the display on the generator page itself
+            const displayEl = document.getElementById('credit-display');
+            if (displayEl) {
+                displayEl.innerText = obj.new_credit_balance;
+                // Add a visual flash effect
+                displayEl.classList.add("text-green-600", "scale-110", "transition-transform", "duration-200");
+                setTimeout(() => displayEl.classList.remove("text-green-600", "scale-110"), 500);
+            }
 
-      } catch (err) {
-        lastMarkdown = `### Error\n\n${err.message}`;
-        resultEl.innerText = lastMarkdown;
-        resultWrapper.classList.remove("hidden");
-      } finally {
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = originalBtnText;
-      }
-    });
+            // Update the Desktop Sidebar badge
+            const navEl = document.getElementById('nav-credit-count');
+            if (navEl) {
+                navEl.innerText = obj.new_credit_balance;
+            }
 
+            // Update the Mobile Menu badge
+            const mobileNavEl = document.getElementById('nav-credit-count-mobile');
+            if (mobileNavEl) {
+                mobileNavEl.innerText = obj.new_credit_balance;
+            }
+        }
+        // --- END UPDATE CREDITS ---
+
+        lastRawJson = obj;
+        suggestTtBtn.disabled = false;
+        
+        lastUploadInfo.options = {
+          weeks: Number(document.getElementById("weeks").value || 0),
+          students: Number(document.getElementById("students").value || 0),
+          sections: Number(document.getElementById("sections").value || 0),
+        };
+        lastUploadInfo.original_filename = file?.files?.[0]?.name || "manual_entry";
+        
+        saveBtn.disabled = false;
+        md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
+      } else {
+        md = `### Error\n\n${obj?.error || "Unknown error"}`;
+      }
+    } else {
+      md = await res.text();
+    }
+
+    lastMarkdown = md;
+    const html = typeof marked !== "undefined" ? marked.parse(md) : md;
+    const safe = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+    resultEl.innerHTML = safe;
+    resultWrapper.classList.remove("hidden");
+    
+    setTimeout(() => resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+
+  } catch (err) {
+    lastMarkdown = `### Error\n\n${err.message}`;
+    resultEl.innerText = lastMarkdown;
+    resultWrapper.classList.remove("hidden");
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = originalBtnText;
+  }
+});
     // Suggest Timetable
     suggestTtBtn.addEventListener("click", async () => {
       if (!lastRawJson) return;
