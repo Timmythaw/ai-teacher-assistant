@@ -28,7 +28,7 @@ def create_app():
     from routes.auth_routes import auth_bp  
 
 
-    app.register_blueprint(main_bp)
+    app.register_blueprint(main_bp, url_prefix="/")
     app.register_blueprint(assessment_bp, url_prefix="/assessments")   
     app.register_blueprint(lesson_plan_bp, url_prefix="/lesson-plans") 
     app.register_blueprint(batch_bp, url_prefix="/batches")
