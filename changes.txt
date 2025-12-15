@@ -16,14 +16,22 @@ code refactoring
 15. change url from path to main.path
 16. some endpoints function names are changes and endpoints strings are changed. Therefore sync them.   
 
-Oauth refactoring
+Web Oauth and google Service online refactoring
 1. install 3 packages
 2. create auth routes
 3. add in app.py
 4. add client_secret.json to gitignore
-5. remove token.json and token.pickle
-6. change localhost 8080 redirect url in gmail_tool.py
+5. remove token.json and token.pickle and credentials.json
 7. edit credentials.json path to client_secret.json
-
+8. change variables in env
+9. add more permission scopes
+10. edit gmail_tool.py and google client to use session credentials
 
 set GOOGLE_CLIENT_ID=840970484260-h2rmsrj3obau562fg7ngg1131o6ne3bt.apps.googleusercontent.com
+
+Authorization and user isolation
+1. create supbase_auth.py
+2. create global js to catch unauthenicated error
+3. modify auth routes
+4. we edit main routes, firebase_auth, db and run three query in supbase
+5. edit routes

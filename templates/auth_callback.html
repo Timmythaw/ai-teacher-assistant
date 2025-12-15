@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signing in...</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+    
+    <div class="text-center">
+        <!-- Loading Spinner -->
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-6">
+            <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Signing you in...</h1>
+        <p class="text-gray-600">Please wait while we complete the authentication</p>
+        
+        <!-- Error Message (hidden by default) -->
+        <div id="error-message" class="hidden mt-6 p-4 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto">
+            <p class="text-red-800 font-semibold mb-2">Authentication Failed</p>
+            <p class="text-red-600 text-sm" id="error-text"></p>
+            <a href="{{ url_for('auth.login') }}" class="inline-block mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                Try Again
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // This page handles OAuth callback
+        // It will automatically redirect after successful authentication
+        
+        // Check for errors in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            document.getElementById('error-message').classList.remove('hidden');
+            document.getElementById('error-text').textContent = error || 'An unknown error occurred';
+        } else {
+            // Redirect will happen from Flask
+            setTimeout(() => {
+                // If still on this page after 5 seconds, show message
+                const errorDiv = document.getElementById('error-message');
+                if (!document.hidden) {
+                    errorDiv.classList.remove('hidden');
+                    document.getElementById('error-text').textContent = 'Authentication is taking longer than expected. Please try again.';
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

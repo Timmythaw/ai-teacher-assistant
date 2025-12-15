@@ -1,20 +1,32 @@
 # routes/assessment_routes.py
+"""
+Assessment Routes with RPC User Isolation
+Database automatically filters data via RLS
+"""
 import json
-from flask import Blueprint, request, render_template, abort, jsonify, current_app
+from flask import Blueprint, request, render_template, abort, jsonify, current_app, g
 
 from agents.assessment_agent import AssessmentAgent
 from core.md_render import render_assessment_markdown
 from integrations.form_creator import create_google_form
 from integrations.form_response import get_form_full_info
-from utils.db import get_supabase_client
+from utils.db import get_supabase_client, get_current_user_id
 from utils.file_helper import allowed_file, save_uploaded_file
+from utils.supabase_auth import login_required, require_user_owns_resource
 
 assessment_bp = Blueprint("assessments", __name__)
 
+
 @assessment_bp.route("/")
+@login_required  # ✅ Added: Require login
 def list_assessments():
-    """List all assessments"""
+    """
+    List current user's assessments
+    RLS automatically filters by user_id
+    """
     supabase = get_supabase_client()
+    
+    # 🔥 RLS handles filtering - no .eq('user_id') needed!
     res = (
         supabase.table("assessments")
         .select("*")
@@ -22,16 +34,20 @@ def list_assessments():
         .execute()
     )
     assessments = res.data if res.data else []
-    return render_template("assessments_list.html", assessments=assessments)
+    
+    # ✅ Added: Pass user to template
+    return render_template("assessments_list.html", assessments=assessments, user=g.current_user)
 
 
 @assessment_bp.route("/generate", methods=["GET"])
+@login_required  # ✅ Added: Require login
 def assessment_page():
     """Assessment generation page"""
-    return render_template("assessments.html")
+    return render_template("assessments.html", user=g.current_user)
 
 
 @assessment_bp.route("/generate", methods=["POST"])
+@login_required  # ✅ Added: Require login
 def generate_assessment():
     """Generate assessment from uploaded PDF"""
     if "pdf" not in request.files:
@@ -87,9 +103,14 @@ def generate_assessment():
 
 
 @assessment_bp.route("/api", methods=["POST"])
+@login_required  # ✅ Added: Require login
 def save_assessment():
-    """Save assessment to database"""
+    """
+    Save assessment to database with user ownership
+    Sets user_id automatically
+    """
     try:
+        user_id = get_current_user_id()  # ✅ Added: Get current user
         supabase = get_supabase_client()
         payload = request.get_json(silent=True) or {}
         result = payload.get("result")
@@ -103,6 +124,7 @@ def save_assessment():
             )
 
         row = {
+            "user_id": user_id,  # ✅ Added: Set ownership
             "original_filename": payload.get("original_filename"),
             "pdf_path": payload.get("pdf_path"),
             "options": payload.get("options"),
@@ -123,10 +145,16 @@ def save_assessment():
 
 
 @assessment_bp.route("/api", methods=["GET"])
+@login_required  # ✅ Added: Require login
 def api_list_assessments():
-    """API endpoint to list assessments"""
+    """
+    API endpoint to list current user's assessments
+    RLS automatically filters by user_id
+    """
     try:
         supabase = get_supabase_client()
+        
+        # 🔥 RLS handles filtering - no .eq('user_id') needed!
         res = (
             supabase.table("assessments")
             .select("*")
@@ -140,9 +168,16 @@ def api_list_assessments():
 
 
 @assessment_bp.route("/<uuid:assessment_id>")
+@login_required  # ✅ Added: Require login
+@require_user_owns_resource('assessments', 'assessment_id')  # ✅ Added: Verify ownership
 def assessment_detail(assessment_id):
-    """Assessment detail page"""
+    """
+    Assessment detail page
+    Decorator verifies ownership, RLS filters query
+    """
     supabase = get_supabase_client()
+    
+    # 🔥 RLS + decorator handle filtering
     sel = (
         supabase.table("assessments")
         .select("*")
@@ -151,6 +186,7 @@ def assessment_detail(assessment_id):
         .execute()
     )
     asmt = sel.data
+    
     if not asmt:
         return render_template("404.html"), 404
 
@@ -163,20 +199,29 @@ def assessment_detail(assessment_id):
     form_url = gf.get("formUrl")
     form_id = gf.get("formId")
 
+    # ✅ Added: Pass user to template
     return render_template(
         "assessment_detail.html",
         assessment=asmt,
         page_title=title,
         form_url=form_url,
         form_id=form_id,
+        user=g.current_user
     )
 
 
 @assessment_bp.route("/api/<uuid:id>/create-form", methods=["POST"])
+@login_required  # ✅ Added: Require login
+@require_user_owns_resource('assessments', 'id')  # ✅ Added: Verify ownership
 def create_form_for_assessment(id):
-    """Create Google Form for an assessment"""
+    """
+    Create Google Form for an assessment
+    Only if user owns the assessment
+    """
     try:
         supabase = get_supabase_client()
+        
+        # 🔥 RLS handles filtering
         sel = (
             supabase.table("assessments")
             .select("*")
@@ -212,6 +257,7 @@ def create_form_for_assessment(id):
             )
 
         # Update row with google_form
+        # 🔥 RLS handles filtering
         upd = (
             supabase.table("assessments")
             .update({"google_form": form_info})
@@ -226,12 +272,18 @@ def create_form_for_assessment(id):
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
-@assessment_bp.route("/"
-"<uuid:assessment_id>/responses", methods=["GET"])
+@assessment_bp.route("/<uuid:assessment_id>/responses", methods=["GET"])
+@login_required  # ✅ Added: Require login
+@require_user_owns_resource('assessments', 'assessment_id')  # ✅ Added: Verify ownership
 def api_assessment_responses(assessment_id):
-    """Fetch responses from Google Forms"""
+    """
+    Fetch responses from Google Forms
+    Only if user owns the assessment
+    """
     try:
         supabase = get_supabase_client()
+        
+        # 🔥 RLS handles filtering
         sel = (
             supabase.table("assessments")
             .select("id, google_form")
@@ -240,11 +292,13 @@ def api_assessment_responses(assessment_id):
             .execute()
         )
         asmt = sel.data
+        
         if not asmt:
             return jsonify({"ok": False, "error": "Assessment not found"}), 404
 
         gf = asmt.get("google_form") or {}
         form_id_or_link = gf.get("formId") or gf.get("formUrl")
+        
         if not form_id_or_link:
             return jsonify({"ok": False, "error": "No Google Form attached"}), 400
 
