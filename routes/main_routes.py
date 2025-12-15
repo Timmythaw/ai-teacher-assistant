@@ -1,13 +1,26 @@
 from flask import Blueprint, render_template, g
 from utils.db import test_user_context
 from utils.supabase_auth import verify_rls_working, login_required
+from utils.supabase_auth import get_current_user
 
 main_bp = Blueprint('main', __name__)
+
+# @main_bp.route('/',  methods=['GET'])
+# def index():
+#     """Render the main index page."""
+#     return render_template('login.html')
 
 @main_bp.route('/',  methods=['GET'])
 def index():
     """Render the main index page."""
-    return render_template('index.html')
+    user = get_current_user()
+    
+    # 1. If user is logged in, show the Dashboard
+    if user:
+        return render_template('index.html', user=user)
+    
+    # 2. If NOT logged in, show Login page
+    return render_template('login.html')
 
 @main_bp.route('/test-rls')
 @login_required
