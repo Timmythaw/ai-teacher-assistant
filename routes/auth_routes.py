@@ -10,6 +10,8 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 import google.auth.transport.requests
 from utils.supabase_auth import ensure_user_exists_in_db, get_current_user
+from flask import Blueprint, session, abort, redirect, request, url_for, jsonify, render_template
+from google.oauth2 import id_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -48,11 +50,26 @@ def get_flow():
     return flow
 
 
+# routes/auth_routes.py
+
 @auth_bp.route("/login")
 def login():
     """
-    Initiate Google OAuth login
-    Redirects to Google's authorization page
+    Render the Login Page.
+    """
+    # If already logged in, redirect to dashboard
+    if get_current_user():
+        return redirect(url_for("main.index"))
+
+    # Just show the HTML page
+    return render_template("login.html")
+
+
+@auth_bp.route("/google")
+def google_login():
+    """
+    Initiate Google OAuth flow.
+    This is called when the user clicks "Continue with Google"
     """
     # If already logged in, redirect to dashboard
     if get_current_user():
@@ -68,6 +85,10 @@ def login():
     session["state"] = state
 
     return redirect(authorization_url)
+
+# ... keep callback, logout, me, and check-google-permissions as they were ...
+
+# You can remove the @auth_bp.route("/verify") function as /login now does this job.
 
 
 @auth_bp.route("/callback")
@@ -103,6 +124,7 @@ def callback():
         session["name"] = id_info.get("name")
         session["email"] = id_info.get("email")
         session["picture"] = id_info.get("picture")
+        session.permanent = True  # <--- Tells browser to keep you logged in
 
         # Store Google OAuth credentials for API access
         session["credentials"] = {
@@ -192,25 +214,25 @@ def get_me():
     )
 
 
-@auth_bp.route("/verify")
-def verify():
-    """
-    Quick endpoint to verify if user is authenticated
-    Used for health checks or quick auth status
+# @auth_bp.route("/verify")
+# def verify():
+#     """
+#     Quick endpoint to verify if user is authenticated
+#     Used for health checks or quick auth status
 
-    Returns:
-        JSON with authenticated status
-    """
-    user = get_current_user()
-    has_credentials = session.get("credentials") is not None
+#     Returns:
+#         JSON with authenticated status
+#     """
+#     user = get_current_user()
+#     has_credentials = session.get("credentials") is not None
 
-    return jsonify(
-        {
-            "authenticated": user is not None,
-            "user_id": user["id"] if user else None,
-            "has_google_credentials": has_credentials,
-        }
-    )
+#     return jsonify(
+#         {
+#             "authenticated": user is not None,
+#             "user_id": user["id"] if user else None,
+#             "has_google_credentials": has_credentials,
+#         }
+#     )
 
 
 @auth_bp.route("/check-google-permissions")
