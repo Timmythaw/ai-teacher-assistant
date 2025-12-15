@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()  #Importing ENV file 
 import os 
 from pathlib import Path
 import token
@@ -42,6 +44,7 @@ if __name__ == "__main__":
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    
     if not google_client_id:
         raise RuntimeError("GOOGLE_CLIENT_ID is not set")
 

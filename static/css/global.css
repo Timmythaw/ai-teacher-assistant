@@ -1,0 +1,127 @@
+/* Global fallback CSS so component classes work without Tailwind build */
+:root {
+  --brand-50: #f0f9ff;
+  --brand-100: #e0f2fe;
+  --brand-200: #bae6fd;
+  --brand-300: #7dd3fc;
+  --brand-400: #38bdf8;
+  --brand-500: #0ea5e9;
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+  --brand-800: #1e40af;
+  --brand-900: #1e3a8a;
+
+  --primary-bg: #e0f1ff;
+  --secondary-bg: #cde1fa;
+  --surface: #ffffff;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: #ffffff;
+  background-color: #161a26;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.btn-primary:hover {
+  background-color: var(--brand-700);
+}
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  color: #374151; /* slate-700 */
+  background-color: #ffffff;
+  transition: background-color 0.15s ease;
+}
+.btn-secondary:hover {
+  background-color: #f8fafc;
+}
+.btn-secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+} /* subtle focus */
+
+/* Table / Card utilities used in base.html */
+.table-container {
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+.table-header {
+  background: #f8fafc; /* slate-50 */
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280; /* gray-500 */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.table-row:hover {
+  background: #f8fafc;
+}
+
+/* Misc helpers used in templates */
+.bg-primary {
+  background-color: var(--primary-bg);
+}
+.bg-secondary {
+  background-color: var(--secondary-bg);
+}
+
+/* Small responsive helpers */
+@media (min-width: 768px) {
+  .md\:hidden {
+    display: none !important;
+  }
+  .md\:flex {
+    display: flex !important;
+  }
+}
+
+/* Provide sensible defaults for elements using inline utility classes that won't exist without Tailwind */
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+.shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.border {
+  border: 1px solid #e6eef9;
+}
+
+/* Quick action button style (match screenshot) */
+.quick-action-btn {
+  background: #111827;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+/* Ensure lucide icons size fallback */
+.i-lucide {
+  width: 1.25rem;
+  height: 1.25rem;
+}
