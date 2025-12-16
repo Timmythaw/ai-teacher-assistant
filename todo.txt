@@ -1,3 +1,0 @@
-loading
-redirect after saving files
-db fields
