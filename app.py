@@ -1,11 +1,10 @@
+from dotenv import load_dotenv
+load_dotenv()  #Importing ENV file 
 import os 
 from pathlib import Path
 from flask import Flask, session, g
 from google.oauth2 import id_token
 from google.auth.transport import requests
-
-# Import your DB helper
-from utils.db import get_supabase_client
 
 def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -18,31 +17,6 @@ def create_app():
     UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", "uploads")).resolve()
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     app.config["UPLOAD_DIR"] = UPLOAD_DIR
-
-    # --- NEW: Global User Loader ---
-    # This runs before every request to fetch the user and their credits
-    @app.before_request
-    def load_logged_in_user():
-        g.current_user = None
-        user_id = session.get("user_id")
-
-        if user_id:
-            try:
-                supabase = get_supabase_client()
-                # Query the 'users' table (which includes the 'credits' column)
-                res = supabase.table("users").select("*").eq("id", user_id).single().execute()
-                g.current_user = res.data
-            except Exception as e:
-                print(f"Error loading user: {e}")
-                # If DB fails or user deleted, clear session to prevent loops
-                session.clear()
-
-    # --- NEW: Template Context Processor ---
-    # This makes 'user' available in ALL templates (base.html, navbar, etc.)
-    # You no longer need to pass `user=g.current_user` in every render_template call!
-    @app.context_processor
-    def inject_user():
-        return dict(user=g.current_user)
 
     # Register blueprints
     from routes.main_routes import main_bp
@@ -68,6 +42,7 @@ if __name__ == "__main__":
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    
     if not google_client_id:
         # It's better to log a warning than crash if you just want to test other parts
         print("WARNING: GOOGLE_CLIENT_ID is not set")
