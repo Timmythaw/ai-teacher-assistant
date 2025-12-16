@@ -121,7 +121,7 @@ Assessment
 - GET `/assessments` (page) and `/assessments/<uuid>` (detail page)
 
 Lesson plans
-- POST `/generate-lesson-plan` (multipart)
+- POST `/generate-lesson-plan` (multipart) -
   - Form fields: `course_outline` (file)
   - Returns JSON with `_markdown` for preview
 - GET `/lesson-plans` (page)

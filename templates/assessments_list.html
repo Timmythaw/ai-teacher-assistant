@@ -1,272 +1,209 @@
-{% extends "base.html" %} {% block title %}Assessments — AI Lesson Planner{%
-endblock %} {% block content %}
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-semibold">Assessments</h1>
-  <a
-    href="{{ url_for('assessment_page') }}"
-    class="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-gray-900 text-white hover:bg-black"
-  >
-    + Generate New
+{% extends "base.html" %} 
+{% block title %}Assessments — AI Lesson Planner{% endblock %} 
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Assessments</h1>
+    <p class="text-sm text-slate-500 mt-1">Manage quizzes, exams, and grading rubrics.</p>
+  </div>
+  
+  <a href="{{ url_for('assessments.assessment_page') }}"
+     class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    Generate New
   </a>
 </div>
 
-{% if assessments and assessments|length > 0 %}
-<div class="overflow-x-auto bg-white border rounded-xl shadow-sm">
-  <table class="min-w-full divide-y divide-gray-200 text-sm">
-    <thead class="bg-gray-50">
-      <tr>
-        <th class="px-4 py-2 text-left font-medium text-gray-700">Title</th>
-        <th class="px-4 py-2 text-left font-medium text-gray-700">Created</th>
-        <th class="px-4 py-2 text-left font-medium text-gray-700">Questions</th>
-        <th class="px-4 py-2 text-left font-medium text-gray-700">
-          Google Form
-        </th>
-        <th class="px-4 py-2 text-right font-medium text-gray-700">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      {% for asmt in assessments %} {% set qcount = asmt.result.questions|length
-      if asmt.result and asmt.result.questions else 0 %} {% set has_form =
-      asmt.google_form and asmt.google_form.formUrl %} {% set detail_url =
-      url_for('assessment_detail', assessment_id=asmt.id) %}
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+  {% if assessments and assessments|length > 0 %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-100">
+      <thead class="bg-slate-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Title</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Created</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Questions</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Google Form</th>
+          <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-slate-100">
+        {% for asmt in assessments %} 
+            {% set qcount = asmt.result.questions|length if asmt.result and asmt.result.questions else 0 %} 
+            {% set has_form = asmt.google_form and asmt.google_form.formUrl %} 
+            {% set detail_url = url_for('assessments.assessment_detail', assessment_id=asmt.id) %}
 
-      <tr
-        class="hover:bg-gray-50 cursor-pointer"
-        data-href="{{ detail_url }}"
-        role="button"
-        tabindex="0"
-        aria-label="Open assessment detail"
-      >
-        <td class="px-4 py-2">
-          <a
-            href="{{ detail_url }}"
-            class="hover:underline"
-            onclick="event.stopPropagation();"
-          >
-            {{ asmt.original_filename or "Untitled" }}
-          </a>
-        </td>
+        <tr class="hover:bg-slate-50/80 transition-colors duration-150 group cursor-pointer"
+            onclick="window.location='{{ detail_url }}'">
+          
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 h-8 w-8 rounded bg-purple-50 text-purple-600 flex items-center justify-center mr-3 border border-purple-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div class="font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {{ asmt.original_filename or "Untitled Assessment" }}
+                </div>
+            </div>
+          </td>
 
-        <td class="px-4 py-2 text-gray-500">
-          {{ asmt.created_at|default("") }}
-        </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+            {{ asmt.created_at|default("-") }}
+          </td>
 
-        <td class="px-4 py-2">{{ qcount }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+               {{ qcount }} Qs
+             </span>
+          </td>
 
-        <td class="px-4 py-2">
-          {% if has_form %}
-          <a
-            href="{{ asmt.google_form.formUrl }}"
-            target="_blank"
-            class="text-blue-600 hover:underline"
-            onclick="event.stopPropagation();"
-          >
-            Open Form
-          </a>
-          {% else %}
-          <span class="text-gray-400">Not created</span>
-          {% endif %}
-        </td>
-
-        <td class="px-4 py-2">
-          <div class="flex items-center justify-end gap-2">
-            {% if not has_form %}
-            <form
-              method="post"
-              action="{{ url_for('create_form_for_assessment', id=asmt.id) }}"
-              data-create-form
-              onclick="event.stopPropagation();"
-            >
-              <button
-                type="submit"
-                class="px-3 py-1.5 text-sm rounded-md border bg-gray-50 hover:bg-gray-100 inline-flex items-center gap-2"
-                data-create-btn
-              >
-                <svg
-                  class="w-4 h-4 animate-spin hidden"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  data-spinner
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="3"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
-                  ></path>
-                </svg>
-                <span data-label>Create Google Form</span>
-              </button>
-            </form>
-
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            {% if has_form %}
+            <a href="{{ asmt.google_form.formUrl }}" target="_blank"
+               class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium"
+               onclick="event.stopPropagation();">
+               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h10v2H7zM4 15h6v2H4zM4 7h16v2H4z"/><path d="M22 2H2v20h20V2zm-2 18H4V4h16v16z"/></svg>
+               Open Form
+            </a>
+            {% else %}
+            <span class="text-slate-400 text-xs italic">No form yet</span>
             {% endif %}
+          </td>
 
-            <button
-              type="button"
-              class="px-3 py-1.5 text-sm rounded-md border hover:bg-gray-50"
-              data-send-btn
-              data-asmt-id="{{ asmt.id }}"
-              data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
-              title="Send email to a batch of students"
-              onclick="event.stopPropagation();"
-            >
-              Send to Students
-            </button>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex items-center justify-end gap-2" onclick="event.stopPropagation();">
+                
+                {% if not has_form %}
+                <form method="post" action="{{ url_for('assessments.create_form_for_assessment', id=asmt.id) }}" data-create-form class="inline-block">
+                    <button type="submit" data-create-btn
+                        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                        <svg class="w-3 h-3 mr-1.5 text-slate-500" data-spinner-icon fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        <svg class="w-3 h-3 mr-1.5 animate-spin hidden text-blue-600" data-spinner-active fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span data-label>Create Form</span>
+                    </button>
+                </form>
+                {% endif %}
+
+                <button type="button" data-send-btn
+                    data-asmt-id="{{ asmt.id }}"
+                    data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
+                    class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    <svg class="w-3 h-3 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                    Send Email
+                </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+    </div>
+    <h3 class="text-sm font-medium text-slate-900">No assessments found</h3>
+    <p class="mt-1 text-sm text-slate-500 mb-6">Create your first quiz or exam from any PDF.</p>
+    <a href="{{ url_for('assessments.assessment_page') }}" 
+       class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      Create Assessment
+    </a>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="p-6 bg-white border rounded-xl shadow-sm text-center text-gray-500">
-  No assessments saved yet.<br />
-  <a
-    href="{{ url_for('assessment_page') }}"
-    class="text-blue-600 hover:underline"
-  >
-    Generate your first assessment
-  </a>
-</div>
-{% endif %}
 
-<!-- Modal overlay (same as you had) -->
-<div id="send-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/50"></div>
-  <div class="relative mx-auto w-full max-w-lg">
-    <div class="bg-white rounded-xl shadow-xl border">
-      <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 class="font-semibold">Send Email to Batch</h3>
-        <button
-          id="send-close"
-          class="p-1.5 rounded hover:bg-gray-100"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-      </div>
+<div id="send-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+  
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+            
+            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-base font-semibold leading-6 text-slate-800">Send Assessment to Batch</h3>
+                <button id="send-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
 
-      <form id="send-form" class="p-4 grid gap-4">
-        <input type="hidden" id="send-asmt-id" />
-        <div>
-          <label class="block text-sm font-medium mb-1">Batch</label>
-          <select id="send-batch" class="w-full border rounded-md p-2" required>
-            <option value="">Loading…</option>
-          </select>
-          <p id="send-batch-hint" class="text-xs text-gray-500 mt-1"></p>
+            <form id="send-form" class="p-6 space-y-4">
+                <input type="hidden" id="send-asmt-id" />
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Target Batch</label>
+                    <select id="send-batch" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                        <option value="">Loading batches...</option>
+                    </select>
+                    <p id="send-batch-hint" class="mt-1 text-xs text-slate-500"></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email Subject</label>
+                    <input id="send-subject" type="text" required placeholder="e.g. Quiz Reminder: Introduction to Physics"
+                        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tone (Optional)</label>
+                    <input id="send-tone" type="text" placeholder="professional, encouraging" value="professional, friendly"
+                        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Message Notes</label>
+                    <textarea id="send-notes" rows="4" placeholder="Briefly describe what this email is about. AI will write the full body."
+                        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                    <p class="mt-1 text-xs text-slate-400">Context like "Due this Friday" helps the AI write better emails.</p>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <input id="send-draft" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                    <label for="send-draft" class="text-sm text-slate-700">Save as Drafts (don't send yet)</label>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2">
+                    <span id="send-status" class="text-xs font-medium text-blue-600"></span>
+                    <div class="flex gap-3">
+                        <button type="button" id="send-cancel" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Cancel
+                        </button>
+                        <button type="submit" id="send-submit" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Send Emails
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Subject</label>
-          <input
-            id="send-subject"
-            class="w-full border rounded-md p-2"
-            type="text"
-            placeholder="e.g., Updates for this week"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Tone (optional)</label>
-          <input
-            id="send-tone"
-            class="w-full border rounded-md p-2"
-            type="text"
-            placeholder="professional, friendly"
-            value="professional, friendly"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Message / Notes</label>
-          <textarea
-            id="send-notes"
-            class="w-full border rounded-md p-2"
-            rows="5"
-            placeholder="Write the key message. The agent will draft a well‑formed email."
-          ></textarea>
-          <p class="text-xs text-gray-500 mt-1">
-            Tip: include context like the assessment title or due dates. We’ll
-            personalize per student name.
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <label class="inline-flex items-center gap-2">
-            <input id="send-draft" type="checkbox" class="h-4 w-4" />
-            <span class="text-sm">Create drafts instead of sending</span>
-          </label>
-        </div>
-        <div class="flex items-center justify-end gap-2 pt-2 border-t">
-          <span id="send-status" class="text-xs text-gray-500 mr-auto"></span>
-          <button
-            type="button"
-            id="send-cancel"
-            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            id="send-submit"
-            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
-          >
-            Send
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+
+{% endblock %} 
+
+{% block scripts %}
 <script>
-  // --- Make rows clickable (navigate to data-href), but ignore clicks on buttons/links/forms
   document.addEventListener("DOMContentLoaded", () => {
-    const rows = document.querySelectorAll("tbody tr[data-href]");
-
-    function navigate(row) {
-      const url = row.getAttribute("data-href");
-      if (url) window.location.href = url;
-    }
-
-    rows.forEach((row) => {
-      row.addEventListener("click", (e) => {
-        const t = e.target;
-        if (t.closest("a, button, input, select, textarea, form, label"))
-          return;
-        navigate(row);
-      });
-      row.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          navigate(row);
-        }
-      });
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Create Google Form Handler
     const table = document.querySelector("table");
-
     table?.addEventListener("submit", async (e) => {
       const form = e.target.closest("form[data-create-form]");
       if (!form) return;
-
       e.preventDefault();
 
       const btn = form.querySelector("[data-create-btn]");
       const label = btn?.querySelector("[data-label]");
-      const spinner = btn?.querySelector("[data-spinner]");
+      const icon = btn?.querySelector("[data-spinner-icon]");
+      const spinner = btn?.querySelector("[data-spinner-active]");
 
-      // loading state
-      btn?.setAttribute("disabled", "disabled");
+      // Loading UI
+      btn.disabled = true;
+      icon?.classList.add("hidden");
       spinner?.classList.remove("hidden");
-      label && (label.textContent = "Creating…");
+      if(label) label.textContent = "Creating...";
 
       try {
         const res = await fetch(form.getAttribute("action"), {
@@ -274,41 +211,26 @@ endblock %} {% block content %}
           headers: { Accept: "application/json" },
         });
 
-        // Some setups may return HTML on error; parse safely
         const ct = res.headers.get("Content-Type") || "";
-        const data = ct.includes("application/json")
-          ? await res.json()
-          : { ok: res.ok, error: await res.text() };
+        const data = ct.includes("application/json") ? await res.json() : { ok: res.ok, error: await res.text() };
 
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || `HTTP ${res.status}`);
-        }
+        if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
-        // Try the direct place first, then fallback to updated row
-        const formUrl =
-          data.google_form?.formUrl || data.updated?.google_form?.formUrl;
+        const formUrl = data.google_form?.formUrl || data.updated?.google_form?.formUrl;
+        if (!formUrl) throw new Error("Form created but URL missing.");
 
-        if (!formUrl) {
-          throw new Error("Form created but no URL returned.");
-        }
-
-        // Redirect to the Google Form (new tab or same tab—pick one)
-        window.location.href = formUrl;
-        // Or open in new tab:
-        // window.open(formUrl, "_blank");
+        window.open(formUrl, "_blank");
+        location.reload(); // Refresh to update row state
       } catch (err) {
-        alert("Failed to create Google Form: " + (err?.message || err));
-        // reset UI so user can retry
-        btn?.removeAttribute("disabled");
+        alert("Error: " + (err.message || err));
+        btn.disabled = false;
+        icon?.classList.remove("hidden");
         spinner?.classList.add("hidden");
-        label && (label.textContent = "Create Google Form");
+        if(label) label.textContent = "Create Form";
       }
     });
-  });
 
-  // --- Existing modal wiring (Send to Students) ---
-  document.addEventListener("DOMContentLoaded", () => {
-    const rowButtons = document.querySelectorAll("[data-send-btn]");
+    // 2. Send Modal Logic
     const modal = document.getElementById("send-modal");
     const btnClose = document.getElementById("send-close");
     const btnCancel = document.getElementById("send-cancel");
@@ -326,10 +248,11 @@ endblock %} {% block content %}
     function openModal(prefill) {
       hiddenAsmtId.value = prefill.asmtId || "";
       const base = (prefill.asmtTitle || "Assessment").replace(/\.[^.]+$/, "");
-      if (!inpSubject.value.trim()) inpSubject.value = `Regarding ${base}`;
+      if (!inpSubject.value.trim()) inpSubject.value = `Assessment: ${base}`;
       modal.classList.remove("hidden");
       fetchBatches();
     }
+    
     function closeModal() {
       modal.classList.add("hidden");
       sendStatus.textContent = "";
@@ -337,96 +260,89 @@ endblock %} {% block content %}
       hiddenAsmtId.value = "";
     }
 
-    rowButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-send-btn]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Prevent row click
         const asmtId = btn.getAttribute("data-asmt-id");
         const asmtTitle = btn.getAttribute("data-asmt-title");
         openModal({ asmtId, asmtTitle });
       });
     });
+
     btnClose?.addEventListener("click", closeModal);
     btnCancel?.addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
 
     async function fetchBatches() {
-      selBatch.innerHTML = `<option value="">Loading…</option>`;
+      selBatch.innerHTML = `<option value="">Loading...</option>`;
       batchHint.textContent = "";
       try {
-        const res = await fetch("/api/batches");
+        const res = await fetch("/batches/api");
         const data = await res.json();
-        if (!res.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${res.status}`);
+        if (!res.ok || !data.ok) throw new Error("Failed to load batches");
 
-        selBatch.innerHTML = `<option value="">Select a batch…</option>`;
-        for (const b of data.batches || []) {
-          const opt = document.createElement("option");
-          opt.value = b.id;
-          opt.textContent = `${b.name} (${b.student_count})`;
-          selBatch.appendChild(opt);
+        selBatch.innerHTML = `<option value="">Select a batch...</option>`;
+        if(data.batches && data.batches.length) {
+            data.batches.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b.id;
+                opt.textContent = `${b.name} (${b.student_count} students)`;
+                selBatch.appendChild(opt);
+            });
+            batchHint.textContent = "Select the group of students to email.";
+        } else {
+            selBatch.innerHTML = `<option value="">No batches found</option>`;
+            batchHint.textContent = "Please create a batch first.";
         }
-        batchHint.textContent = data.batches?.length
-          ? "Choose who should receive the email."
-          : "No batches yet.";
       } catch (e) {
-        selBatch.innerHTML = `<option value="">Failed to load</option>`;
-        batchHint.textContent = `Error: ${e.message}`;
+        selBatch.innerHTML = `<option value="">Error loading batches</option>`;
       }
     }
 
     formSend.addEventListener("submit", async (e) => {
       e.preventDefault();
       const batchId = selBatch.value.trim();
-      const subject = inpSubject.value.trim();
-      const notes = taNotes.value;
-      const tone = inpTone.value.trim() || "professional, friendly";
-      const action = cbDraft.checked ? "draft" : "send";
-
       if (!batchId) {
         sendStatus.textContent = "Please select a batch.";
         return;
       }
-      if (!subject) {
-        sendStatus.textContent = "Subject is required.";
-        return;
-      }
 
       sendSubmit.disabled = true;
-      sendStatus.textContent =
-        action === "send" ? "Sending…" : "Creating drafts…";
+      sendSubmit.textContent = "Processing...";
+      sendStatus.textContent = cbDraft.checked ? "Creating drafts..." : "Sending emails...";
+      sendStatus.className = "text-xs font-medium text-blue-600 animate-pulse";
 
       try {
         const asmtId = hiddenAsmtId.value;
-        const mergedNotes = asmtId
-          ? `[Assessment ID: ${asmtId}] ` + notes
-          : notes;
+        const notes = taNotes.value;
+        const mergedNotes = asmtId ? `[Assessment Context ID: ${asmtId}] ${notes}` : notes;
 
-        const res = await fetch("/api/email/send-batch", {
+        const res = await fetch("/email/api/send-batch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             batch_id: batchId,
-            subject,
+            subject: inpSubject.value.trim(),
             notes: mergedNotes,
-            tone,
-            action,
+            tone: inpTone.value.trim(),
+            action: cbDraft.checked ? "draft" : "send",
             assessment_id: asmtId || null,
           }),
         });
+        
         const data = await res.json();
-        if (!res.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${res.status}`);
+        if (!res.ok || !data.ok) throw new Error(data.error || "Server Error");
 
         const s = data.summary || {};
-        sendStatus.textContent = `Done. Total: ${s.total ?? 0}, Sent: ${
-          s.sent ?? 0
-        }, Drafted: ${s.drafted ?? 0}, Failed: ${s.failed ?? 0}`;
-        setTimeout(closeModal, 1200);
+        sendStatus.textContent = `Success! Sent: ${s.sent || 0}, Drafts: ${s.drafted || 0}`;
+        sendStatus.className = "text-xs font-medium text-green-600";
+        
+        setTimeout(closeModal, 1500);
       } catch (e) {
-        sendStatus.textContent = `Failed: ${e.message}`;
+        sendStatus.textContent = "Error: " + e.message;
+        sendStatus.className = "text-xs font-medium text-red-600";
       } finally {
         sendSubmit.disabled = false;
+        sendSubmit.textContent = "Send Emails";
       }
     });
   });

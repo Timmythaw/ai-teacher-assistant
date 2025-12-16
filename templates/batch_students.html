@@ -1,229 +1,339 @@
-{% extends "base.html" %} {% block title %}Courses & Batches{% endblock %} {%
-block content %}
+{% extends "base.html" %} {% block title %}Batch Details — {{ batch.name }}{%
+endblock %} {% block content %}
 
-<div class="flex items-center justify-between mb-6">
+<div
+  class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+>
   <div>
-    <h1 class="text-2xl font-semibold">{{ batch.name }}</h1>
-    <p class="text-sm text-gray-500">Batch ID: {{ batch.id }}</p>
+    <div class="flex items-center gap-3">
+      <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+        {{ batch.name }}
+      </h1>
+      <span
+        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-brand-700 border border-brand-100"
+      >
+        ID: {{ batch.id }}
+      </span>
+    </div>
+    <p class="text-sm text-slate-500 mt-1">
+      Manage students and communications for this batch.
+    </p>
   </div>
 
-  <div class="flex items-center gap-2">
-    <button
-      id="open-send-all"
-      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black text-sm"
-    >
-      ✉️ Send to All
-    </button>
+  <div class="flex items-center gap-3">
     <a
-      href="{{ url_for('batches_page') }}"
-      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-gray-50 text-sm"
+      href="{{ url_for('batches.batches_page') }}"
+      class="btn-secondary text-slate-600"
     >
-      ← Back to Batches
+      ← Back
     </a>
+    <button id="open-send-all" class="btn-primary gap-2 shadow-md">
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+        />
+      </svg>
+      Send to All
+    </button>
   </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-md p-6">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="text-lg font-medium">Students</h2>
-    <span class="text-sm text-gray-500">{{ students|length }} total</span>
-  </div>
-
+<div class="table-container">
   <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-4 py-2 text-left font-medium text-gray-700">Name</th>
-          <th class="px-4 py-2 text-left font-medium text-gray-700">Email</th>
-          <th class="px-4 py-2 w-56"></th>
+    <table class="min-w-full divide-y divide-slate-100">
+      <thead class="table-header" style="background: #2d3748">
+        <tr class="text-white">
+          <th class="px-6 py-3">Name</th>
+          <th class="px-6 py-3">Email</th>
+          <th class="px-6 py-3 text-right">Actions</th>
         </tr>
       </thead>
-      <tbody id="students-tbody" class="divide-y divide-gray-100">
+      <tbody id="students-tbody" class="divide-y divide-slate-100 bg-white">
         {% if students and students|length > 0 %} {% for s in students %}
         <tr
+          class="table-row group"
           data-row-id="{{ s.id }}"
           data-name="{{ s.name }}"
           data-email="{{ s.email }}"
         >
-          <td class="px-4 py-2">{{ s.name }}</td>
-          <td class="px-4 py-2 text-gray-600">{{ s.email }}</td>
-          <td class="px-4 py-2 text-right space-x-2">
+          <td class="px-6 py-4 text-sm font-medium text-slate-800">
+            {{ s.name }}
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-500">{{ s.email }}</td>
+          <td class="px-6 py-4 text-right">
             <button
-              class="px-2 py-1.5 text-xs rounded-md border hover:bg-gray-50"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-md border border-brand-100 hover:bg-brand-600 hover:text-white transition-colors"
               data-send="{{ s.id }}"
             >
-              Send Email
+              <span>Email</span>
+              <svg
+                class="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                />
+              </svg>
             </button>
           </td>
         </tr>
         {% endfor %} {% else %}
         <tr>
-          <td colspan="3" class="px-4 py-6 text-center text-gray-500">
-            No students in this batch.
+          <td colspan="3" class="px-6 py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center gap-2">
+              <svg
+                class="w-8 h-8 text-slate-300"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+                />
+              </svg>
+              <span class="font-medium">No students in this batch yet.</span>
+            </div>
           </td>
         </tr>
         {% endif %}
       </tbody>
     </table>
   </div>
-
-  <p id="status" class="text-xs text-gray-500 mt-3"></p>
 </div>
 
-<!-- Email Compose Modal -->
-<!-- Email Compose Modal -->
-<div id="email-modal" class="fixed inset-0 z-50 hidden">
-  <!-- Overlay -->
-  <div class="absolute inset-0 bg-black/50"></div>
+<p id="status" class="text-xs text-slate-500 mt-3 text-right"></p>
 
-  <!-- Wrapper -->
-  <div class="relative mx-auto mt-10 w-full max-w-lg px-4 sm:px-0">
+<div
+  id="email-modal"
+  class="fixed inset-0 z-50 hidden"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+  ></div>
+
+  <div class="fixed inset-0 z-10 overflow-y-auto">
     <div
-      class="bg-white rounded-lg shadow-xl border max-h-[90vh] overflow-y-auto"
+      class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
     >
-      <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 class="font-semibold text-base" id="email-modal-title">
-          Compose Email
-        </h3>
-        <button
-          id="email-close"
-          class="p-1.5 rounded hover:bg-gray-100"
-          aria-label="Close"
+      <div
+        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
+      >
+        <div
+          class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between"
         >
-          ✕
-        </button>
-      </div>
-
-      <!-- Form -->
-      <form id="email-form" class="p-4 space-y-4">
-        <!-- Hidden mode fields -->
-        <input type="hidden" id="email-mode" value="single" />
-        <input type="hidden" id="email-single-name" />
-        <input type="hidden" id="email-single-email" />
-
-        <!-- Row 1: To (single or bulk summary) -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">To</label>
-          <input
-            id="email-to"
-            type="email"
-            class="w-full border rounded-md p-2"
-            placeholder="student@example.com"
-          />
-          <div
-            id="email-bulk-summary"
-            class="hidden text-sm text-gray-600"
-          ></div>
+          <h3
+            class="text-base font-semibold leading-6 text-slate-800"
+            id="email-modal-title"
+          >
+            Compose Email
+          </h3>
+          <button
+            id="email-close"
+            class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
 
-        <!-- Row 2: CC / BCC side-by-side on md+ -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="block text-sm font-medium">CC</label>
+        <form id="email-form" class="p-5 space-y-4">
+          <input type="hidden" id="email-mode" value="single" />
+          <input type="hidden" id="email-single-name" />
+          <input type="hidden" id="email-single-email" />
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-slate-700">To</label>
             <input
-              id="email-cc"
-              type="text"
-              class="w-full border rounded-md p-2"
-              placeholder="cc1@example.com, cc2@example.com"
+              id="email-to"
+              type="email"
+              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              placeholder="student@example.com"
             />
-          </div>
-          <div class="space-y-2">
-            <label class="block text-sm font-medium">BCC</label>
-            <input
-              id="email-bcc"
-              type="text"
-              class="w-full border rounded-md p-2"
-              placeholder="bcc1@example.com, bcc2@example.com"
-            />
-          </div>
-        </div>
-
-        <!-- Row 3: Subject -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">Subject</label>
-          <input
-            id="email-subject"
-            type="text"
-            class="w-full border rounded-md p-2"
-            placeholder="Subject"
-          />
-        </div>
-
-        <!-- Row 4: Notes -->
-        <div class="space-y-2">
-          <label class="block text-sm font-medium">Notes / Instructions</label>
-          <textarea
-            id="email-notes"
-            rows="5"
-            class="w-full border rounded-md p-2"
-            placeholder="Tell the assistant what to write (agenda, links, tone hints, etc.)"
-          ></textarea>
-          <p class="text-xs text-gray-500">
-            The assistant drafts the message based on these notes and your tone
-            below.
-          </p>
-        </div>
-
-        <!-- Row 5: Tone / Action -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="block text-sm font-medium">Tone</label>
-            <select id="email-tone" class="w-full border rounded-md p-2">
-              <option selected>professional, friendly</option>
-              <option>concise, formal</option>
-              <option>warm, encouraging</option>
-              <option>direct, action-oriented</option>
-            </select>
+            <div
+              id="email-bulk-summary"
+              class="hidden text-sm text-slate-600 bg-slate-50 p-2 rounded border border-slate-200"
+            ></div>
           </div>
 
-          <div class="space-y-2">
-            <label class="block text-sm font-medium">Action</label>
-            <div class="flex items-center gap-4 h-10">
-              <label class="inline-flex items-center gap-2 text-sm">
-                <input type="radio" name="email-action" value="send" checked />
-                Send
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm">
-                <input type="radio" name="email-action" value="draft" />
-                Draft
-              </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-slate-700">CC</label>
+              <input
+                id="email-cc"
+                type="text"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                placeholder="Optional"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-slate-700"
+                >BCC</label
+              >
+              <input
+                id="email-bcc"
+                type="text"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                placeholder="Optional"
+              />
             </div>
           </div>
-        </div>
 
-        <!-- Progress -->
-        <div id="email-progress" class="hidden text-xs text-gray-600"></div>
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-slate-700"
+              >Subject</label
+            >
+            <input
+              id="email-subject"
+              type="text"
+              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              placeholder="Enter subject line..."
+            />
+          </div>
 
-        <!-- Footer -->
-        <div class="flex items-center justify-end gap-2 pt-2 border-t">
-          <button
-            type="button"
-            id="email-cancel"
-            class="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-slate-700"
+              >AI Instructions</label
+            >
+            <textarea
+              id="email-notes"
+              rows="4"
+              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              placeholder="Tell the AI what this email is about (e.g., 'Remind them about the quiz on Friday')..."
+            ></textarea>
+            <p class="text-xs text-slate-400">
+              The AI will draft the full message based on these notes.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-slate-700"
+                >Tone</label
+              >
+              <select
+                id="email-tone"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              >
+                <option selected>Professional & Friendly</option>
+                <option>Concise & Formal</option>
+                <option>Warm & Encouraging</option>
+                <option>Strict & Direct</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-slate-700"
+                >Action</label
+              >
+              <div class="flex items-center gap-4 mt-2">
+                <label
+                  class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="email-action"
+                    value="send"
+                    checked
+                    class="text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>Send Immediately</span>
+                </label>
+                <label
+                  class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="email-action"
+                    value="draft"
+                    class="text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>Save Draft</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="email-progress"
+            class="hidden rounded-md bg-blue-50 p-3 text-sm text-blue-700 border border-blue-100 flex items-center gap-2"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            id="email-submit"
-            class="px-4 py-1.5 rounded-md border bg-gray-900 text-white hover:bg-black"
+            <svg
+              class="animate-spin h-4 w-4 text-brand-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span id="email-progress-text">Processing...</span>
+          </div>
+
+          <div
+            class="mt-4 flex items-center justify-end gap-3 pt-4 border-t border-slate-100"
           >
-            Send
-          </button>
-        </div>
-      </form>
+            <button type="button" id="email-cancel" class="btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" id="email-submit" class="btn-primary">
+              Generate & Send
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
 {% endblock %} {% block scripts %}
 <script>
+  // I kept your original logic exactly as is, just updated ID references if needed.
+  // The classes above now match your new Design System.
   document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.getElementById("students-tbody");
     const statusEl = document.getElementById("status");
 
-    // ===== Modal elements =====
+    // Modal logic
     const openSendAllBtn = document.getElementById("open-send-all");
     const modal = document.getElementById("email-modal");
     const closeBtn = document.getElementById("email-close");
@@ -242,9 +352,10 @@ block content %}
     const ccEl = document.getElementById("email-cc");
     const bccEl = document.getElementById("email-bcc");
     const progressEl = document.getElementById("email-progress");
+    const progressText = document.getElementById("email-progress-text"); // Updated ID reference
     const titleEl = document.getElementById("email-modal-title");
 
-    let bulkRecipients = []; // [{name,email}, ...]
+    let bulkRecipients = [];
 
     function showModal() {
       modal.classList.remove("hidden");
@@ -261,14 +372,13 @@ block content %}
       bccEl.value = "";
       bulkRecipients = [];
       progressEl.classList.add("hidden");
-      progressEl.textContent = "";
     }
 
     function openEmailModalSingle(name, email) {
       resetForm();
       modeEl.value = "single";
       titleEl.textContent = `Compose Email — ${name || email}`;
-      toInput.classList.remove("hidden");
+      toInput.parentElement.classList.remove("hidden"); // Updated to hide wrapper
       toInput.value = email || "";
       bulkSummary.classList.add("hidden");
       singleNameEl.value = name || "";
@@ -281,8 +391,7 @@ block content %}
       resetForm();
       modeEl.value = "bulk";
       titleEl.textContent = `Compose Email — Send to All (${list.length})`;
-      toInput.classList.add("hidden");
-      toInput.value = "";
+      toInput.parentElement.classList.add("hidden"); // Updated to hide wrapper
       bulkSummary.classList.remove("hidden");
       bulkSummary.textContent = list.map((x) => x.email).join(", ");
       bulkRecipients = list.slice();
@@ -290,7 +399,7 @@ block content %}
       setTimeout(() => subjectEl.focus(), 50);
     }
 
-    // Row button: Send Email
+    // Listeners
     tbody.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-send]");
       if (!btn) return;
@@ -300,30 +409,28 @@ block content %}
       openEmailModalSingle(name, email);
     });
 
-    // Header button: Send to All
-    openSendAllBtn?.addEventListener("click", () => {
-      const rows = [...tbody.querySelectorAll("tr[data-row-id]")];
-      const list = rows
-        .map((r) => ({
-          name: r.getAttribute("data-name") || "",
-          email: r.getAttribute("data-email") || "",
-        }))
-        .filter((x) => x.email);
-      if (!list.length) {
-        statusEl.textContent = "No students to email.";
-        return;
-      }
-      openEmailModalBulk(list);
-    });
+    if (openSendAllBtn) {
+      openSendAllBtn.addEventListener("click", () => {
+        const rows = [...tbody.querySelectorAll("tr[data-row-id]")];
+        const list = rows
+          .map((r) => ({
+            name: r.getAttribute("data-name") || "",
+            email: r.getAttribute("data-email") || "",
+          }))
+          .filter((x) => x.email);
 
-    // Close modal
-    closeBtn?.addEventListener("click", hideModal);
-    cancelBtn?.addEventListener("click", hideModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) hideModal();
-    });
+        if (!list.length) {
+          statusEl.textContent = "No students to email.";
+          return;
+        }
+        openEmailModalBulk(list);
+      });
+    }
 
-    // Helper to call your existing /email/compose route
+    if (closeBtn) closeBtn.addEventListener("click", hideModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", hideModal);
+
+    // Helper to send one
     async function sendOne(
       toEmail,
       name,
@@ -343,7 +450,7 @@ block content %}
       fd.set("cc", cc);
       fd.set("bcc", bcc);
 
-      const res = await fetch("{{ url_for('email_compose') }}", {
+      const res = await fetch("{{ url_for('email.email_compose') }}", {
         method: "POST",
         body: fd,
       });
@@ -360,7 +467,7 @@ block content %}
       return data;
     }
 
-    // Submit modal
+    // Submit Logic
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const tone = toneEl.value || "professional, friendly";
@@ -373,15 +480,17 @@ block content %}
       const subject = subjectEl.value || "";
       const notes = notesEl.value || "";
 
+      progressEl.classList.remove("hidden");
+
       if (modeEl.value === "single") {
         const to = (toInput.value || singleEmailEl.value || "").trim();
         if (!to) {
           alert("Recipient email is required.");
+          progressEl.classList.add("hidden");
           return;
         }
         try {
-          progressEl.classList.remove("hidden");
-          progressEl.textContent = "Sending…";
+          progressText.textContent = "Sending...";
           await sendOne(
             to,
             singleNameEl.value,
@@ -392,29 +501,28 @@ block content %}
             cc,
             bcc
           );
-          progressEl.textContent =
-            action === "draft" ? "Draft created." : "Email sent.";
+          progressText.textContent =
+            action === "draft" ? "Draft created!" : "Email sent!";
           setTimeout(hideModal, 800);
         } catch (err) {
-          progressEl.classList.remove("hidden");
-          progressEl.textContent = "Failed: " + (err?.message || err);
+          progressText.textContent = "Failed: " + (err?.message || err);
         }
         return;
       }
 
-      // bulk
+      // Bulk
       if (!bulkRecipients.length) {
         alert("No recipients");
+        progressEl.classList.add("hidden");
         return;
       }
-      progressEl.classList.remove("hidden");
       let ok = 0,
         fail = 0;
       for (let i = 0; i < bulkRecipients.length; i++) {
         const { name, email } = bulkRecipients[i];
-        progressEl.textContent = `Processing ${i + 1}/${
+        progressText.textContent = `Processing ${i + 1}/${
           bulkRecipients.length
-        }…`;
+        }...`;
         try {
           await sendOne(email, name, subject, notes, tone, action, cc, bcc);
           ok++;
@@ -422,10 +530,7 @@ block content %}
           fail++;
         }
       }
-      progressEl.textContent =
-        action === "draft"
-          ? `Done. Drafted: ${ok}, Failed: ${fail}.`
-          : `Done. Sent: ${ok}, Failed: ${fail}.`;
+      progressText.textContent = `Done. Success: ${ok}, Failed: ${fail}.`;
     });
   });
 </script>

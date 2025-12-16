@@ -2,7 +2,7 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from flask import session
 import base64
 import mimetypes
 import time
@@ -35,89 +35,56 @@ def _guess_mime_type(path: str) -> Tuple[str, str]:
     maintype, subtype = ctype.split("/", 1)
     return maintype, subtype
 
-
 def get_gmail_service(
-    client_secret_path: str = None,
-    token_path: str = None,
     scopes: Iterable[str] = SCOPES,
 ):
     """
-    Authenticate and return a Gmail API service client with error handling.
-    
-    Args:
-        client_secret_path: Path to OAuth client credentials file
-        token_path: Path to store/retrieve OAuth token
-        scopes: Gmail API scopes
-        
-    Returns:
-        Gmail API service client
-        
-    Raises:
-        FileNotFoundError: If credentials file not found
-        RuntimeError: If authentication fails
+    Build and return a Gmail API service client using OAuth credentials
+    obtained in the /auth/callback flow.
+
+    Expects session["credentials"] to be set by auth_routes.callback.
     """
+
     try:
-        # Set default paths if none provided
-        if client_secret_path is None:
-            client_secret_path = os.environ.get("CREDENTIALS_PATH")
-        
-        if token_path is None:
-            token_path = os.environ.get("TOKEN_PATH")
-        
-        # If still no paths, use defaults in project root
-        if client_secret_path is None:
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            client_secret_path = os.path.join(project_root, "credentials.json")
-        
-        if token_path is None:
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            token_path = os.path.join(project_root, "token.json")
-        
-        logger.debug("Using Gmail credentials: %s, token: %s", client_secret_path, token_path)
-        
-        creds = None
-        if os.path.exists(token_path):
-            try:
-                creds = Credentials.from_authorized_user_file(token_path, scopes)
-                logger.debug("Loaded existing credentials from token file")
-            except Exception as e:
-                logger.warning("Failed to load existing token: %s", e)
+        # Get credentials from session (set in auth_routes.callback)
+        sess_creds = session.get("credentials")
+        if not sess_creds:
+            raise RuntimeError("No OAuth credentials in session; user must log in first.")
 
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                try:
-                    creds.refresh(Request())
-                    logger.info("Gmail credentials refreshed successfully")
-                except Exception as e:
-                    logger.warning("Failed to refresh credentials: %s", e)
-                    creds = None
-            
-            if not creds:
-                if not os.path.exists(client_secret_path):
-                    raise FileNotFoundError(f"OAuth client file not found: {client_secret_path}")
-                
-                logger.info("Starting OAuth flow for Gmail authentication")
-                flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, scopes)
-                creds = flow.run_local_server(port=0)
-                logger.info("Gmail OAuth flow completed successfully")
+        # Reconstruct Credentials object
+        creds = Credentials(
+            token=sess_creds.get("token"),
+            refresh_token=sess_creds.get("refresh_token"),
+            token_uri=sess_creds.get("token_uri"),
+            client_id=sess_creds.get("client_id"),
+            client_secret=sess_creds.get("client_secret"),
+            scopes=sess_creds.get("scopes") or scopes,
+        )
 
-            # Save token for reuse
-            try:
-                with open(token_path, "w") as token:
-                    token.write(creds.to_json())
-                logger.info("Gmail credentials cached at %s", token_path)
-            except Exception as e:
-                logger.warning("Failed to cache credentials: %s", e)
+        # Refresh if expired
+        if not creds.valid:
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+                logger.info("Gmail credentials refreshed successfully")
+
+                # Save refreshed token back to session
+                session["credentials"] = {
+                    "token": creds.token,
+                    "refresh_token": creds.refresh_token,
+                    "token_uri": creds.token_uri,
+                    "client_id": creds.client_id,
+                    "client_secret": creds.client_secret,
+                    "scopes": creds.scopes,
+                }
+            else:
+                raise RuntimeError("Invalid Gmail credentials and no refresh token available.")
 
         service = build("gmail", "v1", credentials=creds)
-        logger.info("Gmail service initialized successfully")
+        logger.info("Gmail service initialized successfully (session-based)")
         return service
-        
-    except FileNotFoundError as e:
-        logger.error("Gmail credentials file not found: %s", e)
-        raise
+
     except Exception as e:
-        logger.error("Gmail authentication failed: %s", e, exc_info=True)
+        logger.error("Gmail authentication failed (session-based): %s", e, exc_info=True)
         raise RuntimeError(f"Gmail authentication failed: {e}")
 
 

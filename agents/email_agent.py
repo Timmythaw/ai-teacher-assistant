@@ -31,14 +31,11 @@ class EmailAgent:
         try:
             # Use default paths from the project structure
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            credentials_path = os.path.join(project_root, "credentials.json")
+            credentials_path = os.path.join(project_root, "client_secret.json")
             token_path = os.path.join(project_root, "token.json")
             
             logger.info("Initializing Gmail service with credentials: %s", credentials_path)
-            self.service = get_gmail_service(
-                client_secret_path=credentials_path,
-                token_path=token_path
-            )
+            self.service = get_gmail_service()
             self.sender = get_sender_address(self.service)
             logger.info("Gmail service initialized successfully. Sender: %s", self.sender)
             

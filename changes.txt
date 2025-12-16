@@ -1,0 +1,37 @@
+code refactoring
+1. create routes and utils folder
+2. create db.py (for db instance creation func) and file helper (file type check and file save function) in utils folder
+3. create main route and set index route ("/")
+4. app.py (limit file upload size, setup directory request, create main blueprint, main method)
+5. create assessment_routes.py
+6. add assessment_routes blueprint in app.py
+7. create lesson_plan_routes.py
+8. add lesson_plan_routes blueprint in app.py
+9. create batch_routes.py
+10. add batch_routes blueprint in app.py
+11. create email_routes.py
+12. add email_routes blueprint in app.py
+13. create timetable_routes.py
+14. add timetable_routes blueprint in app.py
+15. change url from path to main.path
+16. some endpoints function names are changes and endpoints strings are changed. Therefore sync them.   
+
+Web Oauth and google Service online refactoring
+1. install 3 packages
+2. create auth routes
+3. add in app.py
+4. add client_secret.json to gitignore
+5. remove token.json and token.pickle and credentials.json
+7. edit credentials.json path to client_secret.json
+8. change variables in env
+9. add more permission scopes
+10. edit gmail_tool.py and google client to use session credentials
+
+set GOOGLE_CLIENT_ID=840970484260-h2rmsrj3obau562fg7ngg1131o6ne3bt.apps.googleusercontent.com
+
+Authorization and user isolation
+1. create supbase_auth.py
+2. create global js to catch unauthenicated error
+3. modify auth routes
+4. we edit main routes, firebase_auth, db and run three query in supbase
+5. edit routes
