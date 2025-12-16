@@ -55,6 +55,30 @@ def index():
     # 2. If NOT logged in, show Login page
     return render_template('login.html')
 
+@main_bp.route('/activity')
+@login_required
+def activity_page():
+    """
+    Show all activity history for the current user
+    """
+    error = None
+    activities = []
+    
+    try:
+        supabase = get_supabase_client()
+        # Fetch more activities for the full history page (50 instead of 6)
+        activities = get_recent_activities(supabase, limit=50)
+    except Exception as e:
+        error = str(e)
+        print(f"Error fetching activity history: {e}")
+    
+    return render_template(
+        'activity.html',
+        user=g.current_user,
+        activities=activities,
+        error=error
+    )
+
 @main_bp.route('/test-rls')
 @login_required
 def test_rls():

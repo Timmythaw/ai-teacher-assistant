@@ -6,6 +6,7 @@ import token
 from flask import Flask
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from datetime import datetime
 
 def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -19,6 +20,48 @@ def create_app():
     UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", "uploads")).resolve()
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     app.config["UPLOAD_DIR"] = UPLOAD_DIR
+
+    # Custom Jinja2 filter for time formatting
+    @app.template_filter('timeago')
+    def timeago_filter(timestamp_str):
+        """Convert ISO timestamp to relative time like '5 minutes ago'"""
+        if not timestamp_str:
+            return "Just now"
+        
+        try:
+            # Handle different timestamp formats
+            timestamp_str = str(timestamp_str).strip()
+            
+            # Try parsing ISO format with timezone
+            if 'T' in timestamp_str:
+                timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            else:
+                # Try parsing without timezone
+                timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            
+            now = datetime.now(timestamp.tzinfo) if timestamp.tzinfo else datetime.now()
+            
+            diff = now - timestamp
+            seconds = abs(diff.total_seconds())  # Use abs to handle future dates
+            
+            if seconds < 60:
+                return "Just now"
+            elif seconds < 3600:
+                minutes = int(seconds / 60)
+                return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+            elif seconds < 86400:
+                hours = int(seconds / 3600)
+                return f"{hours} hour{'s' if hours != 1 else ''} ago"
+            elif seconds < 604800:
+                days = int(seconds / 86400)
+                return f"{days} day{'s' if days != 1 else ''} ago"
+            else:
+                weeks = int(seconds / 604800)
+                return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+        except Exception as e:
+            # If all parsing fails, return "Just now" instead of showing error
+            print(f"TimeAgo filter error: {e} for timestamp: {timestamp_str}")
+            return "Just now"
 
     # Register blueprints
     from routes.main_routes import main_bp
