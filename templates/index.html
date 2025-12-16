@@ -19,35 +19,35 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-  <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden group">
+  <a href="{{ url_for('batches.batches_page') }}" class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md flex items-center justify-between relative overflow-hidden group transition-all duration-200 hover:border-blue-300 cursor-pointer">
     <div class="relative z-10">
-      <p class="text-sm font-medium text-slate-500">Total Batches</p>
+      <p class="text-sm font-medium text-slate-500 group-hover:text-blue-600 transition-colors">Total Batches</p>
       <p class="text-3xl font-bold text-slate-800 mt-2">{{ total_batches or 0 }}</p>
     </div>
-    <div class="p-3 bg-blue-50 rounded-lg text-blue-600 group-hover:scale-110 transition-transform duration-300">
+    <div class="p-3 bg-blue-50 rounded-lg text-blue-600 group-hover:scale-110 group-hover:bg-blue-100 transition-all duration-300">
       <i data-lucide="users" class="w-6 h-6"></i>
     </div>
-  </div>
+  </a>
 
-  <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden group">
+  <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md flex items-center justify-between relative overflow-hidden group transition-all duration-200 hover:border-indigo-300 cursor-pointer">
     <div class="relative z-10">
-      <p class="text-sm font-medium text-slate-500">Active Plans</p>
+      <p class="text-sm font-medium text-slate-500 group-hover:text-indigo-600 transition-colors">Active Plans</p>
       <p class="text-3xl font-bold text-slate-800 mt-2">{{ total_lesson_plans or 0 }}</p>
     </div>
-    <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:scale-110 transition-transform duration-300">
+    <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300">
       <i data-lucide="book-open" class="w-6 h-6"></i>
     </div>
-  </div>
+  </a>
 
-  <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between relative overflow-hidden group">
+  <a href="{{ url_for('assessments.list_assessments') }}" class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md flex items-center justify-between relative overflow-hidden group transition-all duration-200 hover:border-emerald-300 cursor-pointer">
     <div class="relative z-10">
-      <p class="text-sm font-medium text-slate-500">Assessments</p>
+      <p class="text-sm font-medium text-slate-500 group-hover:text-emerald-600 transition-colors">Assessments</p>
       <p class="text-3xl font-bold text-slate-800 mt-2">{{ total_assessments or 0 }}</p>
     </div>
-    <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 group-hover:scale-110 transition-transform duration-300">
+    <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-300">
       <i data-lucide="check-circle" class="w-6 h-6"></i>
     </div>
-  </div>
+  </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
