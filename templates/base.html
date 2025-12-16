@@ -4,75 +4,80 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}AI Lesson Planner{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Spline+Sans:wght@300..700&display=swap"
-      rel="stylesheet"
-    />
 
-    <!-- Tailwind CDN (quick prototyping) + custom config so utility classes work -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind = tailwind || {};
       tailwind.config = {
         theme: {
           extend: {
             colors: {
+              // 1. Updated Brand Palette (Analogous Blue)
               brand: {
-                50: "#f0f9ff",
+                50: "#f0f9ff", // Very light blue (backgrounds)
                 100: "#e0f2fe",
                 200: "#bae6fd",
                 300: "#7dd3fc",
                 400: "#38bdf8",
                 500: "#0ea5e9",
-                600: "#2563eb",
-                700: "#1d4ed8",
+                600: "#2563eb", // Royal Blue (Primary Action)
+                700: "#1d4ed8", // Darker Hover State
                 800: "#1e40af",
                 900: "#1e3a8a",
               },
-              primary: "#E0F1FF",
-              secondary: "#CDE1FA",
-              surface: "#ffffff",
+              // 2. Semantic Names
+              primary: "#E0F1FF",   // Your existing main background
+              secondary: "#CDE1FA", // Your existing sidebar
+              surface: "#ffffff",   // White cards
             },
             fontFamily: {
-              sans: ["Spline Sans", "Inter", "sans-serif"],
+              sans: ['Inter', 'sans-serif'], // Optional: Adds a cleaner font if you load it
             },
           },
         },
       };
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        lucide.createIcons();
-      });
-    </script>
-
-    <!-- Link global fallback CSS so .btn-primary etc. work without Tailwind build -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/global.css') }}"
-    />
 
     {% block head_extra %}{% endblock %}
-
+    
     <style>
-      /* Scrollbar Styling */
-      ::-webkit-scrollbar {
-        width: 8px; /* Slightly thinner */
-        height: 8px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1; /* Blue-gray-300 */
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8; /* Blue-gray-400 */
-      }
+      @layer components {
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+          width: 8px; /* Slightly thinner */
+          height: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1; /* Blue-gray-300 */
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8; /* Blue-gray-400 */
+        }
 
-      /* Minimal inline helpers only; component styles moved to `static/css/global.css` */
+        /* --- NEW COMPONENT CLASSES --- */
+        /* This keeps your HTML clean. You can use these classes in your templates. */
+
+        /* Primary Button (Solid Royal Blue) */
+        .btn-primary {
+          @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500;
+        }
+
+        /* Secondary Button (Outline/Ghost) */
+        .btn-secondary {
+          @apply inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500;
+        }
+
+        /* Table Styles */
+        .table-container {
+          @apply overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg bg-white;
+        }
+        .table-header {
+          @apply bg-slate-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider;
+        }
+        .table-row {
+          @apply hover:bg-slate-50 transition-colors duration-150; /* Hover effect */
+        }
+      }
     </style>
     {% block styles %}{% endblock %}
   </head>
@@ -80,44 +85,60 @@
   <body class="min-h-screen bg-primary text-slate-800 font-sans">
     <div class="flex min-h-screen">
       <aside
-        class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-blue-200/50 bg-white"
+        class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-blue-200/50 bg-secondary"
       >
-        <div class="h-16 flex items-center p-6 mt-4">
-          <a
-            href="{{ url_for('main.index') }}"
-            class="text-xl font-bold text-slate-800 tracking-tight"
+        <div class="h-16 flex items-center px-6 border-b border-blue-200/50">
+          <a href="{{ url_for('main.index') }}" class="text-xl font-bold text-slate-800 tracking-tight"
             >AI Teacher Assistant</a
           >
         </div>
 
-<<<<<<< HEAD
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-=======
-        <nav class="flex-1 p-4 space-y-3">
->>>>>>> 9acac2ac938453a4dcf6ec6fc6f29f60f6f43515
           <a
             href="{{ url_for('main.index') }}"
-            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900"
+            class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'index' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
           >
-            <i data-lucide="home" class="w-5 h-5"></i>
-            <span>Dashboard</span>
+            Dashboard
+          </a>
+          <a
+            href="{{ url_for('batches.batches_page') }}"
+            class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'batches_page' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
+          >
+            Batches
+          </a>
+          <a
+            href="{{ url_for('lesson_plans.list_lesson_plans') }}"
+            class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'list_lesson_plans' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
+          >
+            Lesson Plans
+          </a>
+          <a
+            href="{{ url_for('assessments.list_assessments') }}"
+            class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'list_assessments' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
+          >
+            Assessments
+          </a>
+          <a
+            href="{{ url_for('email.email_page') }}"
+            class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ 'bg-white text-brand-700 shadow-sm ring-1 ring-black/5' if request.endpoint == 'email_page' else 'text-slate-600 hover:bg-white/50 hover:text-slate-900' }}"
+          >
+            Send Email
           </a>
 
-<<<<<<< HEAD
           {% if user %}
-    <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
-    <div class="text-right">
-        <span class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Credits Left</span>
-        <span id="credit-display" class="text-2xl font-bold text-indigo-700 leading-none">
-            {{ credits if credits is defined else (user.credits if user else 0) }}
-        </span>
-    </div>
-    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-        </svg>
-    </div>
-</div>
+          <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="text-right">
+              <span class="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Credits Left</span>
+              <span id="credit-display" class="text-2xl font-bold text-indigo-700 leading-none">
+                  {{ credits if credits is defined else (user.credits if user else 0) }}
+              </span>
+          </div>
+          <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+          </div>
+      </div>
           {% endif %}
 
           <div class="px-3 pt-4">
@@ -125,69 +146,7 @@
               Prototype v1.0
             </p>
           </div>
-=======
-          <a
-            href="{{ url_for('batches.batches_page') }}"
-            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900"
-          >
-            <i data-lucide="users" class="w-5 h-5"></i>
-            <span>Batches</span>
-          </a>
-
-          <a
-            href="{{ url_for('lesson_plans.list_lesson_plans') }}"
-            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900"
-          >
-            <i data-lucide="book-open" class="w-5 h-5"></i>
-            <span>Lesson Plans</span>
-          </a>
-
-          <a
-            href="{{ url_for('assessments.list_assessments') }}"
-            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900"
-          >
-            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-            <span>Assessments</span>
-          </a>
-
-          <a
-            href="{{ url_for('email.email_page') }}"
-            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900"
-          >
-            <i data-lucide="mail" class="w-5 h-5"></i>
-            <span>Send Emails</span>
-          </a>
->>>>>>> 9acac2ac938453a4dcf6ec6fc6f29f60f6f43515
         </nav>
-        <!-- Profile at bottom of sidebar -->
-        <div class="px-4 py-4">
-          <a
-            href="{{ url_for('auth.get_me') }}"
-            class="flex items-center gap-3 text-sm rounded-lg hover:bg-slate-50 p-2"
-          >
-            {% if session.get('picture') %}
-            <img
-              src="{{ session.get('picture') }}"
-              alt="Avatar"
-              class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm"
-            />
-            {% else %}
-            <span
-              class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-600 text-white"
-            >
-              <i data-lucide="user" class="w-5 h-5"></i>
-            </span>
-            {% endif %}
-            <div>
-              <div class="text-sm font-medium text-slate-800">
-                {{ session.get('name') or 'Profile' }}
-              </div>
-              <div class="text-xs text-slate-500">
-                {{ session.get('email') or '' }}
-              </div>
-            </div>
-          </a>
-        </div>
       </aside>
 
       <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -214,27 +173,22 @@
               />
             </svg>
           </button>
-          <a
-            href="{{ url_for('main.index') }}"
-            class="text-lg font-bold text-slate-800"
+          <a href="{{ url_for('main.index') }}" class="text-lg font-bold text-slate-800"
             >AI Lesson Planner</a
           >
-          <div class="w-10"></div>
-        </header>
+          <div class="w-10"></div> </header>
 
         <main class="flex-1 overflow-y-auto focus:outline-none p-4 md:p-8">
           <div class="max-w-7xl mx-auto">
-            {% with messages = get_flashed_messages(with_categories=true) %} {%
-            if messages %}
+            
+            {% with messages = get_flashed_messages(with_categories=true) %} {% if
+            messages %}
             <div class="space-y-3 mb-6">
-              {% for category, message in messages %} {% set color_class =
-              'bg-blue-50 text-blue-800 border-blue-200' %} {% if category in
-              ['success','ok'] %}{% set color_class = 'bg-green-50
-              text-green-800 border-green-200' %}{% endif %} {% if category in
-              ['warning'] %}{% set color_class = 'bg-amber-50 text-amber-800
-              border-amber-200' %}{% endif %} {% if category in
-              ['error','danger'] %}{% set color_class = 'bg-red-50 text-red-800
-              border-red-200' %}{% endif %}
+              {% for category, message in messages %} 
+                {% set color_class = 'bg-blue-50 text-blue-800 border-blue-200' %} 
+                {% if category in ['success','ok'] %}{% set color_class = 'bg-green-50 text-green-800 border-green-200' %}{% endif %} 
+                {% if category in ['warning'] %}{% set color_class = 'bg-amber-50 text-amber-800 border-amber-200' %}{% endif %} 
+                {% if category in ['error','danger'] %}{% set color_class = 'bg-red-50 text-red-800 border-red-200' %}{% endif %}
               <div
                 class="border px-4 py-3 rounded-md shadow-sm text-sm font-medium {{ color_class }} flex items-center"
               >
@@ -242,115 +196,37 @@
               </div>
               {% endfor %}
             </div>
-            {% endif %} {% endwith %} {% block content %}{% endblock %}
+            {% endif %} {% endwith %} 
+            
+            {% block content %}{% endblock %}
+          
           </div>
         </main>
 
-        <!-- <footer
+        <footer
           class="border-t border-blue-200/30 bg-white/50 text-xs text-slate-400 px-8 py-4 text-center"
         >
           &copy; {{ current_year or 2025 }} AI Lesson Planner
-        </footer> -->
+        </footer>
       </div>
     </div>
 
-    <!-- Mobile Responsive Part -->
-    <div
-      id="drawer"
-      class="relative z-50 hidden md:hidden"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div
-        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
-        data-close
-      ></div>
-      <div class="fixed inset-0 flex">
-        <div
-          class="relative flex w-full max-w-xs flex-1 flex-col bg-secondary pb-4 pt-5 shadow-xl"
-        >
-          <div class="absolute top-0 right-0 -mr-12 pt-2">
-            <button
-              type="button"
-              class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-              data-close
-            >
-              <span class="sr-only">Close sidebar</span>
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="flex flex-shrink-0 items-center px-4">
-            <span class="text-xl font-bold text-slate-800">Menu</span>
-          </div>
-          <div class="mt-5 h-0 flex-1 overflow-y-auto">
-            <nav class="space-y-1 px-2">
-              <a
-                href="{{ url_for('main.index') }}"
-                class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50"
-                >Dashboard</a
-              >
-              <a
-                href="{{ url_for('batches.batches_page') }}"
-                class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50"
-                >Batches</a
-              >
-              <a
-                href="{{ url_for('lesson_plans.list_lesson_plans') }}"
-                class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50"
-                >Lesson Plans</a
-              >
-              <a
-                href="{{ url_for('assessments.list_assessments') }}"
-                class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50"
-                >Assessments</a
-              >
-              <a
-                href="{{ url_for('email.email_page') }}"
-                class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50"
-                >Send Email</a
-              >
-            </nav>
-          </div>
-          <!-- Profile area at bottom of drawer -->
-          <div class="mt-auto px-4 py-3 border-t border-slate-200">
-            <a
-              href="{{ url_for('auth.get_me') }}"
-              class="flex items-center gap-3 text-sm p-2 rounded-md hover:bg-white/50"
-            >
-              {% if session.get('picture') %}
-              <img
-                src="{{ session.get('picture') }}"
-                alt="Avatar"
-                class="w-9 h-9 rounded-full object-cover border-2 border-white"
-              />
-              {% else %}
-              <span
-                class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-600 text-white"
-                ><i data-lucide="user" class="w-5 h-5"></i
-              ></span>
-              {% endif %}
-              <div>
-                <div class="text-sm font-medium text-slate-800">
-                  {{ session.get('name') or 'Profile' }}
+    <div id="drawer" class="relative z-50 hidden md:hidden" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" data-close></div>
+        <div class="fixed inset-0 flex">
+            <div class="relative flex w-full max-w-xs flex-1 flex-col bg-secondary pb-4 pt-5 shadow-xl">
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button type="button" class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" data-close>
+                        <span class="sr-only">Close sidebar</span>
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="text-xs text-slate-500">
-                  {{ session.get('email') or '' }}
+                
+                <div class="flex flex-shrink-0 items-center px-4">
+                    <span class="text-xl font-bold text-slate-800">Menu</span>
                 </div>
-<<<<<<< HEAD
                 <div class="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav class="space-y-1 px-2">
                         <a href="{{ url_for('main.index') }}" class="block rounded-md px-3 py-2 text-base font-medium text-slate-800 hover:bg-white/50">Dashboard</a>
@@ -368,28 +244,23 @@
                     </nav>
                 </div>
             </div>
-=======
-              </div>
-            </a>
-          </div>
->>>>>>> 9acac2ac938453a4dcf6ec6fc6f29f60f6f43515
         </div>
-      </div>
     </div>
 
-    <!-- Removed CDN prototyping scripts (use local/static assets) -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
     {% block scripts_before %}{% endblock %}
-
     <script>
       const openBtn = document.getElementById("openSidebar");
       const drawer = document.getElementById("drawer");
-
+      
       if (openBtn && drawer) {
         openBtn.addEventListener("click", () => {
           drawer.classList.remove("hidden");
         });
-
+        
         drawer.querySelectorAll("[data-close]").forEach((el) => {
           el.addEventListener("click", () => {
             drawer.classList.add("hidden");
