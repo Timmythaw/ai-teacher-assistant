@@ -158,75 +158,75 @@ def api_timetable_schedule():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
-@timetable_bp.route("/api/for-lesson-plan/<uuid:lesson_plan_id>", methods=["POST"])
-@login_required  # ✅ Added: Require login
-@require_user_owns_resource('lesson_plans', 'lesson_plan_id')  # ✅ Added: Verify ownership
-def api_generate_timetable_for_lesson_plan(lesson_plan_id):
-    """
-    Generate and schedule timetable for a specific lesson plan
-    Combines suggest + schedule in one endpoint
-    Only if user owns the lesson plan
-    """
-    try:
-        supabase = get_supabase_client()
+# @timetable_bp.route("/api/for-lesson-plan/<uuid:lesson_plan_id>", methods=["POST"])
+# @login_required  # ✅ Added: Require login
+# @require_user_owns_resource('lesson_plans', 'lesson_plan_id')  # ✅ Added: Verify ownership
+# def api_generate_timetable_for_lesson_plan(lesson_plan_id):
+#     """
+#     Generate and schedule timetable for a specific lesson plan
+#     Combines suggest + schedule in one endpoint
+#     Only if user owns the lesson plan
+#     """
+#     try:
+#         supabase = get_supabase_client()
         
-        # Get lesson plan - 🔥 RLS + decorator handle filtering
-        sel = supabase.table("lesson_plans")\
-            .select("result")\
-            .eq("id", str(lesson_plan_id))\
-            .single()\
-            .execute()
+#         # Get lesson plan - 🔥 RLS + decorator handle filtering
+#         sel = supabase.table("lesson_plans")\
+#             .select("result")\
+#             .eq("id", str(lesson_plan_id))\
+#             .single()\
+#             .execute()
         
-        lesson_plan = sel.data
-        if not lesson_plan:
-            return jsonify({"ok": False, "error": "Lesson plan not found"}), 404
+#         lesson_plan = sel.data
+#         if not lesson_plan:
+#             return jsonify({"ok": False, "error": "Lesson plan not found"}), 404
         
-        plan = lesson_plan.get("result")
-        if not isinstance(plan, dict):
-            return jsonify({"ok": False, "error": "Invalid lesson plan data"}), 400
+#         plan = lesson_plan.get("result")
+#         if not isinstance(plan, dict):
+#             return jsonify({"ok": False, "error": "Invalid lesson plan data"}), 400
 
-        # Get parameters from request
-        data = request.get_json(silent=True) or {}
-        slot_hours = int(data.get("slot_hours") or 1)
-        work_hours = data.get("work_hours") or [9, 17]
-        calendar_id = (data.get("calendar_id") or "primary").strip() or "primary"
-        location_hint = data.get("location_hint")
-        auto_schedule = data.get("auto_schedule", False)  # Whether to schedule immediately
+#         # Get parameters from request
+#         data = request.get_json(silent=True) or {}
+#         slot_hours = int(data.get("slot_hours") or 1)
+#         work_hours = data.get("work_hours") or [9, 17]
+#         calendar_id = (data.get("calendar_id") or "primary").strip() or "primary"
+#         location_hint = data.get("location_hint")
+#         auto_schedule = data.get("auto_schedule", False)  # Whether to schedule immediately
 
-        # Suggest timetable
-        agent = TimetableAgent()
-        res = agent.suggest_consistent_schedule(
-            plan,
-            slot_hours=slot_hours,
-            work_hours=(int(work_hours[0]), int(work_hours[1])),
-            calendar_id=calendar_id,
-            location_hint=location_hint,
-        )
+#         # Suggest timetable
+#         agent = TimetableAgent()
+#         res = agent.suggest_consistent_schedule(
+#             plan,
+#             slot_hours=slot_hours,
+#             work_hours=(int(work_hours[0]), int(work_hours[1])),
+#             calendar_id=calendar_id,
+#             location_hint=location_hint,
+#         )
         
-        if not isinstance(res, dict) or res.get("error"):
-            return jsonify({
-                "ok": False, 
-                "error": res.get("error", "Failed to suggest timetable")
-            }), 500
+#         if not isinstance(res, dict) or res.get("error"):
+#             return jsonify({
+#                 "ok": False, 
+#                 "error": res.get("error", "Failed to suggest timetable")
+#             }), 500
 
-        # Optionally schedule immediately
-        schedule_results = None
-        if auto_schedule:
-            schedule_results = schedule_from_timetable(res)
-            total = len(schedule_results) if isinstance(schedule_results, list) else 0
-            ok_count = sum(1 for r in schedule_results if r.get("ok")) if schedule_results else 0
+#         # Optionally schedule immediately
+#         schedule_results = None
+#         if auto_schedule:
+#             schedule_results = schedule_from_timetable(res)
+#             total = len(schedule_results) if isinstance(schedule_results, list) else 0
+#             ok_count = sum(1 for r in schedule_results if r.get("ok")) if schedule_results else 0
 
-        return jsonify({
-            "ok": True,
-            "suggested_slots": res.get("suggested_slots") or [],
-            "metadata": res.get("metadata") or {},
-            "scheduled": auto_schedule,
-            "schedule_summary": {
-                "total": total,
-                "inserted": ok_count,
-                "failed": total - ok_count
-            } if auto_schedule else None,
-        }), 200
+#         return jsonify({
+#             "ok": True,
+#             "suggested_slots": res.get("suggested_slots") or [],
+#             "metadata": res.get("metadata") or {},
+#             "scheduled": auto_schedule,
+#             "schedule_summary": {
+#                 "total": total,
+#                 "inserted": ok_count,
+#                 "failed": total - ok_count
+#             } if auto_schedule else None,
+#         }), 200
         
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+#     except Exception as e:
+#         return jsonify({"ok": False, "error": str(e)}), 500

@@ -106,3 +106,29 @@ def test_user_context():
             "context_set": g.get('db_user_context_set', False),
             "message": "Could not test - but context_set=True means RPC is working"
         }
+
+
+
+# from supabase import create_client, Client
+# from flask import g
+# import os
+
+# SUPABASE_URL = os.getenv("SUPABASE_URL")
+# SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# if not SUPABASE_URL or not SUPABASE_KEY:
+#     raise RuntimeError("SUPABASE_URL and SUPABASE_KEY must be set")
+
+# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# def get_supabase_client() -> Client:
+#     if has_request_context():
+#         user_id = get_current_user_id()
+#         if user_id:
+#             try:
+#                 supabase.rpc("set_user_context", {"user_id": user_id}).execute()
+#                 g.db_user_context_set = True
+#             except Exception as e:
+#                 print("Warning: Could not set user context via RPC:", e)
+#                 g.db_user_context_set = False
+#     return supabase
