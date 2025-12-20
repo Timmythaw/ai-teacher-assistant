@@ -1,5 +1,5 @@
-{% extends "base.html" %} 
-{% block title %}Activity History — AI Teacher Assistant{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Activity History — AI Teacher Assistant{% endblock %}
 
 {% block content %}
 
@@ -15,7 +15,9 @@
   <div class="flex">
     <div class="flex-shrink-0">
       <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <path fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+          clip-rule="evenodd" />
       </svg>
     </div>
     <div class="ml-3">
@@ -39,67 +41,63 @@
             {% if not loop.last %}
             <span class="absolute left-5 top-5 -ml-px h-full w-0.5 bg-slate-200" aria-hidden="true"></span>
             {% endif %}
-            
+
             <div class="relative flex items-start space-x-4">
-              <div class="relative flex h-10 w-10 items-center justify-center rounded-full bg-white ring-8 ring-white">
+              <!-- icon circle, matching dashboard style -->
+              <div
+                class="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 ring-8 ring-white">
                 {% if 'assessment' in act.type %}
-                <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                  <i data-lucide="file-check" class="w-5 h-5 text-purple-600"></i>
-                </div>
+                <i data-lucide="file-check" class="w-5 h-5"></i>
                 {% elif 'lesson' in act.type or 'plan' in act.type %}
-                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
-                </div>
+                <i data-lucide="book-open" class="w-5 h-5"></i>
                 {% elif 'batch' in act.type %}
-                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
-                </div>
+                <i data-lucide="users" class="w-5 h-5"></i>
                 {% elif 'email' in act.type %}
-                <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
-                  <i data-lucide="mail" class="w-5 h-5 text-amber-600"></i>
-                </div>
+                <i data-lucide="mail" class="w-5 h-5"></i>
                 {% else %}
-                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-                  <i data-lucide="file-text" class="w-5 h-5 text-slate-600"></i>
-                </div>
+                <i data-lucide="file-text" class="w-5 h-5"></i>
                 {% endif %}
               </div>
-              
+
               <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
+                <div class="flex items-start justify-between gap-4">
                   <div>
-                    <p class="text-sm font-semibold text-slate-900">
-                      {{ act.type | replace('_', ' ') | capitalize }} created
+                    <p class="text-sm font-medium text-slate-900">
+                      {{ act.type | replace('_', ' ') | capitalize }}
                     </p>
-                    <p class="mt-0.5 text-sm text-slate-600">
-                      {{ act.title or "Untitled Item" }}
+                    <p class="mt-0.5 text-xs text-slate-500 line-clamp-1">
+                      {{ (act.original_filename or "Untitled Item") | remove_extension }}
                     </p>
-                  </div>
-                  <div class="ml-4 flex-shrink-0 flex items-center gap-2">
-                    <time class="whitespace-nowrap text-xs text-slate-500">
+                    <p class="text-[11px] text-slate-400 mt-1">
                       {% if act.created_at %}{{ act.created_at | timeago }}{% else %}Just now{% endif %}
-                    </time>
-                    {% if act.id %}
-                    <div class="flex gap-1">
-                      {% if 'assessment' in act.type %}
-                      <a href="{{ url_for('assessments.assessment_detail', assessment_id=act.id) }}" 
-                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">
-                        View
-                      </a>
-                      {% elif 'lesson' in act.type or 'plan' in act.type %}
-                      <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" 
-                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">
-                        View
-                      </a>
-                      {% elif 'batch' in act.type %}
-                      <a href="{{ url_for('batches.batch_show', batch_id=act.id) }}" 
-                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                        View
-                      </a>
-                      {% endif %}
-                    </div>
-                    {% endif %}
+                    </p>
                   </div>
+
+                  {% if act.id %}
+                  <div class="flex-shrink-0 mt-1">
+                    <a href="
+        {% if 'assessment' in act.type %}
+          {{ url_for('assessments.assessment_detail', assessment_id=act.id) }}
+        {% elif 'lesson' in act.type or 'plan' in act.type %}
+          {{ url_for('lesson_plans.list_lesson_plans') }}
+        {% elif 'batch' in act.type %}
+          {{ url_for('batches.batch_show', batch_id=act.id) }}
+        {% elif 'email' in act.type %}
+          {{ url_for('email.email_page') }}
+        {% else %}
+          {{ url_for('main.index') }}
+        {% endif %}
+      " class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm
+             text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50
+             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+             transition-all">
+                      View
+                    </a>
+                  </div>
+                  {% endif %}
+
+
+
                 </div>
               </div>
             </div>
@@ -118,8 +116,8 @@
     </div>
     <h3 class="text-sm font-medium text-slate-900">No activity yet</h3>
     <p class="mt-1 text-sm text-slate-500 mb-6">Start creating content to see your activity timeline.</p>
-    <a href="{{ url_for('main.index') }}" 
-       class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    <a href="{{ url_for('main.index') }}"
+      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
       Go to Dashboard
     </a>
   </div>
@@ -127,4 +125,3 @@
 </div>
 
 {% endblock %}
-

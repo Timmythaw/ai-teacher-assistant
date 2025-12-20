@@ -65,7 +65,7 @@ def lesson_generator_page():
 @login_required 
 def generate_lesson_plan():
     """Generate lesson plan from course outline"""
-    COST = 2
+    COST = 0
 
     # --- 1. CREDIT CHECK ---
     try:

@@ -17,16 +17,21 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_supabase_client() -> Client:
     if has_request_context():
-        user_id = get_current_user_id()
-        if user_id:
-            try:
-                supabase.rpc("set_user_context", {"user_id": user_id}).execute()
-                g.db_user_context_set = True
-            except Exception as e:
-                print("Warning: Could not set user context via RPC:", e)
-                g.db_user_context_set = False
-
+        # Check if we already set context for this request
+        if not hasattr(g, 'supabase_context_ready'):
+            user_id = get_current_user_id()
+            if user_id:
+                try:
+                    # This blocks until RPC completes
+                    supabase.rpc("set_user_context", {"user_id": user_id}).execute()
+                    g.supabase_context_ready = True
+                except Exception as e:
+                    print(f"Error setting user context: {e}")
+                    raise  # Don't continue if context fails
+            else:
+                g.supabase_context_ready = True
     return supabase
+
 
 def get_current_user_id():
     """
