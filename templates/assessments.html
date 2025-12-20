@@ -1,117 +1,242 @@
-{% extends "base.html" %} 
-{% set breadcrumbs = [ {'label': 'Dashboard', 'url': url_for('main.index')}, {'label': 'Generate Assessment', 'url': None} ] %} 
-
-{% block title %}Generate Assessment — AI Lesson Planner{% endblock %} 
-
-{% block content %}
+{% extends "base.html" %} {% set breadcrumbs = [ {'label': 'Dashboard', 'url':
+url_for('main.index')}, {'label': 'Generate Assessment', 'url': None} ] %} {%
+block title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block
+content %}
 
 <div class="max-w-2xl mx-auto md:mx-0">
   <div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Generate Assessment From PDF</h1>
-    <p class="text-sm text-slate-500 mt-1">Upload course material to create quizzes, exams, and rubrics instantly.</p>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+      Generate Assessment From PDF
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      Upload course material to create quizzes, exams, and rubrics instantly.
+    </p>
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 w-full">
-    <form id="upload-form" action="{{ url_for('assessments.generate_assessment') }}" method="post" enctype="multipart/form-data" class="space-y-6">
-      
+    <form
+      id="upload-form"
+      action="{{ url_for('assessments.generate_assessment') }}"
+      method="post"
+      enctype="multipart/form-data"
+      class="space-y-6"
+    >
       <div>
-          <label for="pdf" class="block text-sm font-semibold text-slate-700 mb-2">Course Material (PDF)</label>
-          <div class="relative">
-              <input id="pdf" name="pdf" type="file" accept="application/pdf" required
-                  class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-          </div>
-          <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-              PDF documents only.
-          </p>
+        <label for="pdf" class="block text-sm font-semibold text-slate-700 mb-2"
+          >Course Material (PDF)</label
+        >
+        <div class="relative">
+          <input
+            id="pdf"
+            name="pdf"
+            type="file"
+            accept="application/pdf"
+            required
+            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+            />
+          </svg>
+          PDF documents only.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        
         <div>
-          <label for="type" class="block text-sm font-semibold text-slate-700 mb-2">Assessment Type</label>
-          <select id="type" name="type" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-              <option value="MCQ" selected>Multiple Choice</option>
-              <option value="ShortAnswer">Short Answer</option>
-              <option value="Project">Project / Essay</option>
+          <label
+            for="type"
+            class="block text-sm font-semibold text-slate-700 mb-2"
+            >Assessment Type</label
+          >
+          <select
+            id="type"
+            name="type"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5"
+          >
+            <option value="MCQ" selected>Multiple Choice</option>
+            <option value="ShortAnswer">Short Answer</option>
+            <option value="Project">Project / Essay</option>
           </select>
         </div>
 
         <div>
-          <label for="difficulty" class="block text-sm font-semibold text-slate-700 mb-2">Difficulty</label>
-          <select id="difficulty" name="difficulty" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-              <option>Easy</option>
-              <option selected>Medium</option>
-              <option>Hard</option>
+          <label
+            for="difficulty"
+            class="block text-sm font-semibold text-slate-700 mb-2"
+            >Difficulty</label
+          >
+          <select
+            id="difficulty"
+            name="difficulty"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5"
+          >
+            <option>Easy</option>
+            <option selected>Medium</option>
+            <option>Hard</option>
           </select>
         </div>
 
         <div>
-          <label for="count" class="block text-sm font-semibold text-slate-700 mb-2">Question Count</label>
-          <input id="count" name="count" type="number" min="1" max="50" value="5" 
-              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+          <label
+            for="count"
+            class="block text-sm font-semibold text-slate-700 mb-2"
+            >Question Count</label
+          >
+          <input
+            id="count"
+            name="count"
+            type="number"
+            min="1"
+            max="50"
+            value="5"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5"
+          />
         </div>
       </div>
 
       <div class="flex items-center gap-4 pt-2">
-          <label class="inline-flex items-center gap-2 cursor-pointer group">
-              <input id="rubric" name="rubric" type="checkbox" checked 
-                  class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-              <span class="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">Include Grading Rubric</span>
-          </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer group">
+          <input
+            id="rubric"
+            name="rubric"
+            type="checkbox"
+            checked
+            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span
+            class="text-sm text-slate-700 group-hover:text-slate-900 transition-colors"
+            >Include Grading Rubric</span
+          >
+        </label>
       </div>
 
-      <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4">
-          <div class="flex flex-col">
-              <span id="save-status" class="text-sm font-medium text-blue-600 animate-pulse"></span>
-              <span class="text-xs text-slate-400">AI generation takes about 10-15 seconds.</span>
-          </div>
-          
-          <button id="assessment-generate-btn" type="submit" 
-              class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed w-full sm:w-auto">
-              <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
-              Generate Assessment
-          </button>
+      <div
+        class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4"
+      >
+        <div class="flex flex-col">
+          <span
+            id="save-status"
+            class="text-sm font-medium text-blue-600 animate-pulse"
+          ></span>
+          <span class="text-xs text-slate-400"
+            >AI generation takes about 10-15 seconds.</span
+          >
+        </div>
+
+        <button
+          id="assessment-generate-btn"
+          type="submit"
+          class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed w-full sm:w-auto"
+        >
+          <svg
+            class="w-5 h-5 mr-2 -ml-1"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+            />
+          </svg>
+          Generate Assessment
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-<section id="result-wrapper" class="mt-8 hidden animate-fade-in-up max-w-4xl mx-auto md:mx-0">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+<section
+  id="result-wrapper"
+  class="mt-8 hidden animate-fade-in-up max-w-4xl mx-auto md:mx-0"
+>
+  <div
+    class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4"
+  >
     <h2 class="text-lg font-bold text-slate-800">Preview Assessment</h2>
-    
+
     <div class="flex flex-wrap items-center gap-2">
-      <button id="copy-md-btn" type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      <!-- <button
+        id="copy-md-btn"
+        type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
         Copy Markdown
-      </button>
-      
-      <button id="copy-plain-btn" type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      </button> -->
+
+      <button
+        id="copy-plain-btn"
+        type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
         Copy Text
       </button>
 
-      <button id="download-pdf-btn" type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+      <button
+        id="download-pdf-btn"
+        type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <svg
+          class="w-4 h-4 mr-1.5 text-slate-500"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+          />
+        </svg>
         Download PDF
       </button>
 
-      <button id="save-btn" type="button"
-        class="hidden inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50">
-        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-        Save to DB
+      <button
+        id="save-btn"
+        type="button"
+        class="hidden inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
+      >
+        <svg
+          class="w-4 h-4 mr-1.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4.5 12.75l6 6 9-13.5"
+          />
+        </svg>
+        Save to Database
       </button>
     </div>
   </div>
 
-  <article id="result" class="prose prose-slate max-w-none bg-white border border-slate-200 rounded-xl p-8 shadow-sm"></article>
+  <article
+    id="result"
+    class="prose prose-slate max-w-none bg-white border border-slate-200 rounded-xl p-8 shadow-sm"
+  ></article>
 </section>
 
-{% endblock %} 
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -137,12 +262,15 @@
 
     // Helper: JSON to Markdown
     function jsonToMarkdownStrict(data) {
-      if (!data || typeof data !== "object") return "### Error\n\nInvalid data.";
+      if (!data || typeof data !== "object")
+        return "### Error\n\nInvalid data.";
       const lines = [];
-      const title = data.type ? `${data.type} Assessment` : "Generated Assessment";
+      const title = data.type
+        ? `${data.type} Assessment`
+        : "Generated Assessment";
       lines.push(`# ${title}`, "");
       if (data.difficulty) lines.push(`**Difficulty:** ${data.difficulty}`, "");
-      
+
       if (Array.isArray(data.questions)) {
         data.questions.forEach((q, i) => {
           lines.push(`## Q${i + 1}. ${q.q || "Untitled Question"}`, "");
@@ -158,10 +286,172 @@
       }
       if (Array.isArray(data.rubric) && data.rubric.length) {
         lines.push("## Rubric", "");
-        data.rubric.forEach((r) => lines.push(`- ${r.criteria || "Criteria"} (${r.points ?? 0} pts)`));
+        data.rubric.forEach((r) =>
+          lines.push(`- ${r.criteria || "Criteria"} (${r.points ?? 0} pts)`)
+        );
         lines.push("");
       }
       return lines.join("\n").trim();
+    }
+
+    // Render HTML preview with rubrics at the top and highlighted correct answers
+    function renderAssessmentHTML(data) {
+      if (!data || typeof data !== "object")
+        return '<p class="text-sm text-red-600">Invalid data</p>';
+      const parts = [];
+      const title =
+        data.title || data.type
+          ? `${data.type || "Generated"} Assessment`
+          : "Generated Assessment";
+      parts.push(
+        `<div class=\"mb-4\"><h1 class=\"text-xl font-bold\">${escapeHtml(
+          title
+        )}\</h1></div>`
+      );
+
+      // Rubrics: accept data.rubric or data.rubrics
+      const rubrics = data.rubric || data.rubrics || data.Rubric;
+      if (Array.isArray(rubrics) && rubrics.length) {
+        parts.push(
+          '<div class="mb-4 p-4 bg-slate-50 border border-slate-100 rounded-md">'
+        );
+        parts.push('<h3 class="text-sm font-semibold mb-2">Rubric</h3>');
+        parts.push('<ul class="text-sm text-slate-700 space-y-1">');
+        rubrics.forEach((r) => {
+          if (typeof r === "string") {
+            parts.push(`<li>- ${escapeHtml(r)}</li>`);
+            return;
+          }
+          // r is an object: extract criteria/description/name and points
+          const criteria = r.criteria || r.description || r.name || "";
+          const points = r.points != null ? ` (${r.points} pts)` : "";
+          const text = criteria
+            ? criteria + points
+            : JSON.stringify(r) + points;
+          parts.push(`<li>- ${escapeHtml(text)}</li>`);
+        });
+        parts.push("</ul></div>");
+      }
+
+      if (Array.isArray(data.questions) && data.questions.length) {
+        data.questions.forEach((q, i) => {
+          const qText =
+            q.q || q.question || q.prompt || q.text || "Untitled Question";
+          parts.push(
+            '<div class="mb-6 p-4 bg-white border border-slate-100 rounded-lg shadow-sm">'
+          );
+          parts.push(
+            `<h4 class="font-semibold mb-3 text-slate-800">Q${
+              i + 1
+            }. ${escapeHtml(qText)}</h4>`
+          );
+
+          // options
+          const opts = Array.isArray(q.options)
+            ? q.options
+            : Array.isArray(q.choices)
+            ? q.choices
+            : null;
+          if (opts && opts.length) {
+            // determine correct index with several heuristics
+            let correctIndex = -1;
+            const candidates = [
+              q.answer,
+              q.correct,
+              q.correct_answer,
+              q.answer_index,
+              q.answer_letter,
+              q.correctIndex,
+              q.correct_idx,
+            ];
+            for (const cand of candidates) {
+              if (cand == null) continue;
+              if (typeof cand === "number") {
+                correctIndex = cand;
+                break;
+              }
+              if (typeof cand === "string") {
+                const s = cand.trim();
+                if (/^[A-Za-z]$/.test(s)) {
+                  correctIndex = s.toUpperCase().charCodeAt(0) - 65;
+                  break;
+                }
+                if (/^\d+$/.test(s)) {
+                  correctIndex = parseInt(s, 10);
+                  break;
+                }
+                // match option text
+                const idx = opts.findIndex(
+                  (o) =>
+                    (o || "").toString().trim().toLowerCase() ===
+                    s.toLowerCase()
+                );
+                if (idx >= 0) {
+                  correctIndex = idx;
+                  break;
+                }
+              }
+              if (typeof cand === "object" && cand.index != null) {
+                correctIndex = cand.index;
+                break;
+              }
+            }
+            // fallback: if q.answer_text exists, match it
+            if (correctIndex === -1 && q.answer_text) {
+              const idx = opts.findIndex(
+                (o) =>
+                  (o || "").toString().trim().toLowerCase() ===
+                  (q.answer_text || "").toLowerCase()
+              );
+              if (idx >= 0) correctIndex = idx;
+            }
+
+            opts.forEach((opt, j) => {
+              const letter = String.fromCharCode(65 + j);
+              const isCorrect = j === correctIndex;
+              const classes = `block w-full text-left px-4 py-3 rounded-md border flex items-start gap-3 ${
+                isCorrect
+                  ? "bg-emerald-50 border-emerald-200"
+                  : "bg-slate-50 border-slate-200"
+              }`;
+              parts.push(
+                `<div class="${classes}"><div class="flex-shrink-0 w-6 h-6 rounded-full text-sm font-semibold text-slate-700 flex items-center justify-center border border-slate-200 bg-white">${letter}</div><div class="flex-1 text-slate-800">${escapeHtml(
+                  opt
+                )}</div></div>`
+              );
+            });
+          }
+
+          // optional answer note or explanation
+          if (q.explanation || q.answer_text || q.answer_note) {
+            const note = q.explanation || q.answer_text || q.answer_note;
+            parts.push(
+              `<div class="mt-3 text-xs text-slate-500">${escapeHtml(
+                note
+              )}</div>`
+            );
+          }
+
+          parts.push("</div>");
+        });
+      } else {
+        parts.push(
+          `<p class="text-sm text-slate-500">No questions generated.</p>`
+        );
+      }
+
+      return parts.join("\n");
+    }
+
+    // small helper to escape HTML
+    function escapeHtml(str) {
+      if (str == null) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     // Generate Handler
@@ -170,7 +460,7 @@
 
       const generateBtn = document.getElementById("assessment-generate-btn");
       const originalBtnText = generateBtn.innerHTML;
-      
+
       // Loading State
       generateBtn.disabled = true;
       generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
@@ -217,6 +507,7 @@
           if (assessment.error) {
             md = `### Error\n\n${assessment.error}`;
             suggestedFileName = "assessment_error";
+            lastAssessmentObj = null;
           } else {
             lastAssessmentObj = assessment;
             md = assessment._markdown || jsonToMarkdownStrict(assessment);
@@ -226,12 +517,17 @@
         }
 
         lastMarkdown = md;
-        resultEl.innerHTML = DOMPurify.sanitize(marked.parse(md));
+        if (lastAssessmentObj) {
+          const html = renderAssessmentHTML(lastAssessmentObj);
+          resultEl.innerHTML = DOMPurify.sanitize(html);
+        } else {
+          resultEl.innerHTML = DOMPurify.sanitize(marked.parse(md));
+        }
         resultWrapper.classList.remove("hidden");
-        
+
         // Smooth scroll
         setTimeout(() => {
-            resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+          resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
 
         if (lastAssessmentObj && Array.isArray(lastAssessmentObj.questions)) {
@@ -253,13 +549,17 @@
       saveBtn.disabled = true;
       saveBtn.innerHTML = "Saving...";
       saveStatus.textContent = "Saving to database...";
-      
+
       try {
         const payload = {
           original_filename: lastOriginalFilename,
           pdf_path: null,
           options: lastOptions,
-          result: (() => { const c = JSON.parse(JSON.stringify(lastAssessmentObj || {})); delete c._markdown; return c; })(),
+          result: (() => {
+            const c = JSON.parse(JSON.stringify(lastAssessmentObj || {}));
+            delete c._markdown;
+            return c;
+          })(),
           google_form: null,
         };
         const resp = await fetch("/assessments/api", {
@@ -268,12 +568,16 @@
           body: JSON.stringify(payload),
         });
         const data = await resp.json();
-        if (!resp.ok || !data.ok) throw new Error(data.error || `HTTP ${resp.status}`);
-        
+        if (!resp.ok || !data.ok)
+          throw new Error(data.error || `HTTP ${resp.status}`);
+
         saveStatus.textContent = "Saved successfully!";
         saveStatus.className = "text-sm font-medium text-green-600";
         saveBtn.innerHTML = "Saved!";
-        
+        // redirect back to the assessments list after a short delay
+        setTimeout(() => {
+          window.location.href = "/assessments";
+        }, 600);
       } catch (e) {
         saveStatus.textContent = `Save failed: ${e.message}`;
         saveStatus.className = "text-sm font-medium text-red-600";
@@ -288,18 +592,30 @@
       try {
         await navigator.clipboard.writeText(text);
         btnEl.innerText = "Copied!";
-        btnEl.classList.add("text-emerald-700", "bg-emerald-50", "border-emerald-200");
+        btnEl.classList.add(
+          "text-emerald-700",
+          "bg-emerald-50",
+          "border-emerald-200"
+        );
         setTimeout(() => {
           btnEl.innerText = original;
-          btnEl.classList.remove("text-emerald-700", "bg-emerald-50", "border-emerald-200");
+          btnEl.classList.remove(
+            "text-emerald-700",
+            "bg-emerald-50",
+            "border-emerald-200"
+          );
         }, 1500);
       } catch {
         btnEl.innerText = "Failed";
       }
     }
-    
-    copyMdBtn.addEventListener("click", () => copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim()));
-    copyPlainBtn.addEventListener("click", () => copyWithFeedback(copyPlainBtn, resultEl.innerText.trim()));
+
+    copyMdBtn.addEventListener("click", () =>
+      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
+    );
+    copyPlainBtn.addEventListener("click", () =>
+      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
+    );
 
     // PDF Download
     downloadPdfBtn.addEventListener("click", () => {
@@ -314,7 +630,7 @@
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
-      
+
       const preview = resultEl.cloneNode(true);
       preview.className = "prose prose-slate";
       preview.style.cssText = `

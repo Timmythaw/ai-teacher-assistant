@@ -63,6 +63,14 @@ def create_app():
             print(f"TimeAgo filter error: {e} for timestamp: {timestamp_str}")
             return "Just now"
 
+    # Register datetime format filter
+    try:
+        from utils.date_helper import register_jinja_filters
+        register_jinja_filters(app)
+    except Exception as _err:
+        # non-critical: if register fails, continue without crashing
+        print('Warning: could not register format_datetime filter:', _err)
+
     # Register blueprints
     from routes.main_routes import main_bp
     from routes.assessment_routes import assessment_bp

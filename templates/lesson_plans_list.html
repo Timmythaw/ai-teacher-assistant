@@ -1,16 +1,32 @@
-{% extends "base.html" %}
-{% block title %}Lesson Plans — AI Lesson Planner{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Lesson Plans — AI Lesson Planner{%
+endblock %} {% block content %}
 <div class="flex items-center justify-between mb-8">
   <div>
-    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Lesson Plans</h1>
-    <p class="text-sm text-slate-500 mt-1">Manage and preview your generated course content.</p>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+      Lesson Plans
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      Manage and preview your generated course content.
+    </p>
   </div>
-  
-  <a href="{{ url_for('lesson_plans.lesson_generator_page') }}"
-     class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+
+  <a
+    href="{{ url_for('lesson_plans.lesson_generator_page') }}"
+    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+  >
+    <svg
+      class="w-5 h-5 mr-2 -ml-1"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 4.5v15m7.5-7.5h-15"
+      />
+    </svg>
     Generate New
   </a>
 </div>
@@ -20,11 +36,17 @@
   <div class="flex">
     <div class="flex-shrink-0">
       <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+          clip-rule="evenodd"
+        />
       </svg>
     </div>
     <div class="ml-3">
-      <h3 class="text-sm font-medium text-red-800">Error loading lesson plans</h3>
+      <h3 class="text-sm font-medium text-red-800">
+        Error loading lesson plans
+      </h3>
       <div class="mt-2 text-sm text-red-700">
         <p>{{ error }}</p>
       </div>
@@ -33,58 +55,101 @@
 </div>
 {% endif %}
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+<div
+  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+>
   {% if lesson_plans and lesson_plans|length > 0 %}
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-slate-100">
       <thead class="bg-slate-50">
         <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Title</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Created</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Duration</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Workload</th>
-          <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Title
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Created
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Duration
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Workload
+          </th>
+          <th scope="col" class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-slate-100">
-        {% for lp in lesson_plans %}
-        {% set r = lp.result or {} %}
+        {% for lp in lesson_plans %} {% set r = lp.result or {} %}
         <tr class="hover:bg-slate-50/80 transition-colors duration-150 group">
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-8 w-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3 border border-blue-100">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                </div>
-                <div class="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors">
-                    {{ r.title or r.name or lp.original_filename or "Untitled Plan" }}
-                </div>
+              <div
+                class="flex-shrink-0 h-8 w-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3 border border-blue-100"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                  />
+                </svg>
+              </div>
+              <div
+                class="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors"
+              >
+                {{ r.title or r.name or lp.original_filename or "Untitled Plan"
+                }}
+              </div>
             </div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-            {{ lp.created_at|default("-") }}
+            {% if lp.created_at %} {{ lp.created_at | format_datetime }} {% else
+            %} - {% endif %}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-             {% set weeks = r.total_duration or r.weeks or r.duration_weeks or (lp.options.weeks if lp.options and lp.options.weeks) or "-" %}
-             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
-                {{ weeks }} Weeks
-             </span>
+            {% set weeks = r.total_duration or r.weeks or r.duration_weeks or
+            (lp.options.weeks if lp.options and lp.options.weeks) or "-" %}
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800"
+            >
+              {{ weeks }} Weeks
+            </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-            {{ r.sections_per_week or (lp.options.sections if lp.options and lp.options.sections) or "-" }} Sections/Week
+            {{ r.sections_per_week or (lp.options.sections if lp.options and
+            lp.options.sections) or "-" }} Sections/Week
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-            <button type="button"
+          <td
+            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
+          >
+            <button
+              type="button"
               class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               data-preview-id="lp-{{ lp.id }}"
               data-lp-id="{{ lp.id }}"
-              data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}">
+              data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}"
+            >
               Preview
-            </button>
-            <button type="button"
-              class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              data-json-id="lp-json-{{ lp.id }}"
-              data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan JSON' }}">
-              JSON
             </button>
           </td>
         </tr>
@@ -100,271 +165,416 @@
   </div>
   {% else %}
   <div class="flex flex-col items-center justify-center py-16 text-center">
-    <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+    <div
+      class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4"
+    >
+      <svg
+        class="w-8 h-8 text-slate-300"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        />
+      </svg>
     </div>
-    <h3 class="text-sm font-medium text-slate-900">No lesson plans saved yet</h3>
-    <p class="mt-1 text-sm text-slate-500 mb-6">Create your first AI-generated curriculum today.</p>
-    <a href="{{ url_for('lesson_plans.lesson_generator_page') }}" 
-       class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    <h3 class="text-sm font-medium text-slate-900">
+      No lesson plans saved yet
+    </h3>
+    <p class="mt-1 text-sm text-slate-500 mb-6">
+      Create your first AI-generated curriculum today.
+    </p>
+    <a
+      href="{{ url_for('lesson_plans.lesson_generator_page') }}"
+      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
       Generate Lesson Plan
     </a>
   </div>
   {% endif %}
 </div>
 
-<div id="lp-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-  
+<div
+  id="lp-modal"
+  class="fixed inset-0 z-50 hidden"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+  ></div>
+
   <div class="fixed inset-0 z-10 overflow-y-auto">
-    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-slate-200 flex flex-col max-h-[85vh]">
-            
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <h3 id="lp-modal-title" class="text-base font-semibold leading-6 text-slate-800">Preview</h3>
-                <button id="lp-modal-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto p-6 grow">
-                <article id="lp-modal-body" class="prose prose-slate prose-sm max-w-none">
-                    </article>
-            </div>
-
-            <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end gap-3 shrink-0">
-                <button id="lp-modal-copy" class="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Copy Markdown
-                </button>
-                <button id="lp-modal-close2" class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-slate-800 hover:bg-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-                    Close
-                </button>
-            </div>
+    <div
+      class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
+    >
+      <div
+        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-slate-200 flex flex-col max-h-[85vh]"
+      >
+        <div
+          class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0"
+        >
+          <h3
+            id="lp-modal-title"
+            class="text-base font-semibold leading-6 text-slate-800"
+          >
+            Preview
+          </h3>
+          <button
+            id="lp-modal-close"
+            class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
+
+        <div class="overflow-y-auto p-6 grow">
+          <article
+            id="lp-modal-body"
+            class="prose prose-slate prose-sm max-w-none"
+          ></article>
+        </div>
+
+        <div
+          class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end gap-3 shrink-0"
+        >
+          <button
+            id="lp-modal-copy"
+            class="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Copy Markdown
+          </button>
+          <button
+            id="lp-modal-close2"
+            class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-slate-800 hover:bg-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div id="json-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-  
+<div
+  id="json-modal"
+  class="fixed inset-0 z-50 hidden"
+  role="dialog"
+  aria-modal="true"
+>
+  <div
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+  ></div>
+
   <div class="fixed inset-0 z-10 overflow-y-auto">
-    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-slate-200 flex flex-col max-h-[85vh]">
-            
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <h3 id="json-modal-title" class="text-base font-semibold leading-6 text-slate-800">JSON Preview</h3>
-                <button id="json-modal-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto p-4 grow bg-slate-50">
-                <pre id="json-modal-body" class="text-xs font-mono text-slate-700 bg-white p-4 rounded-lg border border-slate-200 overflow-x-auto whitespace-pre-wrap break-words"></pre>
-            </div>
-
-            <div class="bg-white px-4 py-3 border-t border-slate-200 flex justify-end gap-3 shrink-0">
-                <button id="json-modal-copy" class="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Copy JSON
-                </button>
-                <button id="json-modal-close2" class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-slate-800 hover:bg-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-                    Close
-                </button>
-            </div>
+    <div
+      class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
+    >
+      <div
+        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-slate-200 flex flex-col max-h-[85vh]"
+      >
+        <div
+          class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0"
+        >
+          <h3
+            id="json-modal-title"
+            class="text-base font-semibold leading-6 text-slate-800"
+          >
+            JSON Preview
+          </h3>
+          <button
+            id="json-modal-close"
+            class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
+
+        <div class="overflow-y-auto p-4 grow bg-slate-50">
+          <pre
+            id="json-modal-body"
+            class="text-xs font-mono text-slate-700 bg-white p-4 rounded-lg border border-slate-200 overflow-x-auto whitespace-pre-wrap break-words"
+          ></pre>
+        </div>
+
+        <div
+          class="bg-white px-4 py-3 border-t border-slate-200 flex justify-end gap-3 shrink-0"
+        >
+          <button
+            id="json-modal-copy"
+            class="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Copy JSON
+          </button>
+          <button
+            id="json-modal-close2"
+            class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-slate-800 hover:bg-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Modal elements
-  const previewModal = document.getElementById("lp-modal");
-  const previewTitle = document.getElementById("lp-modal-title");
-  const previewBody = document.getElementById("lp-modal-body");
-  const previewClose = document.getElementById("lp-modal-close");
-  const previewClose2 = document.getElementById("lp-modal-close2");
-  const previewCopy = document.getElementById("lp-modal-copy");
+  document.addEventListener("DOMContentLoaded", () => {
+    // Modal elements
+    const previewModal = document.getElementById("lp-modal");
+    const previewTitle = document.getElementById("lp-modal-title");
+    const previewBody = document.getElementById("lp-modal-body");
+    const previewClose = document.getElementById("lp-modal-close");
+    const previewClose2 = document.getElementById("lp-modal-close2");
+    const previewCopy = document.getElementById("lp-modal-copy");
 
-  const jsonModal = document.getElementById("json-modal");
-  const jsonTitle = document.getElementById("json-modal-title");
-  const jsonBody = document.getElementById("json-modal-body");
-  const jsonClose = document.getElementById("json-modal-close");
-  const jsonClose2 = document.getElementById("json-modal-close2");
-  const jsonCopy = document.getElementById("json-modal-copy");
+    const jsonModal = document.getElementById("json-modal");
+    const jsonTitle = document.getElementById("json-modal-title");
+    const jsonBody = document.getElementById("json-modal-body");
+    const jsonClose = document.getElementById("json-modal-close");
+    const jsonClose2 = document.getElementById("json-modal-close2");
+    const jsonCopy = document.getElementById("json-modal-copy");
 
-  let lastMarkdown = "";
-  let lastJson = "";
+    let lastMarkdown = "";
+    let lastJson = "";
 
-  // Helper functions
-  const pick = (obj, keys) => {
-    for (const key of keys) {
-      if (obj && Object.prototype.hasOwnProperty.call(obj, key) && obj[key] != null) {
-        return obj[key];
+    // Helper functions
+    const pick = (obj, keys) => {
+      for (const key of keys) {
+        if (
+          obj &&
+          Object.prototype.hasOwnProperty.call(obj, key) &&
+          obj[key] != null
+        ) {
+          return obj[key];
+        }
       }
-    }
-    return undefined;
-  };
+      return undefined;
+    };
 
-  function jsonToMarkdownFlexibleLP(data) {
-    if (!data || typeof data !== "object") return "### Error\n\nInvalid data.";
-    const lines = [];
-    const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
-    const totalWeeks = pick(data, ["total_duration", "weeks", "duration_weeks"]);
-    const classSize = pick(data, ["class_size", "students", "num_students"]);
-    const sectionsPerWeek = pick(data, ["sections_per_week", "sectionsPerWeek"]);
+    function jsonToMarkdownFlexibleLP(data) {
+      if (!data || typeof data !== "object")
+        return "### Error\n\nInvalid data.";
+      const lines = [];
+      const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
+      const totalWeeks = pick(data, [
+        "total_duration",
+        "weeks",
+        "duration_weeks",
+      ]);
+      const classSize = pick(data, ["class_size", "students", "num_students"]);
+      const sectionsPerWeek = pick(data, [
+        "sections_per_week",
+        "sectionsPerWeek",
+      ]);
 
-    lines.push(`# ${title}`, "");
-    const meta = [];
-    if (totalWeeks != null) meta.push(`**Total duration:** ${totalWeeks} week(s)`);
-    if (classSize != null) meta.push(`**Class size:** ${classSize}`);
-    if (sectionsPerWeek != null) meta.push(`**Sections per week:** ${sectionsPerWeek}`);
-    if (meta.length) lines.push(meta.join(" | "));
+      lines.push(`# ${title}`, "");
+      const meta = [];
+      if (totalWeeks != null)
+        meta.push(`**Total duration:** ${totalWeeks} week(s)`);
+      if (classSize != null) meta.push(`**Class size:** ${classSize}`);
+      if (sectionsPerWeek != null)
+        meta.push(`**Sections per week:** ${sectionsPerWeek}`);
+      if (meta.length) lines.push(meta.join(" | "));
 
-    const overview = pick(data, ["overview", "summary"]);
-    if (overview)
-      lines.push(
-        "",
-        "## Overview",
-        "",
-        typeof overview === "string" ? overview : JSON.stringify(overview, null, 2)
-      );
+      const overview = pick(data, ["overview", "summary"]);
+      if (overview)
+        lines.push(
+          "",
+          "## Overview",
+          "",
+          typeof overview === "string"
+            ? overview
+            : JSON.stringify(overview, null, 2)
+        );
 
-    const weekly = pick(data, ["weekly_schedule", "weeks_schedule", "plan", "weekly"]);
-    if (Array.isArray(weekly)) {
-      lines.push("", "## Weekly Schedule", "");
-      weekly.forEach((w, i) => {
-        const label = pick(w, ["week", "label"]) ?? i + 1;
-        const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
-        lines.push(`### Week ${label}: ${topic}`);
-        // Add content description if available
-        if (w.content) lines.push(w.content);
-        if (w.objectives) lines.push(`*Objectives: ${w.objectives}*`);
-      });
-    }
-    return lines.join("\n").trim();
-  }
-
-  function openPreviewModal(markdown, title) {
-    lastMarkdown = markdown;
-    previewTitle.textContent = title || "Preview";
-    const html = typeof marked !== "undefined" ? marked.parse(markdown) : markdown;
-    const safeHtml = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
-    previewBody.innerHTML = safeHtml;
-    previewModal.classList.remove("hidden");
-  }
-
-  function closePreviewModal() {
-    previewModal.classList.add("hidden");
-    previewBody.innerHTML = "";
-    lastMarkdown = "";
-  }
-
-  function openJsonModal(jsonText, title) {
-    lastJson = jsonText;
-    jsonTitle.textContent = title || "JSON Preview";
-    jsonBody.textContent = jsonText;
-    jsonModal.classList.remove("hidden");
-  }
-
-  function closeJsonModal() {
-    jsonModal.classList.add("hidden");
-    jsonBody.textContent = "";
-    lastJson = "";
-  }
-
-  // Click handlers
-  document.body.addEventListener("click", (e) => {
-    // Backdrop close
-    if (e.target === previewModal || e.target.querySelector('#lp-modal > div')) closePreviewModal();
-    if (e.target === jsonModal || e.target.querySelector('#json-modal > div')) closeJsonModal();
-
-    // Preview Button
-    const previewBtn = e.target.closest("button[data-preview-id]");
-    if (previewBtn) {
-      const id = previewBtn.getAttribute("data-preview-id");
-      const lpId = previewBtn.getAttribute("data-lp-id");
-      const scriptEl = document.getElementById(id);
-      if (!scriptEl) {
-        alert("No preview data found.");
-        return;
+      const weekly = pick(data, [
+        "weekly_schedule",
+        "weeks_schedule",
+        "plan",
+        "weekly",
+      ]);
+      if (Array.isArray(weekly)) {
+        lines.push("", "## Weekly Schedule", "");
+        weekly.forEach((w, i) => {
+          const label = pick(w, ["week", "label"]) ?? i + 1;
+          const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
+          lines.push(`### Week ${label}: ${topic}`);
+          // Add content description if available
+          if (w.content) lines.push(w.content);
+          if (w.objectives) lines.push(`*Objectives: ${w.objectives}*`);
+        });
       }
-      try {
-        const obj = JSON.parse(scriptEl.textContent);
-        const serverUrl = lpId ? `/lesson-plans/api/${lpId}/markdown` : null;
-        
-        if (serverUrl) {
-          fetch(serverUrl)
-            .then(r => r.ok ? r.json() : null)
-            .then(data => {
-              const md = (data && data.ok && data.markdown) ? data.markdown : jsonToMarkdownFlexibleLP(obj);
-              const title = previewBtn.getAttribute("data-title");
-              openPreviewModal(md, title);
-            })
-            .catch(() => {
-              const md = jsonToMarkdownFlexibleLP(obj);
-              const title = previewBtn.getAttribute("data-title");
-              openPreviewModal(md, title);
-            });
+      return lines.join("\n").trim();
+    }
+
+    function openPreviewModal(markdown, title) {
+      lastMarkdown = markdown;
+      previewTitle.textContent = title || "Preview";
+      const html =
+        typeof marked !== "undefined" ? marked.parse(markdown) : markdown;
+      const safeHtml =
+        typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+      previewBody.innerHTML = safeHtml;
+      previewModal.classList.remove("hidden");
+    }
+
+    function closePreviewModal() {
+      previewModal.classList.add("hidden");
+      previewBody.innerHTML = "";
+      lastMarkdown = "";
+    }
+
+    function openJsonModal(jsonText, title) {
+      lastJson = jsonText;
+      jsonTitle.textContent = title || "JSON Preview";
+      jsonBody.textContent = jsonText;
+      jsonModal.classList.remove("hidden");
+    }
+
+    function closeJsonModal() {
+      jsonModal.classList.add("hidden");
+      jsonBody.textContent = "";
+      lastJson = "";
+    }
+
+    // Click handlers
+    document.body.addEventListener("click", (e) => {
+      // Backdrop close
+      if (
+        e.target === previewModal ||
+        e.target.querySelector("#lp-modal > div")
+      )
+        closePreviewModal();
+      if (e.target === jsonModal || e.target.querySelector("#json-modal > div"))
+        closeJsonModal();
+
+      // Preview Button
+      const previewBtn = e.target.closest("button[data-preview-id]");
+      if (previewBtn) {
+        const id = previewBtn.getAttribute("data-preview-id");
+        const lpId = previewBtn.getAttribute("data-lp-id");
+        const scriptEl = document.getElementById(id);
+        if (!scriptEl) {
+          alert("No preview data found.");
           return;
         }
-        const md = jsonToMarkdownFlexibleLP(obj);
-        const title = previewBtn.getAttribute("data-title");
-        openPreviewModal(md, title);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to render preview.");
-      }
-      return;
-    }
+        try {
+          const obj = JSON.parse(scriptEl.textContent);
+          const serverUrl = lpId ? `/lesson-plans/api/${lpId}/markdown` : null;
 
-    // JSON Button
-    const jsonBtn = e.target.closest("button[data-json-id]");
-    if (jsonBtn) {
-      const id = jsonBtn.getAttribute("data-json-id");
-      const scriptEl = document.getElementById(id);
-      if (!scriptEl) return;
+          if (serverUrl) {
+            fetch(serverUrl)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((data) => {
+                const md =
+                  data && data.ok && data.markdown
+                    ? data.markdown
+                    : jsonToMarkdownFlexibleLP(obj);
+                const title = previewBtn.getAttribute("data-title");
+                openPreviewModal(md, title);
+              })
+              .catch(() => {
+                const md = jsonToMarkdownFlexibleLP(obj);
+                const title = previewBtn.getAttribute("data-title");
+                openPreviewModal(md, title);
+              });
+            return;
+          }
+          const md = jsonToMarkdownFlexibleLP(obj);
+          const title = previewBtn.getAttribute("data-title");
+          openPreviewModal(md, title);
+        } catch (err) {
+          console.error(err);
+          alert("Failed to render preview.");
+        }
+        return;
+      }
+
+      // JSON Button
+      const jsonBtn = e.target.closest("button[data-json-id]");
+      if (jsonBtn) {
+        const id = jsonBtn.getAttribute("data-json-id");
+        const scriptEl = document.getElementById(id);
+        if (!scriptEl) return;
+        try {
+          const jsonText = scriptEl.textContent;
+          const title = jsonBtn.getAttribute("data-title");
+          openJsonModal(jsonText, title);
+        } catch (err) {
+          console.error(err);
+        }
+        return;
+      }
+    });
+
+    // Close buttons
+    if (previewClose) previewClose.addEventListener("click", closePreviewModal);
+    if (previewClose2)
+      previewClose2.addEventListener("click", closePreviewModal);
+    if (jsonClose) jsonClose.addEventListener("click", closeJsonModal);
+    if (jsonClose2) jsonClose2.addEventListener("click", closeJsonModal);
+
+    // Copy buttons
+    async function copyText(text, btn, originalLabel) {
+      if (!text) return;
       try {
-        const jsonText = scriptEl.textContent;
-        const title = jsonBtn.getAttribute("data-title");
-        openJsonModal(jsonText, title);
+        await navigator.clipboard.writeText(text);
+        const originalContent = btn.innerHTML;
+        btn.textContent = "Copied!";
+        btn.classList.add("text-green-700", "bg-green-50", "border-green-200");
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+          btn.classList.remove(
+            "text-green-700",
+            "bg-green-50",
+            "border-green-200"
+          );
+        }, 2000);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to copy", err);
       }
-      return;
     }
+
+    if (previewCopy)
+      previewCopy.addEventListener("click", () =>
+        copyText(lastMarkdown, previewCopy, "Copy Markdown")
+      );
+    if (jsonCopy)
+      jsonCopy.addEventListener("click", () =>
+        copyText(lastJson, jsonCopy, "Copy JSON")
+      );
   });
-
-  // Close buttons
-  if(previewClose) previewClose.addEventListener("click", closePreviewModal);
-  if(previewClose2) previewClose2.addEventListener("click", closePreviewModal);
-  if(jsonClose) jsonClose.addEventListener("click", closeJsonModal);
-  if(jsonClose2) jsonClose2.addEventListener("click", closeJsonModal);
-
-  // Copy buttons
-  async function copyText(text, btn, originalLabel) {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      const originalContent = btn.innerHTML;
-      btn.textContent = "Copied!";
-      btn.classList.add("text-green-700", "bg-green-50", "border-green-200");
-      setTimeout(() => {
-        btn.innerHTML = originalContent;
-        btn.classList.remove("text-green-700", "bg-green-50", "border-green-200");
-      }, 2000);
-    } catch (err) {
-      console.error("Failed to copy", err);
-    }
-  }
-
-  if(previewCopy) previewCopy.addEventListener("click", () => copyText(lastMarkdown, previewCopy, "Copy Markdown"));
-  if(jsonCopy) jsonCopy.addEventListener("click", () => copyText(lastJson, jsonCopy, "Copy JSON"));
-});
 </script>
 {% endblock %}
