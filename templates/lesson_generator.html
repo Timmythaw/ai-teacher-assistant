@@ -117,7 +117,8 @@ Planner{% endblock %} {% block content %}
         class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4"
       >
         <div class="text-xs text-slate-400 italic">
-          Note: Generation may take 15-30 seconds.
+          Note: Generation may take 15-30 seconds. Note: Generation may take
+          15-30 seconds.
         </div>
 
         <div class="flex items-center gap-3">
@@ -373,518 +374,550 @@ Planner{% endblock %} {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // Elements
-    const form = document.getElementById("lesson-form");
-    const resultWrapper = document.getElementById("lp-result-wrapper");
-    const resultEl = document.getElementById("lp-result");
-    const copyMdBtn = document.getElementById("lp-copy-md-btn");
-    const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
-    const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
-    const saveBtn = document.getElementById("lp-save-btn");
-    const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
-    const ttPreview = document.getElementById("tt-preview");
-    const ttList = document.getElementById("tt-list");
-    const ttInsertBtn = document.getElementById("tt-insert-btn");
-    const ttModal = document.getElementById("tt-modal");
-    const ttModalList = document.getElementById("tt-modal-list");
-    const ttModalClose = document.getElementById("tt-modal-close");
-    const ttModalCancel = document.getElementById("tt-modal-cancel");
-    const ttModalConfirm = document.getElementById("tt-modal-confirm"); // State
+    document.addEventListener("DOMContentLoaded", () => {
+      // Elements
+      const form = document.getElementById("lesson-form");
+      const resultWrapper = document.getElementById("lp-result-wrapper");
+      const resultEl = document.getElementById("lp-result");
+      const copyMdBtn = document.getElementById("lp-copy-md-btn");
+      const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
+      const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
+      const saveBtn = document.getElementById("lp-save-btn");
+      const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
+      const ttPreview = document.getElementById("tt-preview");
+      const ttList = document.getElementById("tt-list");
+      const ttInsertBtn = document.getElementById("tt-insert-btn");
+      const ttModal = document.getElementById("tt-modal");
+      const ttModalList = document.getElementById("tt-modal-list");
+      const ttModalClose = document.getElementById("tt-modal-close");
+      const ttModalCancel = document.getElementById("tt-modal-cancel");
+      const ttModalConfirm = document.getElementById("tt-modal-confirm"); // State
 
-    let lastMarkdown = "";
-    let suggestedFileName = "lesson_plan";
-    let lastRawJson = null;
-    let lastUploadInfo = {
-      original_filename: null,
-      pdf_path: null,
-      options: null,
-    };
-    let lastTimetable = null;
+      let lastMarkdown = "";
+      let suggestedFileName = "lesson_plan";
+      let lastRawJson = null;
+      let lastUploadInfo = {
+        original_filename: null,
+        pdf_path: null,
+        options: null,
+      };
+      let lastTimetable = null;
 
-    // Toast Helper
-    function showToast(
-      message,
-      type = "success",
-      timeout = 4500,
-      action = null
-    ) {
-      const container = document.getElementById("toast-container");
-      if (!container) return;
-      const wrapper = document.createElement("div");
-      const colors =
-        type === "success"
-          ? "bg-emerald-600 text-white"
-          : type === "error"
-          ? "bg-red-600 text-white"
-          : "bg-slate-800 text-white";
-      wrapper.className = `min-w-[300px] max-w-md rounded-lg shadow-xl px-4 py-3 ${colors} transition-all transform translate-y-2 opacity-0 flex items-center gap-3`;
-      const actionHtml =
-        action && action.href
-          ? `<a href="${action.href}" target="${(
-              action.target || "_blank"
-            ).replace(
-              '"',
-              ""
-            )}" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${
-              action.text || "Open"
-            }</a>`
-          : "";
-      wrapper.innerHTML = `
-        <div class="text-sm font-medium flex-1">${message}</div>
-        ${actionHtml}
-        <button class="shrink-0 text-white/70 hover:text-white transition-colors" aria-label="Close">✕</button>`;
-      wrapper.querySelector("button").addEventListener("click", () => {
-        wrapper.style.opacity = "0";
-        wrapper.style.transform = "translateY(4px)";
-        setTimeout(() => wrapper.remove(), 200);
-      });
-      container.appendChild(wrapper);
-      requestAnimationFrame(() => {
-        wrapper.style.opacity = "1";
-        wrapper.style.transform = "translateY(0)";
-      });
-      if (timeout > 0) {
-        setTimeout(() => {
+      // Toast Helper
+      function showToast(
+        message,
+        type = "success",
+        timeout = 4500,
+        action = null
+      ) {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        const wrapper = document.createElement("div");
+        const colors =
+          type === "success"
+            ? "bg-emerald-600 text-white"
+            : type === "error"
+            ? "bg-red-600 text-white"
+            : "bg-slate-800 text-white";
+        wrapper.className = `min-w-[300px] max-w-md rounded-lg shadow-xl px-4 py-3 ${colors} transition-all transform translate-y-2 opacity-0 flex items-center gap-3`;
+        const actionHtml =
+          action && action.href
+            ? `<a href="${action.href}" target="${(
+                action.target || "_blank"
+              ).replace(
+                '"',
+                ""
+              )}" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${
+                action.text || "Open"
+              }</a>`
+            : "";
+        wrapper.innerHTML = `
+          <div class="text-sm font-medium flex-1">${message}</div>
+          ${actionHtml}
+          <button class="shrink-0 text-white/70 hover:text-white transition-colors" aria-label="Close">✕</button>`;
+        wrapper.querySelector("button").addEventListener("click", () => {
           wrapper.style.opacity = "0";
           wrapper.style.transform = "translateY(4px)";
           setTimeout(() => wrapper.remove(), 200);
-        }, timeout);
-      }
-    }
-
-    // Helpers
-    function toArray(x) {
-      return Array.isArray(x) ? x : x == null ? [] : [x];
-    }
-    function pick(obj, keys) {
-      for (const k of keys) if (obj && obj[k] != null) return obj[k];
-      return undefined;
-    }
-
-    function jsonToMarkdownFlexibleLP(data) {
-      if (!data || typeof data !== "object")
-        return "### Error\n\nInvalid data.";
-      const lines = [];
-      const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
-      lines.push(`# ${title}`, "");
-
-      const meta = [];
-      const totalWeeks = pick(data, [
-        "total_duration",
-        "weeks",
-        "duration_weeks",
-      ]);
-      const classSize = pick(data, ["class_size", "students", "num_students"]);
-      const sectionsPerWeek = pick(data, [
-        "sections_per_week",
-        "sectionsPerWeek",
-      ]);
-
-      if (totalWeeks != null) meta.push(`**Duration:** ${totalWeeks} week(s)`);
-      if (classSize != null) meta.push(`**Class Size:** ${classSize}`);
-      if (sectionsPerWeek != null)
-        meta.push(`**Sessions/Week:** ${sectionsPerWeek}`);
-      if (meta.length) lines.push(meta.join(" | "));
-
-      const overview = pick(data, ["overview", "summary"]);
-      if (overview)
-        lines.push(
-          "",
-          "## Overview",
-          "",
-          typeof overview === "string"
-            ? overview
-            : JSON.stringify(overview, null, 2)
-        );
-
-      const weekly = pick(data, [
-        "weekly_schedule",
-        "weeks_schedule",
-        "plan",
-        "weekly",
-      ]);
-      if (Array.isArray(weekly) && weekly.length) {
-        lines.push("", "## Weekly Schedule", "");
-        weekly.forEach((w, i) => {
-          const label = pick(w, ["week", "label"]) ?? i + 1;
-          const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
-          lines.push(`### Week ${label}: ${topic}`);
-
-          // Compact objectives
-          const objectives = pick(w, [
-            "objectives",
-            "goals",
-            "learning_objectives",
-          ]);
-          if (objectives) {
-            lines.push(`**Objectives:**`);
-            toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
-            lines.push("");
-          }
-
-          // Content
-          if (w.content) lines.push(w.content, "");
         });
+        container.appendChild(wrapper);
+        requestAnimationFrame(() => {
+          wrapper.style.opacity = "1";
+          wrapper.style.transform = "translateY(0)";
+        });
+        if (timeout > 0) {
+          setTimeout(() => {
+            wrapper.style.opacity = "0";
+            wrapper.style.transform = "translateY(4px)";
+            setTimeout(() => wrapper.remove(), 200);
+          }, timeout);
+        }
       }
 
-      return lines.join("\n").trim();
-    }
+      // Helpers
+      function toArray(x) {
+        return Array.isArray(x) ? x : x == null ? [] : [x];
+      }
+      function pick(obj, keys) {
+        for (const k of keys) if (obj && obj[k] != null) return obj[k];
+        return undefined;
+      }
 
-    // Ensure markdown/plain text from AI has reasonable paragraph spacing
-    function normalizeMarkdownSpacing(text) {
-      if (!text || typeof text !== "string") return text;
-      // Normalize newlines and remove excessive blank lines
-      let t = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
-      // Avoid breaking lists, headings, blockquotes, code fences and indented lines.
-      // Insert a paragraph break where there's a single newline between normal lines.
-      t = t.replace(/([^\n])\n(?![#\-\*>\s`\\])/g, "$1\n\n");
-      return t;
-    }
+      function jsonToMarkdownFlexibleLP(data) {
+        if (!data || typeof data !== "object")
+          return "### Error\n\nInvalid data.";
+        const lines = [];
+        const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
+        lines.push(`# ${title}`, "");
 
-    async function copyWithFeedback(btn, text) {
-      const original = btn.innerText;
-      try {
-        await navigator.clipboard.writeText(text);
-        btn.innerText = "Copied!";
-        btn.classList.add(
-          "text-emerald-700",
-          "bg-emerald-50",
-          "border-emerald-200"
-        );
-        setTimeout(() => {
-          btn.innerText = original;
-          btn.classList.remove(
+        const meta = [];
+        const totalWeeks = pick(data, [
+          "total_duration",
+          "weeks",
+          "duration_weeks",
+        ]);
+        const classSize = pick(data, ["class_size", "students", "num_students"]);
+        const sectionsPerWeek = pick(data, [
+          "sections_per_week",
+          "sectionsPerWeek",
+        ]);
+
+        if (totalWeeks != null) meta.push(`**Duration:** ${totalWeeks} week(s)`);
+        if (classSize != null) meta.push(`**Class Size:** ${classSize}`);
+        if (sectionsPerWeek != null)
+          meta.push(`**Sessions/Week:** ${sectionsPerWeek}`);
+        if (meta.length) lines.push(meta.join(" | "));
+
+        const overview = pick(data, ["overview", "summary"]);
+        if (overview)
+          lines.push(
+            "",
+            "## Overview",
+            "",
+            typeof overview === "string"
+              ? overview
+              : JSON.stringify(overview, null, 2)
+          );
+
+        const weekly = pick(data, [
+          "weekly_schedule",
+          "weeks_schedule",
+          "plan",
+          "weekly",
+        ]);
+        if (Array.isArray(weekly) && weekly.length) {
+          lines.push("", "## Weekly Schedule", "");
+          weekly.forEach((w, i) => {
+            const label = pick(w, ["week", "label"]) ?? i + 1;
+            const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
+            lines.push(`### Week ${label}: ${topic}`);
+
+            // Compact objectives
+            const objectives = pick(w, [
+              "objectives",
+              "goals",
+              "learning_objectives",
+            ]);
+            if (objectives) {
+              lines.push(`**Objectives:**`);
+              toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
+              lines.push("");
+            }
+
+            }
+
+            // Content
+            if (w.content) lines.push(w.content, "");
+          });
+        }
+
+        return lines.join("\n").trim();
+      }
+
+      // Ensure markdown/plain text from AI has reasonable paragraph spacing
+      function normalizeMarkdownSpacing(text) {
+        if (!text || typeof text !== "string") return text;
+        // Normalize newlines and remove excessive blank lines
+        let t = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+        // Avoid breaking lists, headings, blockquotes, code fences and indented lines.
+        // Insert a paragraph break where there's a single newline between normal lines.
+        t = t.replace(/([^\n])\n(?![#\-\*>\s`\\])/g, "$1\n\n");
+        return t;
+      }
+
+      async function copyWithFeedback(btn, text) {
+        const original = btn.innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.innerText = "Copied!";
+          btn.classList.add(
             "text-emerald-700",
             "bg-emerald-50",
             "border-emerald-200"
           );
-        }, 1200);
-      } catch {
-        btn.innerText = "Failed";
-      }
-    } // Submit: generate plan // Submit: generate plan
+          setTimeout(() => {
+            btn.innerText = original;
+            btn.classList.remove(
+              "text-emerald-700",
+              "bg-emerald-50",
+              "border-emerald-200"
+            );
+          }, 1200);
+        } catch {
+          btn.innerText = "Failed";
+        }
+      } // Submit: generate plan // Submit: generate plan
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      const generateBtn = document.getElementById("lp-generate-btn");
-      const originalBtnText = generateBtn.innerHTML;
+        const generateBtn = document.getElementById("lp-generate-btn");
+        const originalBtnText = generateBtn.innerHTML;
 
-      // UI Loading State
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+        // UI Loading State
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+        // UI Loading State
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
 
-      resultEl.innerHTML = "";
-      lastMarkdown = "";
-      suggestedFileName = "lesson_plan";
-      lastRawJson = null;
-      saveBtn.disabled = true;
-      suggestTtBtn.disabled = true;
-      ttPreview.classList.add("hidden");
+        resultEl.innerHTML = "";
+        lastMarkdown = "";
+        suggestedFileName = "lesson_plan";
+        lastRawJson = null;
+        saveBtn.disabled = true;
+        suggestTtBtn.disabled = true;
+        ttPreview.classList.add("hidden");
+        resultEl.innerHTML = "";
+        lastMarkdown = "";
+        suggestedFileName = "lesson_plan";
+        lastRawJson = null;
+        saveBtn.disabled = true;
+        suggestTtBtn.disabled = true;
+        ttPreview.classList.add("hidden");
 
-      const file = document.getElementById("course_outline");
-      if (file.files && file.files.length > 0) {
-        const base = file.files[0].name.replace(/\.[^.]+$/, "");
-        suggestedFileName = `lesson_plan_${base}`;
-      }
-
-      const fd = new FormData(form);
-      try {
-        const res = await fetch(form.action, { method: "POST", body: fd });
-        const contentType = res.headers.get("Content-Type") || "";
-
-        let md = "";
-        if (contentType.includes("application/json")) {
-          const obj = await res.json();
-
-          // 1. HANDLE ERRORS (Like insufficient credits)
-          if (res.status === 402) {
-            showToast(obj.error, "error");
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = originalBtnText;
-            return;
-          }
-
-          if (obj && typeof obj === "object" && !obj.error) {
-            // --- START UPDATE CREDITS ---
-            if (obj.new_credit_balance !== undefined) {
-              // Update the display on the generator page itself
-              const displayEl = document.getElementById("credit-display");
-              if (displayEl) {
-                displayEl.innerText = obj.new_credit_balance;
-                // Add a visual flash effect
-                displayEl.classList.add(
-                  "text-green-600",
-                  "scale-110",
-                  "transition-transform",
-                  "duration-200"
-                );
-                setTimeout(
-                  () =>
-                    displayEl.classList.remove("text-green-600", "scale-110"),
-                  500
-                );
-              }
-
-              // Update the Desktop Sidebar badge
-              const navEl = document.getElementById("nav-credit-count");
-              if (navEl) {
-                navEl.innerText = obj.new_credit_balance;
-              }
-
-              // Update the Mobile Menu badge
-              const mobileNavEl = document.getElementById(
-                "nav-credit-count-mobile"
-              );
-              if (mobileNavEl) {
-                mobileNavEl.innerText = obj.new_credit_balance;
-              }
-            }
-            // --- END UPDATE CREDITS ---
-
-            lastRawJson = obj;
-            suggestTtBtn.disabled = false;
-
-            lastUploadInfo.options = {
-              weeks: Number(document.getElementById("weeks").value || 0),
-              students: Number(document.getElementById("students").value || 0),
-              sections: Number(document.getElementById("sections").value || 0),
-            };
-            lastUploadInfo.original_filename =
-              file?.files?.[0]?.name || "manual_entry";
-
-            saveBtn.disabled = false;
-            md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
-            md = normalizeMarkdownSpacing(md);
-          } else {
-            md = `### Error\n\n${obj?.error || "Unknown error"}`;
-          }
-        } else {
-          md = await res.text();
-          md = normalizeMarkdownSpacing(md);
+        const file = document.getElementById("course_outline");
+        if (file.files && file.files.length > 0) {
+          const base = file.files[0].name.replace(/\.[^.]+$/, "");
+          suggestedFileName = `lesson_plan_${base}`;
+        }
+        const file = document.getElementById("course_outline");
+        if (file.files && file.files.length > 0) {
+          const base = file.files[0].name.replace(/\.[^.]+$/, "");
+          suggestedFileName = `lesson_plan_${base}`;
         }
 
-        lastMarkdown = md;
-        const html = typeof marked !== "undefined" ? marked.parse(md) : md;
-        const safe =
-          typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
-        resultEl.innerHTML = safe;
-        resultWrapper.classList.remove("hidden");
+        const fd = new FormData(form);
+        try {
+          const res = await fetch(form.action, { method: "POST", body: fd });
+          const contentType = res.headers.get("Content-Type") || "";
+        const fd = new FormData(form);
+        try {
+          const res = await fetch(form.action, { method: "POST", body: fd });
+          const contentType = res.headers.get("Content-Type") || "";
 
-        setTimeout(
-          () =>
-            resultWrapper.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            }),
-          100
-        );
-      } catch (err) {
-        lastMarkdown = `### Error\n\n${err.message}`;
-        resultEl.innerText = lastMarkdown;
-        resultWrapper.classList.remove("hidden");
-      } finally {
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = originalBtnText;
-      }
-    }); // Suggest Timetable
-    suggestTtBtn.addEventListener("click", async () => {
-      if (!lastRawJson) return;
-      suggestTtBtn.disabled = true;
-      const original = suggestTtBtn.innerHTML;
-      suggestTtBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...`;
+          let md = "";
+          if (contentType.includes("application/json")) {
+            const obj = await res.json();
+          let md = "";
+          if (contentType.includes("application/json")) {
+            const obj = await res.json();
 
-      try {
-        const payload = {
-          plan: (() => {
-            const c = JSON.parse(JSON.stringify(lastRawJson));
-            delete c._markdown;
-            return c;
-          })(),
-          slot_hours: 1,
-          work_hours: [9, 17],
-          calendar_id: "primary",
-          location_hint: "Room 101",
-        };
-        const r = await fetch("/timetable/suggest", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${r.status}`);
+            // 1. HANDLE ERRORS (Like insufficient credits)
+            if (res.status === 402) {
+              showToast(obj.error, "error");
+              generateBtn.disabled = false;
+              generateBtn.innerHTML = originalBtnText;
+              return;
+            }
 
-        lastTimetable = {
-          suggested_slots: data.suggested_slots,
-          metadata: data.metadata,
-        };
+            if (obj && typeof obj === "object" && !obj.error) {
+              // --- START UPDATE CREDITS ---
+              if (obj.new_credit_balance !== undefined) {
+                // Update the display on the generator page itself
+                const displayEl = document.getElementById("credit-display");
+                if (displayEl) {
+                  displayEl.innerText = obj.new_credit_balance;
+                  // Add a visual flash effect
+                  displayEl.classList.add(
+                    "text-green-600",
+                    "scale-110",
+                    "transition-transform",
+                    "duration-200"
+                  );
+                  setTimeout(
+                    () =>
+                      displayEl.classList.remove("text-green-600", "scale-110"),
+                    500
+                  );
+                }
 
-        // Render Compact list
-        const items = (lastTimetable.suggested_slots || [])
-          .slice(0, 5)
-          .map((s) => {
-            const date = new Date(s.start).toLocaleDateString(undefined, {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-            });
-            const time = new Date(s.start).toLocaleTimeString(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            return `<div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-             <span class="font-medium text-slate-700">${s.title}</span>
-             <span class="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-500">${date} • ${time}</span>
-          </div>`;
+                // Update the Desktop Sidebar badge
+                const navEl = document.getElementById("nav-credit-count");
+                if (navEl) {
+                  navEl.innerText = obj.new_credit_balance;
+                }
+                }
+
+                // Update the Mobile Menu badge
+                const mobileNavEl = document.getElementById(
+                  "nav-credit-count-mobile"
+                );
+                if (mobileNavEl) {
+                  mobileNavEl.innerText = obj.new_credit_balance;
+                }
+              }
+              // --- END UPDATE CREDITS ---
+                }
+              }
+              // --- END UPDATE CREDITS ---
+
+              lastRawJson = obj;
+              suggestTtBtn.disabled = false;
+
+              lastUploadInfo.options = {
+                weeks: Number(document.getElementById("weeks").value || 0),
+                students: Number(document.getElementById("students").value || 0),
+                sections: Number(document.getElementById("sections").value || 0),
+              };
+              lastUploadInfo.original_filename =
+                file?.files?.[0]?.name || "manual_entry";
+
+              saveBtn.disabled = false;
+              md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
+              md = normalizeMarkdownSpacing(md);
+            } else {
+              md = `### Error\n\n${obj?.error || "Unknown error"}`;
+            }
+          } else {
+            md = await res.text();
+            md = normalizeMarkdownSpacing(md);
+          }
+
+          lastMarkdown = md;
+          const html = typeof marked !== "undefined" ? marked.parse(md) : md;
+          const safe =
+            typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+          resultEl.innerHTML = safe;
+          resultWrapper.classList.remove("hidden");
+
+          setTimeout(
+            () =>
+              resultWrapper.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              }),
+            100
+          );
+        } catch (err) {
+          lastMarkdown = `### Error\n\n${err.message}`;
+          resultEl.innerText = lastMarkdown;
+          resultWrapper.classList.remove("hidden");
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = originalBtnText;
+        }
+      }); // Suggest Timetable
+      suggestTtBtn.addEventListener("click", async () => {
+        if (!lastRawJson) return;
+        suggestTtBtn.disabled = true;
+        const original = suggestTtBtn.innerHTML;
+        suggestTtBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...`;
+
+        try {
+          const payload = {
+            plan: (() => {
+              const c = JSON.parse(JSON.stringify(lastRawJson));
+              delete c._markdown;
+              return c;
+            })(),
+            slot_hours: 1,
+            work_hours: [9, 17],
+            calendar_id: "primary",
+            location_hint: "Room 101",
+          };
+          const r = await fetch("/timetable/suggest", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(payload),
           });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok || !data.ok)
+            throw new Error(data.error || `HTTP ${r.status}`);
 
-        ttList.innerHTML = items.length
-          ? items.join("")
-          : '<p class="text-slate-400 italic">No slots suggested.</p>';
-        ttPreview.classList.remove("hidden");
-        ttInsertBtn.disabled = items.length === 0;
+          lastTimetable = {
+            suggested_slots: data.suggested_slots,
+            metadata: data.metadata,
+          };
 
-        // Scroll to timetable
-        ttPreview.scrollIntoView({ behavior: "smooth", block: "center" });
-      } catch (e) {
-        showToast("Failed to suggest timetable: " + (e?.message || e), "error");
-      } finally {
-        suggestTtBtn.disabled = false;
-        suggestTtBtn.innerHTML = original;
-      }
-    });
-
-    // Open Modal logic
-    ttInsertBtn.addEventListener("click", () => {
-      if (!lastTimetable) return;
-      // Render Full Modal List
-      const modalItems = (lastTimetable.suggested_slots || []).map((s) => {
-        const date = new Date(s.start).toLocaleDateString(undefined, {
-          weekday: "long",
-          month: "short",
-          day: "numeric",
-        });
-        const time = new Date(s.start).toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        return `<div class="flex items-start gap-3 p-2 hover:bg-white rounded transition-colors group">
-                <div class="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0 group-hover:scale-110 transition-transform"></div>
-                <div>
-                    <div class="font-medium text-slate-800">${s.title}</div>
-                    <div class="text-xs text-slate-500">${date} at ${time}</div>
-                </div>
+          // Render Compact list
+          const items = (lastTimetable.suggested_slots || [])
+            .slice(0, 5)
+            .map((s) => {
+              const date = new Date(s.start).toLocaleDateString(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              });
+              const time = new Date(s.start).toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              return `<div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+               <span class="font-medium text-slate-700">${s.title}</span>
+               <span class="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-500">${date} • ${time}</span>
             </div>`;
+            });
+
+          ttList.innerHTML = items.length
+            ? items.join("")
+            : '<p class="text-slate-400 italic">No slots suggested.</p>';
+          ttPreview.classList.remove("hidden");
+          ttInsertBtn.disabled = items.length === 0;
+
+          // Scroll to timetable
+          ttPreview.scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (e) {
+          showToast("Failed to suggest timetable: " + (e?.message || e), "error");
+        } finally {
+          suggestTtBtn.disabled = false;
+          suggestTtBtn.innerHTML = original;
+        }
       });
-      ttModalList.innerHTML = modalItems.join("");
-      ttModal.classList.remove("hidden");
-    }); // Modal Close
 
-    function hideTtModal() {
-      ttModal.classList.add("hidden");
-    }
-    ttModalClose.addEventListener("click", hideTtModal);
-    ttModalCancel.addEventListener("click", hideTtModal); // Insert Timetable (Confirm)
-
-    ttModalConfirm.addEventListener("click", async () => {
-      if (!lastTimetable) return;
-      ttModalConfirm.disabled = true;
-      ttModalConfirm.textContent = "Inserting...";
-      try {
-        const r = await fetch("/timetable/schedule", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ timetable: lastTimetable }),
+      // Open Modal logic
+      ttInsertBtn.addEventListener("click", () => {
+        if (!lastTimetable) return;
+        // Render Full Modal List
+        const modalItems = (lastTimetable.suggested_slots || []).map((s) => {
+          const date = new Date(s.start).toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+          });
+          const time = new Date(s.start).toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `<div class="flex items-start gap-3 p-2 hover:bg-white rounded transition-colors group">
+                  <div class="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0 group-hover:scale-110 transition-transform"></div>
+                  <div>
+                      <div class="font-medium text-slate-800">${s.title}</div>
+                      <div class="text-xs text-slate-500">${date} at ${time}</div>
+                  </div>
+              </div>`;
         });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${r.status}`);
+        ttModalList.innerHTML = modalItems.join("");
+        ttModal.classList.remove("hidden");
+      }); // Modal Close
 
-        const firstLink =
-          (data.results || []).find((r) => r.ok && r.html_link)?.html_link ||
-          "https://calendar.google.com/calendar/u/0/r";
-        showToast(`Time slots inserted.`, "success", 6000, {
-          text: "View Calendar",
-          href: firstLink,
-          target: "_blank",
-        });
-        hideTtModal();
-      } catch (e) {
-        showToast("Failed to insert events: " + (e?.message || e), "error");
-      } finally {
-        ttModalConfirm.disabled = false;
-        ttModalConfirm.textContent = "Add to Google Calendar";
+      function hideTtModal() {
+        ttModal.classList.add("hidden");
       }
-    }); // Save to DB
+      ttModalClose.addEventListener("click", hideTtModal);
+      ttModalCancel.addEventListener("click", hideTtModal); // Insert Timetable (Confirm)
 
-    saveBtn.addEventListener("click", async () => {
-      if (!lastRawJson) return;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = "Saving...";
-      try {
-        const payload = {
-          original_filename: lastUploadInfo.original_filename,
-          pdf_path: lastUploadInfo.pdf_path,
-          options: lastUploadInfo.options,
-          result: (() => {
-            const c = JSON.parse(JSON.stringify(lastRawJson || {}));
-            delete c._markdown;
-            return c;
-          })(),
+      ttModalConfirm.addEventListener("click", async () => {
+        if (!lastTimetable) return;
+        ttModalConfirm.disabled = true;
+        ttModalConfirm.textContent = "Inserting...";
+        try {
+          const r = await fetch("/timetable/schedule", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ timetable: lastTimetable }),
+          });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok || !data.ok)
+            throw new Error(data.error || `HTTP ${r.status}`);
+
+          const firstLink =
+            (data.results || []).find((r) => r.ok && r.html_link)?.html_link ||
+            "https://calendar.google.com/calendar/u/0/r";
+          showToast(`Time slots inserted.`, "success", 6000, {
+            text: "View Calendar",
+            href: firstLink,
+            target: "_blank",
+          });
+          hideTtModal();
+        } catch (e) {
+          showToast("Failed to insert events: " + (e?.message || e), "error");
+        } finally {
+          ttModalConfirm.disabled = false;
+          ttModalConfirm.textContent = "Add to Google Calendar";
+        }
+      }); // Save to DB
+
+      saveBtn.addEventListener("click", async () => {
+        if (!lastRawJson) return;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = "Saving...";
+        try {
+          const payload = {
+            original_filename: lastUploadInfo.original_filename,
+            pdf_path: lastUploadInfo.pdf_path,
+            options: lastUploadInfo.options,
+            result: (() => {
+              const c = JSON.parse(JSON.stringify(lastRawJson || {}));
+              delete c._markdown;
+              return c;
+            })(),
+          };
+          const res = await fetch("/lesson-plans/api", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok)
+            throw new Error(data.error || `HTTP ${res.status}`);
+
+          saveBtn.innerHTML = "Saved!";
+          saveBtn.classList.remove("bg-emerald-600", "hover:bg-emerald-700");
+          saveBtn.classList.add("bg-emerald-500", "cursor-default");
+
+
+          showToast("Lesson plan saved successfully!", "success");
+        } catch (err) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Save to DB";
+          showToast("Failed to save: " + (err?.message || err), "error");
+        }
+      }); // Copy buttons
+
+      copyMdBtn.addEventListener("click", () =>
+        copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
+      );
+      copyPlainBtn.addEventListener("click", () =>
+        copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
+      ); // PDF download
+
+      downloadPdfBtn.addEventListener("click", () => {
+        const opt = {
+          margin: [15, 15],
+          filename: `${suggestedFileName}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         };
-        const res = await fetch("/lesson-plans/api", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${res.status}`);
 
-        saveBtn.innerHTML = "Saved!";
-        saveBtn.classList.remove("bg-emerald-600", "hover:bg-emerald-700");
-        saveBtn.classList.add("bg-emerald-500", "cursor-default");
-
-        showToast("Lesson plan saved successfully!", "success");
-      } catch (err) {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Save to DB";
-        showToast("Failed to save: " + (err?.message || err), "error");
-      }
-    }); // Copy buttons
-
-    copyMdBtn.addEventListener("click", () =>
-      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
-    );
-    copyPlainBtn.addEventListener("click", () =>
-      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
-    ); // PDF download
-
-    downloadPdfBtn.addEventListener("click", () => {
-      const opt = {
-        margin: [15, 15],
-        filename: `${suggestedFileName}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
-
-      const preview = resultEl.cloneNode(true);
-      preview.className = "prose prose-slate";
-      preview.style.cssText = `background-color: #ffffff; width: 100%; font-family: sans-serif; color: #000;`;
-      html2pdf().set(opt).from(preview).save();
+        const preview = resultEl.cloneNode(true);
+        preview.className = "prose prose-slate";
+        preview.style.cssText = `background-color: #ffffff; width: 100%; font-family: sans-serif; color: #000;`;
+        html2pdf().set(opt).from(preview).save();
+      });
     });
-  });
+        html2pdf().set(opt).from(preview).save();
+      });
+    });
 </script>
 {% endblock %}
