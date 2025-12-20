@@ -1,166 +1,78 @@
-{% extends "base.html" %} {% block title %}Generate Lesson Plan — AI Lesson
-Planner{% endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Generate Lesson Plan — AI Lesson Planner{% endblock %}
+
+{% block content %}
 
 <div class="max-w-4xl mx-auto md:mx-0">
   <div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
-      Generate Lesson Plan
-    </h1>
-    <p class="text-sm text-slate-500 mt-1">
-      Upload your course outline to structure your semester and generate weekly
-      content.
-    </p>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Generate Lesson Plan</h1>
+    <p class="text-sm text-slate-500 mt-1">Upload your course outline to structure your semester and generate weekly
+      content.</p>
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 w-full">
-    <form
-      id="lesson-form"
-      action="{{ url_for('lesson_plans.generate_lesson_plan') }}"
-      method="post"
-      enctype="multipart/form-data"
-      class="space-y-6"
-    >
+    <form id="lesson-form" action="{{ url_for('lesson_plans.generate_lesson_plan') }}" method="post"
+      enctype="multipart/form-data" class="space-y-6">
+
       <div>
-        <label
-          for="course_outline"
-          class="block text-sm font-semibold text-slate-700 mb-2"
-          >Course Outline / Syllabus (PDF)</label
-        >
+        <label for="course_outline" class="block text-sm font-semibold text-slate-700 mb-2">Course Outline / Syllabus
+          (PDF)</label>
         <div class="relative">
-          <input
-            id="course_outline"
-            name="course_outline"
-            type="file"
-            accept="application/pdf"
-            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <input id="course_outline" name="course_outline" type="file" accept="application/pdf"
+            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-            />
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
-          Optional. Providing a PDF helps the AI tailor the content to your
-          specific curriculum.
+          Providing a PDF helps the AI tailor the content to your specific curriculum.
         </p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div>
-          <label
-            for="weeks"
-            class="block text-sm font-semibold text-slate-700 mb-2"
-            >Duration (Weeks)</label
-          >
-          <input
-            id="weeks"
-            name="weeks"
-            type="number"
-            min="1"
-            max="52"
-            step="1"
-            value="8"
-            class="block w-full rounded-md border-slate-300 shadow-sm py-2.5 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            required
-          />
+          <label for="weeks" class="block text-sm font-semibold text-slate-700 mb-2">Duration (Weeks)</label>
+          <input id="weeks" name="weeks" type="number" min="1" max="52" step="1" value="8"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required />
         </div>
 
         <div>
-          <label
-            for="students"
-            class="block text-sm font-semibold text-slate-700 mb-2"
-            >Class Size</label
-          >
-          <input
-            id="students"
-            name="students"
-            type="number"
-            min="1"
-            max="500"
-            step="1"
-            value="30"
-            class="block w-full rounded-md border-slate-300 shadow-sm py-2.5 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            required
-          />
+          <label for="students" class="block text-sm font-semibold text-slate-700 mb-2">Class Size</label>
+          <input id="students" name="students" type="number" min="1" max="500" step="1" value="30"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required />
         </div>
 
         <div>
-          <label
-            for="sections"
-            class="block text-sm font-semibold text-slate-700 mb-2"
-            >Sessions per Week</label
-          >
-          <input
-            id="sections"
-            name="sections"
-            type="number"
-            min="1"
-            max="10"
-            step="1"
-            value="2"
-            class="block w-full rounded-md border-slate-300 shadow-sm py-2.5 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            required
-          />
+          <label for="sections" class="block text-sm font-semibold text-slate-700 mb-2">Sessions per Week</label>
+          <input id="sections" name="sections" type="number" min="1" max="10" step="1" value="2"
+            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required />
         </div>
       </div>
 
       <div
-        class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4"
-      >
+        class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4">
         <div class="text-xs text-slate-400 italic">
-          Note: Generation may take 15-30 seconds. Note: Generation may take
-          15-30 seconds.
+          Note: Generation may take 15-30 seconds.
         </div>
 
         <div class="flex items-center gap-3">
-          <button
-            id="lp-suggest-tt-btn"
-            type="button"
-            disabled
-            class="inline-flex items-center justify-center px-4 py-2 border border-indigo-200 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg
-              class="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+          <button id="lp-suggest-tt-btn" type="button" disabled
+            class="inline-flex items-center justify-center px-4 py-2 border border-indigo-200 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Suggest Timetable
           </button>
 
-          <button
-            id="lp-generate-btn"
-            type="submit"
-            class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            <svg
-              class="w-5 h-5 mr-2 -ml-1"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-              />
+          <button id="lp-generate-btn" type="submit"
+            class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed">
+            <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
             </svg>
             Generate Plan
           </button>
@@ -170,190 +82,100 @@ Planner{% endblock %} {% block content %}
   </div>
 </div>
 
-<section
-  id="lp-result-wrapper"
-  class="mt-8 hidden animate-fade-in-up max-w-4xl mx-auto md:mx-0"
->
-  <div
-    class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4"
-  >
+<section id="lp-result-wrapper" class="mt-8 hidden animate-fade-in-up max-w-4xl mx-auto md:mx-0">
+
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
     <h2 class="text-lg font-bold text-slate-800">Generated Plan</h2>
 
     <div class="flex flex-wrap items-center gap-2">
-      <button
-        id="lp-copy-md-btn"
-        type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
+      <button id="lp-copy-md-btn" type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
         Copy Markdown
       </button>
-      <button
-        id="lp-copy-plain-btn"
-        type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
+      <button id="lp-copy-plain-btn" type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
         Copy Text
       </button>
-      <button
-        id="lp-download-pdf-btn"
-        type="button"
-        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
-        <svg
-          class="w-4 h-4 mr-1.5 text-slate-500"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-          />
+      <button id="lp-download-pdf-btn" type="button"
+        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
         </svg>
         Download PDF
       </button>
-      <button
-        id="lp-save-btn"
-        type="button"
-        disabled
-        class="inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg
-          class="w-4 h-4 mr-1.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M4.5 12.75l6 6 9-13.5"
-          />
+      <button id="lp-save-btn" type="button" disabled
+        class="inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
         </svg>
         Save to DB
       </button>
     </div>
   </div>
 
-  <article
-    id="lp-result"
-    class="prose prose-slate max-w-none bg-white border border-slate-200 rounded-xl p-8 shadow-sm"
-  ></article>
+  <article id="lp-result"
+    class="prose prose-slate max-w-none bg-white border border-slate-200 rounded-xl p-8 shadow-sm"></article>
 
-  <div
-    id="tt-preview"
-    class="mt-6 hidden bg-white border border-slate-200 rounded-xl p-6 shadow-sm ring-1 ring-slate-900/5"
-  >
+  <div id="tt-preview"
+    class="mt-6 hidden bg-white border border-slate-200 rounded-xl p-6 shadow-sm ring-1 ring-slate-900/5">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-            />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
           </svg>
         </div>
         <div>
-          <h3 class="text-base font-semibold text-slate-800">
-            Suggested Schedule
-          </h3>
-          <p class="text-xs text-slate-500">
-            AI suggested slots based on your preferences.
-          </p>
+          <h3 class="text-base font-semibold text-slate-800">Suggested Schedule</h3>
+          <p class="text-xs text-slate-500">AI suggested slots based on your preferences.</p>
         </div>
       </div>
-      <button
-        id="tt-insert-btn"
-        type="button"
-        disabled
-        class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-      >
+      <button id="tt-insert-btn" type="button" disabled
+        class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
         Add to Google Calendar
       </button>
     </div>
-    <div
-      id="tt-list"
-      class="text-sm text-slate-600 max-h-64 overflow-auto bg-slate-50 rounded-lg p-4 border border-slate-100"
-    ></div>
+    <div id="tt-list"
+      class="text-sm text-slate-600 max-h-64 overflow-auto bg-slate-50 rounded-lg p-4 border border-slate-100"></div>
   </div>
 
-  <div
-    id="tt-modal"
-    class="fixed inset-0 z-50 hidden"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
-    ></div>
+  <div id="tt-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
     <div class="fixed inset-0 z-10 overflow-y-auto">
-      <div
-        class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
-      >
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div
-          class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
-        >
-          <div
-            class="bg-indigo-50 px-4 py-4 border-b border-indigo-100 flex items-center justify-between"
-          >
-            <h3 class="text-base font-semibold leading-6 text-indigo-900">
-              Confirm Schedule
-            </h3>
-            <button
-              id="tt-modal-close"
-              class="text-indigo-400 hover:text-indigo-600 rounded-md p-1 hover:bg-indigo-100 transition-colors"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+          class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+
+          <div class="bg-indigo-50 px-4 py-4 border-b border-indigo-100 flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 text-indigo-900">Confirm Schedule</h3>
+            <button id="tt-modal-close"
+              class="text-indigo-400 hover:text-indigo-600 rounded-md p-1 hover:bg-indigo-100 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           <div class="p-6">
             <p class="text-sm text-slate-600 mb-4">
-              Review the suggested time slots below. Clicking "Add" will insert
-              these events directly into your primary Google Calendar.
+              Review the suggested time slots below. Clicking "Add" will insert these events directly into your primary
+              Google Calendar.
             </p>
-            <div
-              id="tt-modal-list"
-              class="text-sm text-slate-700 max-h-60 overflow-y-auto border border-slate-200 rounded-lg bg-slate-50 p-3 space-y-2"
-            ></div>
+            <div id="tt-modal-list"
+              class="text-sm text-slate-700 max-h-60 overflow-y-auto border border-slate-200 rounded-lg bg-slate-50 p-3 space-y-2">
+            </div>
           </div>
 
-          <div
-            class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end gap-3"
-          >
-            <button
-              id="tt-modal-cancel"
-              class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
+          <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end gap-3">
+            <button id="tt-modal-cancel"
+              class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               Cancel
             </button>
-            <button
-              id="tt-modal-confirm"
-              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+            <button id="tt-modal-confirm"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               Add to Calendar
             </button>
           </div>
@@ -363,561 +185,410 @@ Planner{% endblock %} {% block content %}
   </div>
 </section>
 
-<div
-  id="toast-container"
-  class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
-></div>
+<div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Elements
-      const form = document.getElementById("lesson-form");
-      const resultWrapper = document.getElementById("lp-result-wrapper");
-      const resultEl = document.getElementById("lp-result");
-      const copyMdBtn = document.getElementById("lp-copy-md-btn");
-      const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
-      const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
-      const saveBtn = document.getElementById("lp-save-btn");
-      const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
-      const ttPreview = document.getElementById("tt-preview");
-      const ttList = document.getElementById("tt-list");
-      const ttInsertBtn = document.getElementById("tt-insert-btn");
-      const ttModal = document.getElementById("tt-modal");
-      const ttModalList = document.getElementById("tt-modal-list");
-      const ttModalClose = document.getElementById("tt-modal-close");
-      const ttModalCancel = document.getElementById("tt-modal-cancel");
-      const ttModalConfirm = document.getElementById("tt-modal-confirm"); // State
+  document.addEventListener("DOMContentLoaded", () => {
+    // Elements
+    const form = document.getElementById("lesson-form");
+    const resultWrapper = document.getElementById("lp-result-wrapper");
+    const resultEl = document.getElementById("lp-result");
+    const copyMdBtn = document.getElementById("lp-copy-md-btn");
+    const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
+    const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
+    const saveBtn = document.getElementById("lp-save-btn");
+    const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
 
-      let lastMarkdown = "";
-      let suggestedFileName = "lesson_plan";
-      let lastRawJson = null;
-      let lastUploadInfo = {
-        original_filename: null,
-        pdf_path: null,
-        options: null,
-      };
-      let lastTimetable = null;
+    const ttPreview = document.getElementById("tt-preview");
+    const ttList = document.getElementById("tt-list");
+    const ttInsertBtn = document.getElementById("tt-insert-btn");
+    const ttModal = document.getElementById("tt-modal");
+    const ttModalList = document.getElementById("tt-modal-list");
+    const ttModalClose = document.getElementById("tt-modal-close");
+    const ttModalCancel = document.getElementById("tt-modal-cancel");
+    const ttModalConfirm = document.getElementById("tt-modal-confirm");
 
-      // Toast Helper
-      function showToast(
-        message,
-        type = "success",
-        timeout = 4500,
-        action = null
-      ) {
-        const container = document.getElementById("toast-container");
-        if (!container) return;
-        const wrapper = document.createElement("div");
-        const colors =
-          type === "success"
-            ? "bg-emerald-600 text-white"
-            : type === "error"
-            ? "bg-red-600 text-white"
-            : "bg-slate-800 text-white";
-        wrapper.className = `min-w-[300px] max-w-md rounded-lg shadow-xl px-4 py-3 ${colors} transition-all transform translate-y-2 opacity-0 flex items-center gap-3`;
-        const actionHtml =
-          action && action.href
-            ? `<a href="${action.href}" target="${(
-                action.target || "_blank"
-              ).replace(
-                '"',
-                ""
-              )}" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${
-                action.text || "Open"
-              }</a>`
-            : "";
-        wrapper.innerHTML = `
-          <div class="text-sm font-medium flex-1">${message}</div>
-          ${actionHtml}
-          <button class="shrink-0 text-white/70 hover:text-white transition-colors" aria-label="Close">✕</button>`;
-        wrapper.querySelector("button").addEventListener("click", () => {
-          wrapper.style.opacity = "0";
-          wrapper.style.transform = "translateY(4px)";
+    // State
+    let lastMarkdown = "";
+    let suggestedFileName = "lesson_plan";
+    let lastRawJson = null;
+    let lastUploadInfo = { original_filename: null, pdf_path: null, options: null };
+    let lastTimetable = null;
+
+    // Toast Helper
+    function showToast(message, type = 'success', timeout = 4500, action = null) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const wrapper = document.createElement('div');
+      const colors = type === 'success' ? 'bg-emerald-600 text-white'
+        : type === 'error' ? 'bg-red-600 text-white'
+          : 'bg-slate-800 text-white';
+
+      wrapper.className = `min-w-[300px] max-w-md rounded-lg shadow-xl px-4 py-3 ${colors} transition-all transform translate-y-2 opacity-0 flex items-center gap-3`;
+
+      const actionHtml = action && action.href
+        ? `<a href="${action.href}" target="${(action.target || '_blank').replace('"', '')}" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${action.text || 'Open'}</a>`
+        : '';
+
+      wrapper.innerHTML = `
+        <div class="text-sm font-medium flex-1">${message}</div>
+        ${actionHtml}
+        <button class="shrink-0 text-white/70 hover:text-white transition-colors" aria-label="Close">✕</button>`;
+
+      wrapper.querySelector('button').addEventListener('click', () => {
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'translateY(4px)';
+        setTimeout(() => wrapper.remove(), 200);
+      });
+
+      container.appendChild(wrapper);
+      requestAnimationFrame(() => {
+        wrapper.style.opacity = '1';
+        wrapper.style.transform = 'translateY(0)';
+      });
+
+      if (timeout > 0) {
+        setTimeout(() => {
+          wrapper.style.opacity = '0';
+          wrapper.style.transform = 'translateY(4px)';
           setTimeout(() => wrapper.remove(), 200);
-        });
-        container.appendChild(wrapper);
-        requestAnimationFrame(() => {
-          wrapper.style.opacity = "1";
-          wrapper.style.transform = "translateY(0)";
-        });
-        if (timeout > 0) {
-          setTimeout(() => {
-            wrapper.style.opacity = "0";
-            wrapper.style.transform = "translateY(4px)";
-            setTimeout(() => wrapper.remove(), 200);
-          }, timeout);
-        }
+        }, timeout);
       }
+    }
 
-      // Helpers
-      function toArray(x) {
-        return Array.isArray(x) ? x : x == null ? [] : [x];
-      }
-      function pick(obj, keys) {
-        for (const k of keys) if (obj && obj[k] != null) return obj[k];
-        return undefined;
-      }
+    // Helpers
+    function toArray(x) { return Array.isArray(x) ? x : x == null ? [] : [x]; }
+    function pick(obj, keys) { for (const k of keys) if (obj && obj[k] != null) return obj[k]; return undefined; }
 
-      function jsonToMarkdownFlexibleLP(data) {
-        if (!data || typeof data !== "object")
-          return "### Error\n\nInvalid data.";
-        const lines = [];
-        const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
-        lines.push(`# ${title}`, "");
+    function jsonToMarkdownFlexibleLP(data) {
+      if (!data || typeof data !== "object") return "### Error\n\nInvalid data.";
+      const lines = [];
+      const title = pick(data, ["title", "name"]) || "Generated Lesson Plan";
 
-        const meta = [];
-        const totalWeeks = pick(data, [
-          "total_duration",
-          "weeks",
-          "duration_weeks",
-        ]);
-        const classSize = pick(data, ["class_size", "students", "num_students"]);
-        const sectionsPerWeek = pick(data, [
-          "sections_per_week",
-          "sectionsPerWeek",
-        ]);
+      lines.push(`# ${title}`, "");
 
-        if (totalWeeks != null) meta.push(`**Duration:** ${totalWeeks} week(s)`);
-        if (classSize != null) meta.push(`**Class Size:** ${classSize}`);
-        if (sectionsPerWeek != null)
-          meta.push(`**Sessions/Week:** ${sectionsPerWeek}`);
-        if (meta.length) lines.push(meta.join(" | "));
+      const meta = [];
+      const totalWeeks = pick(data, ["total_duration", "weeks", "duration_weeks"]);
+      const classSize = pick(data, ["class_size", "students", "num_students"]);
+      const sectionsPerWeek = pick(data, ["sections_per_week", "sectionsPerWeek"]);
 
-        const overview = pick(data, ["overview", "summary"]);
-        if (overview)
-          lines.push(
-            "",
-            "## Overview",
-            "",
-            typeof overview === "string"
-              ? overview
-              : JSON.stringify(overview, null, 2)
-          );
+      if (totalWeeks != null) meta.push(`**Duration:** ${totalWeeks} week(s)`);
+      if (classSize != null) meta.push(`**Class Size:** ${classSize}`);
+      if (sectionsPerWeek != null) meta.push(`**Sessions/Week:** ${sectionsPerWeek}`);
+      if (meta.length) lines.push(meta.join(" | "));
 
-        const weekly = pick(data, [
-          "weekly_schedule",
-          "weeks_schedule",
-          "plan",
-          "weekly",
-        ]);
-        if (Array.isArray(weekly) && weekly.length) {
-          lines.push("", "## Weekly Schedule", "");
-          weekly.forEach((w, i) => {
-            const label = pick(w, ["week", "label"]) ?? i + 1;
-            const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
-            lines.push(`### Week ${label}: ${topic}`);
+      const overview = pick(data, ["overview", "summary"]);
+      if (overview) lines.push("", "## Overview", "", typeof overview === "string" ? overview : JSON.stringify(overview, null, 2));
 
-            // Compact objectives
-            const objectives = pick(w, [
-              "objectives",
-              "goals",
-              "learning_objectives",
-            ]);
-            if (objectives) {
-              lines.push(`**Objectives:**`);
-              toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
-              lines.push("");
-            }
+      const weekly = pick(data, ["weekly_schedule", "weeks_schedule", "plan", "weekly"]);
+      if (Array.isArray(weekly) && weekly.length) {
+        lines.push("", "## Weekly Schedule", "");
+        weekly.forEach((w, i) => {
+          const label = pick(w, ["week", "label"]) ?? i + 1;
+          const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
+          lines.push(`### Week ${label}: ${topic}`);
 
-            }
-
-            // Content
-            if (w.content) lines.push(w.content, "");
-          });
-        }
-
-        return lines.join("\n").trim();
-      }
-
-      // Ensure markdown/plain text from AI has reasonable paragraph spacing
-      function normalizeMarkdownSpacing(text) {
-        if (!text || typeof text !== "string") return text;
-        // Normalize newlines and remove excessive blank lines
-        let t = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
-        // Avoid breaking lists, headings, blockquotes, code fences and indented lines.
-        // Insert a paragraph break where there's a single newline between normal lines.
-        t = t.replace(/([^\n])\n(?![#\-\*>\s`\\])/g, "$1\n\n");
-        return t;
-      }
-
-      async function copyWithFeedback(btn, text) {
-        const original = btn.innerText;
-        try {
-          await navigator.clipboard.writeText(text);
-          btn.innerText = "Copied!";
-          btn.classList.add(
-            "text-emerald-700",
-            "bg-emerald-50",
-            "border-emerald-200"
-          );
-          setTimeout(() => {
-            btn.innerText = original;
-            btn.classList.remove(
-              "text-emerald-700",
-              "bg-emerald-50",
-              "border-emerald-200"
-            );
-          }, 1200);
-        } catch {
-          btn.innerText = "Failed";
-        }
-      } // Submit: generate plan // Submit: generate plan
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const generateBtn = document.getElementById("lp-generate-btn");
-        const originalBtnText = generateBtn.innerHTML;
-
-        // UI Loading State
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
-        // UI Loading State
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
-
-        resultEl.innerHTML = "";
-        lastMarkdown = "";
-        suggestedFileName = "lesson_plan";
-        lastRawJson = null;
-        saveBtn.disabled = true;
-        suggestTtBtn.disabled = true;
-        ttPreview.classList.add("hidden");
-        resultEl.innerHTML = "";
-        lastMarkdown = "";
-        suggestedFileName = "lesson_plan";
-        lastRawJson = null;
-        saveBtn.disabled = true;
-        suggestTtBtn.disabled = true;
-        ttPreview.classList.add("hidden");
-
-        const file = document.getElementById("course_outline");
-        if (file.files && file.files.length > 0) {
-          const base = file.files[0].name.replace(/\.[^.]+$/, "");
-          suggestedFileName = `lesson_plan_${base}`;
-        }
-        const file = document.getElementById("course_outline");
-        if (file.files && file.files.length > 0) {
-          const base = file.files[0].name.replace(/\.[^.]+$/, "");
-          suggestedFileName = `lesson_plan_${base}`;
-        }
-
-        const fd = new FormData(form);
-        try {
-          const res = await fetch(form.action, { method: "POST", body: fd });
-          const contentType = res.headers.get("Content-Type") || "";
-        const fd = new FormData(form);
-        try {
-          const res = await fetch(form.action, { method: "POST", body: fd });
-          const contentType = res.headers.get("Content-Type") || "";
-
-          let md = "";
-          if (contentType.includes("application/json")) {
-            const obj = await res.json();
-          let md = "";
-          if (contentType.includes("application/json")) {
-            const obj = await res.json();
-
-            // 1. HANDLE ERRORS (Like insufficient credits)
-            if (res.status === 402) {
-              showToast(obj.error, "error");
-              generateBtn.disabled = false;
-              generateBtn.innerHTML = originalBtnText;
-              return;
-            }
-
-            if (obj && typeof obj === "object" && !obj.error) {
-              // --- START UPDATE CREDITS ---
-              if (obj.new_credit_balance !== undefined) {
-                // Update the display on the generator page itself
-                const displayEl = document.getElementById("credit-display");
-                if (displayEl) {
-                  displayEl.innerText = obj.new_credit_balance;
-                  // Add a visual flash effect
-                  displayEl.classList.add(
-                    "text-green-600",
-                    "scale-110",
-                    "transition-transform",
-                    "duration-200"
-                  );
-                  setTimeout(
-                    () =>
-                      displayEl.classList.remove("text-green-600", "scale-110"),
-                    500
-                  );
-                }
-
-                // Update the Desktop Sidebar badge
-                const navEl = document.getElementById("nav-credit-count");
-                if (navEl) {
-                  navEl.innerText = obj.new_credit_balance;
-                }
-                }
-
-                // Update the Mobile Menu badge
-                const mobileNavEl = document.getElementById(
-                  "nav-credit-count-mobile"
-                );
-                if (mobileNavEl) {
-                  mobileNavEl.innerText = obj.new_credit_balance;
-                }
-              }
-              // --- END UPDATE CREDITS ---
-                }
-              }
-              // --- END UPDATE CREDITS ---
-
-              lastRawJson = obj;
-              suggestTtBtn.disabled = false;
-
-              lastUploadInfo.options = {
-                weeks: Number(document.getElementById("weeks").value || 0),
-                students: Number(document.getElementById("students").value || 0),
-                sections: Number(document.getElementById("sections").value || 0),
-              };
-              lastUploadInfo.original_filename =
-                file?.files?.[0]?.name || "manual_entry";
-
-              saveBtn.disabled = false;
-              md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
-              md = normalizeMarkdownSpacing(md);
-            } else {
-              md = `### Error\n\n${obj?.error || "Unknown error"}`;
-            }
-          } else {
-            md = await res.text();
-            md = normalizeMarkdownSpacing(md);
+          // Compact objectives
+          const objectives = pick(w, ["objectives", "goals", "learning_objectives"]);
+          if (objectives) {
+            lines.push(`**Objectives:**`);
+            toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
+            lines.push("");
           }
 
-          lastMarkdown = md;
-          const html = typeof marked !== "undefined" ? marked.parse(md) : md;
-          const safe =
-            typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
-          resultEl.innerHTML = safe;
-          resultWrapper.classList.remove("hidden");
-
-          setTimeout(
-            () =>
-              resultWrapper.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              }),
-            100
-          );
-        } catch (err) {
-          lastMarkdown = `### Error\n\n${err.message}`;
-          resultEl.innerText = lastMarkdown;
-          resultWrapper.classList.remove("hidden");
-        } finally {
-          generateBtn.disabled = false;
-          generateBtn.innerHTML = originalBtnText;
-        }
-      }); // Suggest Timetable
-      suggestTtBtn.addEventListener("click", async () => {
-        if (!lastRawJson) return;
-        suggestTtBtn.disabled = true;
-        const original = suggestTtBtn.innerHTML;
-        suggestTtBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...`;
-
-        try {
-          const payload = {
-            plan: (() => {
-              const c = JSON.parse(JSON.stringify(lastRawJson));
-              delete c._markdown;
-              return c;
-            })(),
-            slot_hours: 1,
-            work_hours: [9, 17],
-            calendar_id: "primary",
-            location_hint: "Room 101",
-          };
-          const r = await fetch("/timetable/suggest", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
-          const data = await r.json().catch(() => ({}));
-          if (!r.ok || !data.ok)
-            throw new Error(data.error || `HTTP ${r.status}`);
-
-          lastTimetable = {
-            suggested_slots: data.suggested_slots,
-            metadata: data.metadata,
-          };
-
-          // Render Compact list
-          const items = (lastTimetable.suggested_slots || [])
-            .slice(0, 5)
-            .map((s) => {
-              const date = new Date(s.start).toLocaleDateString(undefined, {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              });
-              const time = new Date(s.start).toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-              return `<div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-               <span class="font-medium text-slate-700">${s.title}</span>
-               <span class="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-500">${date} • ${time}</span>
-            </div>`;
-            });
-
-          ttList.innerHTML = items.length
-            ? items.join("")
-            : '<p class="text-slate-400 italic">No slots suggested.</p>';
-          ttPreview.classList.remove("hidden");
-          ttInsertBtn.disabled = items.length === 0;
-
-          // Scroll to timetable
-          ttPreview.scrollIntoView({ behavior: "smooth", block: "center" });
-        } catch (e) {
-          showToast("Failed to suggest timetable: " + (e?.message || e), "error");
-        } finally {
-          suggestTtBtn.disabled = false;
-          suggestTtBtn.innerHTML = original;
-        }
-      });
-
-      // Open Modal logic
-      ttInsertBtn.addEventListener("click", () => {
-        if (!lastTimetable) return;
-        // Render Full Modal List
-        const modalItems = (lastTimetable.suggested_slots || []).map((s) => {
-          const date = new Date(s.start).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-          });
-          const time = new Date(s.start).toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-          return `<div class="flex items-start gap-3 p-2 hover:bg-white rounded transition-colors group">
-                  <div class="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0 group-hover:scale-110 transition-transform"></div>
-                  <div>
-                      <div class="font-medium text-slate-800">${s.title}</div>
-                      <div class="text-xs text-slate-500">${date} at ${time}</div>
-                  </div>
-              </div>`;
+          // Content
+          if (w.content) lines.push(w.content, "");
         });
-        ttModalList.innerHTML = modalItems.join("");
-        ttModal.classList.remove("hidden");
-      }); // Modal Close
-
-      function hideTtModal() {
-        ttModal.classList.add("hidden");
       }
-      ttModalClose.addEventListener("click", hideTtModal);
-      ttModalCancel.addEventListener("click", hideTtModal); // Insert Timetable (Confirm)
 
-      ttModalConfirm.addEventListener("click", async () => {
-        if (!lastTimetable) return;
-        ttModalConfirm.disabled = true;
-        ttModalConfirm.textContent = "Inserting...";
-        try {
-          const r = await fetch("/timetable/schedule", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({ timetable: lastTimetable }),
-          });
-          const data = await r.json().catch(() => ({}));
-          if (!r.ok || !data.ok)
-            throw new Error(data.error || `HTTP ${r.status}`);
+      return lines.join("\n").trim();
+    }
 
-          const firstLink =
-            (data.results || []).find((r) => r.ok && r.html_link)?.html_link ||
-            "https://calendar.google.com/calendar/u/0/r";
-          showToast(`Time slots inserted.`, "success", 6000, {
-            text: "View Calendar",
-            href: firstLink,
-            target: "_blank",
-          });
-          hideTtModal();
-        } catch (e) {
-          showToast("Failed to insert events: " + (e?.message || e), "error");
-        } finally {
-          ttModalConfirm.disabled = false;
-          ttModalConfirm.textContent = "Add to Google Calendar";
+    async function copyWithFeedback(btn, text) {
+      const original = btn.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.innerText = "Copied!";
+        btn.classList.add("text-emerald-700", "bg-emerald-50", "border-emerald-200");
+        setTimeout(() => {
+          btn.innerText = original;
+          btn.classList.remove("text-emerald-700", "bg-emerald-50", "border-emerald-200");
+        }, 1200);
+      } catch {
+        btn.innerText = "Failed";
+      }
+    }
+
+    // Submit: generate plan
+    // Submit: generate plan
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const generateBtn = document.getElementById("lp-generate-btn");
+      const originalBtnText = generateBtn.innerHTML;
+
+      // UI Loading State
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+
+      resultEl.innerHTML = "";
+      lastMarkdown = "";
+      suggestedFileName = "lesson_plan";
+      lastRawJson = null;
+      saveBtn.disabled = true;
+      suggestTtBtn.disabled = true;
+      ttPreview.classList.add("hidden");
+
+      const file = document.getElementById("course_outline");
+      if (file.files && file.files.length > 0) {
+        const base = file.files[0].name.replace(/\.[^.]+$/, "");
+        suggestedFileName = `lesson_plan_${base}`;
+      }
+
+      const fd = new FormData(form);
+      try {
+        const res = await fetch(form.action, { method: "POST", body: fd });
+        const contentType = res.headers.get("Content-Type") || "";
+
+        let md = "";
+        if (contentType.includes("application/json")) {
+          const obj = await res.json();
+
+          // 1. HANDLE ERRORS (Like insufficient credits)
+          if (res.status === 402) {
+            showToast(obj.error, 'error');
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = originalBtnText;
+            return;
+          }
+
+          if (obj && typeof obj === "object" && !obj.error) {
+
+            // --- START UPDATE CREDITS ---
+            if (obj.new_credit_balance !== undefined) {
+
+              // Update the display on the generator page itself
+              const displayEl = document.getElementById('credit-display');
+              if (displayEl) {
+                displayEl.innerText = obj.new_credit_balance;
+                // Add a visual flash effect
+                displayEl.classList.add("text-green-600", "scale-110", "transition-transform", "duration-200");
+                setTimeout(() => displayEl.classList.remove("text-green-600", "scale-110"), 500);
+              }
+
+              // Update the Desktop Sidebar badge
+              const navEl = document.getElementById('nav-credit-count');
+              if (navEl) {
+                navEl.innerText = obj.new_credit_balance;
+              }
+
+              // Update the Mobile Menu badge
+              const mobileNavEl = document.getElementById('nav-credit-count-mobile');
+              if (mobileNavEl) {
+                mobileNavEl.innerText = obj.new_credit_balance;
+              }
+            }
+            // --- END UPDATE CREDITS ---
+
+            lastRawJson = obj;
+            suggestTtBtn.disabled = false;
+
+            lastUploadInfo.options = {
+              weeks: Number(document.getElementById("weeks").value || 0),
+              students: Number(document.getElementById("students").value || 0),
+              sections: Number(document.getElementById("sections").value || 0),
+            };
+            lastUploadInfo.original_filename = file?.files?.[0]?.name || "manual_entry";
+
+            saveBtn.disabled = false;
+            md = obj._markdown || jsonToMarkdownFlexibleLP(obj || {});
+          } else {
+            md = `### Error\n\n${obj?.error || "Unknown error"}`;
+          }
+        } else {
+          md = await res.text();
         }
-      }); // Save to DB
 
-      saveBtn.addEventListener("click", async () => {
-        if (!lastRawJson) return;
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = "Saving...";
-        try {
-          const payload = {
-            original_filename: lastUploadInfo.original_filename,
-            pdf_path: lastUploadInfo.pdf_path,
-            options: lastUploadInfo.options,
-            result: (() => {
-              const c = JSON.parse(JSON.stringify(lastRawJson || {}));
-              delete c._markdown;
-              return c;
-            })(),
-          };
-          const res = await fetch("/lesson-plans/api", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok)
-            throw new Error(data.error || `HTTP ${res.status}`);
+        lastMarkdown = md;
+        const html = typeof marked !== "undefined" ? marked.parse(md) : md;
+        const safe = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+        resultEl.innerHTML = safe;
+        resultWrapper.classList.remove("hidden");
 
-          saveBtn.innerHTML = "Saved!";
-          saveBtn.classList.remove("bg-emerald-600", "hover:bg-emerald-700");
-          saveBtn.classList.add("bg-emerald-500", "cursor-default");
+        setTimeout(() => resultWrapper.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
 
+      } catch (err) {
+        lastMarkdown = `### Error\n\n${err.message}`;
+        resultEl.innerText = lastMarkdown;
+        resultWrapper.classList.remove("hidden");
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalBtnText;
+      }
+    });
+    // Suggest Timetable
+    suggestTtBtn.addEventListener("click", async () => {
+      if (!lastRawJson) return;
+      suggestTtBtn.disabled = true;
+      const original = suggestTtBtn.innerHTML;
+      suggestTtBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...`;
 
-          showToast("Lesson plan saved successfully!", "success");
-        } catch (err) {
-          saveBtn.disabled = false;
-          saveBtn.textContent = "Save to DB";
-          showToast("Failed to save: " + (err?.message || err), "error");
-        }
-      }); // Copy buttons
-
-      copyMdBtn.addEventListener("click", () =>
-        copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
-      );
-      copyPlainBtn.addEventListener("click", () =>
-        copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
-      ); // PDF download
-
-      downloadPdfBtn.addEventListener("click", () => {
-        const opt = {
-          margin: [15, 15],
-          filename: `${suggestedFileName}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      try {
+        const payload = {
+          plan: (() => { const c = JSON.parse(JSON.stringify(lastRawJson)); delete c._markdown; return c; })(),
+          slot_hours: 1,
+          work_hours: [9, 17],
+          calendar_id: "primary",
+          location_hint: "Room 101",
         };
+        const r = await fetch('/timetable/suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
 
-        const preview = resultEl.cloneNode(true);
-        preview.className = "prose prose-slate";
-        preview.style.cssText = `background-color: #ffffff; width: 100%; font-family: sans-serif; color: #000;`;
-        html2pdf().set(opt).from(preview).save();
-      });
+        lastTimetable = { suggested_slots: data.suggested_slots, metadata: data.metadata };
+
+        // Render Compact list
+        const items = (lastTimetable.suggested_slots || []).slice(0, 5).map(s => {
+          const date = new Date(s.start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+          const time = new Date(s.start).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+          return `<div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+             <span class="font-medium text-slate-700">${s.title}</span>
+             <span class="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-500">${date} • ${time}</span>
+          </div>`;
+        });
+
+        ttList.innerHTML = items.length ? items.join('') : '<p class="text-slate-400 italic">No slots suggested.</p>';
+        ttPreview.classList.remove('hidden');
+        ttInsertBtn.disabled = items.length === 0;
+
+        // Scroll to timetable
+        ttPreview.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      } catch (e) {
+        showToast('Failed to suggest timetable: ' + (e?.message || e), 'error');
+      } finally {
+        suggestTtBtn.disabled = false;
+        suggestTtBtn.innerHTML = original;
+      }
     });
-        html2pdf().set(opt).from(preview).save();
+
+    // Open Modal logic
+    ttInsertBtn.addEventListener("click", () => {
+      if (!lastTimetable) return;
+      // Render Full Modal List
+      const modalItems = (lastTimetable.suggested_slots || []).map(s => {
+        const date = new Date(s.start).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+        const time = new Date(s.start).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        return `<div class="flex items-start gap-3 p-2 hover:bg-white rounded transition-colors group">
+                <div class="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0 group-hover:scale-110 transition-transform"></div>
+                <div>
+                    <div class="font-medium text-slate-800">${s.title}</div>
+                    <div class="text-xs text-slate-500">${date} at ${time}</div>
+                </div>
+            </div>`;
       });
+      ttModalList.innerHTML = modalItems.join('');
+      ttModal.classList.remove("hidden");
     });
+
+    // Modal Close
+    function hideTtModal() { ttModal.classList.add('hidden'); }
+    ttModalClose.addEventListener('click', hideTtModal);
+    ttModalCancel.addEventListener('click', hideTtModal);
+
+    // Insert Timetable (Confirm)
+    ttModalConfirm.addEventListener('click', async () => {
+      if (!lastTimetable) return;
+      ttModalConfirm.disabled = true;
+      ttModalConfirm.textContent = 'Inserting...';
+      try {
+        const r = await fetch('/timetable/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ timetable: lastTimetable })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        const firstLink = (data.results || []).find(r => r.ok && r.html_link)?.html_link || 'https://calendar.google.com/calendar/u/0/r';
+        showToast(
+          `Time slots inserted.`,
+          'success',
+          6000,
+          { text: 'View Calendar', href: firstLink, target: '_blank' }
+        );
+        hideTtModal();
+      } catch (e) {
+        showToast('Failed to insert events: ' + (e?.message || e), 'error');
+      } finally {
+        ttModalConfirm.disabled = false;
+        ttModalConfirm.textContent = 'Add to Google Calendar';
+      }
+    });
+
+    // Save to DB
+    saveBtn.addEventListener("click", async () => {
+      if (!lastRawJson) return;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = "Saving...";
+      try {
+        const payload = {
+          original_filename: lastUploadInfo.original_filename,
+          pdf_path: lastUploadInfo.pdf_path,
+          options: lastUploadInfo.options,
+          result: (() => { const c = JSON.parse(JSON.stringify(lastRawJson || {})); delete c._markdown; return c; })(),
+        };
+        const res = await fetch("/lesson-plans/api", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+        saveBtn.innerHTML = "Saved!";
+        saveBtn.classList.remove("bg-emerald-600", "hover:bg-emerald-700");
+        saveBtn.classList.add("bg-emerald-500", "cursor-default");
+
+        showToast("Lesson plan saved successfully!", "success");
+
+      } catch (err) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save to DB";
+        showToast("Failed to save: " + (err?.message || err), "error");
+      }
+    });
+
+    // Copy buttons
+    copyMdBtn.addEventListener("click", () => copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim()));
+    copyPlainBtn.addEventListener("click", () => copyWithFeedback(copyPlainBtn, resultEl.innerText.trim()));
+
+    // PDF download
+    downloadPdfBtn.addEventListener("click", () => {
+      const opt = {
+        margin: [15, 15],
+        filename: `${suggestedFileName}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+
+      const preview = resultEl.cloneNode(true);
+      preview.className = "prose prose-slate";
+      preview.style.cssText = `background-color: #ffffff; width: 100%; font-family: sans-serif; color: #000;`;
+      html2pdf().set(opt).from(preview).save();
+    });
+  });
 </script>
 {% endblock %}
