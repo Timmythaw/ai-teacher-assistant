@@ -12,6 +12,7 @@ main_bp = Blueprint('main', __name__)
 #     return render_template('login.html')
 
 @main_bp.route('/',  methods=['GET'])
+@login_required
 def index():
     """Render the main index page."""
     user = get_current_user()
@@ -24,7 +25,7 @@ def index():
             supabase = get_supabase_client()
 
             counts = get_dashboard_counts(supabase)
-            recent_activities = get_recent_activities(supabase, limit=6)
+            recent_activities = get_recent_activities(supabase, limit=3)
 
             total_batches = counts.get('batches', 0)
             total_lesson_plans = counts.get('lesson_plans', 0)
@@ -32,6 +33,7 @@ def index():
 
             # debug: log raw recent activities for diagnostics
             print(f"Dashboard recent merged: {recent_activities}")
+            print("skeys" + str(recent_activities))
 
         except Exception as e:
             # If DB fails, fall back to zeros so UI still renders
@@ -41,6 +43,8 @@ def index():
             total_lesson_plans = 0
             total_assessments = 0
             recent_activities = []
+
+            
 
         return render_template(
             'index.html',
@@ -67,7 +71,7 @@ def activity_page():
     try:
         supabase = get_supabase_client()
         # Fetch more activities for the full history page (50 instead of 6)
-        activities = get_recent_activities(supabase, limit=50)
+        activities = get_recent_activities(supabase, limit=30)
     except Exception as e:
         error = str(e)
         print(f"Error fetching activity history: {e}")

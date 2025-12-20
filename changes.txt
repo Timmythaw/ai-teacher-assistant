@@ -27,8 +27,6 @@ Web Oauth and google Service online refactoring
 9. add more permission scopes
 10. edit gmail_tool.py and google client to use session credentials
 
-set GOOGLE_CLIENT_ID=840970484260-h2rmsrj3obau562fg7ngg1131o6ne3bt.apps.googleusercontent.com
-
 Authorization and user isolation
 1. create supbase_auth.py
 2. create global js to catch unauthenicated error

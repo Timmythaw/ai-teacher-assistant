@@ -38,7 +38,7 @@ def get_dashboard_counts(supabase=None) -> Dict[str, int]:
     return counts
 
 
-def get_recent_activities(supabase=None, limit: int = 6) -> List[Dict]:
+def get_recent_activities(supabase=None, limit: int = 3) -> List[Dict]:
     """Return a merged, time-sorted list of recent activities across tables.
 
     Each item is a dict with keys: type (one of 'assessment','lesson_plan','batch'),
@@ -60,6 +60,7 @@ def get_recent_activities(supabase=None, limit: int = 6) -> List[Dict]:
                 "id": r.get("id"),
                 "title": r.get(title_field) or (r.get("name") or r.get("title") or f"{typ.title()} {r.get('id')}"),
                 "created_at": r.get("created_at") or r.get("updated_at") or "",
+                "original_filename": r.get("original_filename", ""),
             })
 
     try:
