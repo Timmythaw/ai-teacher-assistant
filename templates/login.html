@@ -3,158 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | PNai - Your Teaching Companion</title>
+    <title>Login | PNai Academic Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        academic: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-                        serif: ['Georgia', 'ui-serif', 'system-ui'],
-                    },
-                    animation: {
-                        'subtle-float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+        .academic-gradient {
+            background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+        }
+        .dark .academic-gradient {
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 min-h-screen flex items-center justify-center p-4">
+<body class="academic-gradient dark:text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="max-w-md w-full space-y-8">
+    <div class="max-w-5xl w-full grid md:grid-cols-2 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-gray-800">
         
-        <header class="text-center space-y-2 animate-subtle-float">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-white dark:border-gray-700 mb-4 transition-transform hover:scale-105 duration-300">
-                <span class="text-4xl font-serif font-bold bg-clip-text text-transparent bg-gradient-to-tr from-academic-700 to-indigo-500">
-                    PN
+        <div class="hidden md:flex flex-col justify-center p-12 bg-slate-50 dark:bg-gray-800/50 border-r border-slate-100 dark:border-gray-800">
+            <div class="mb-8">
+                <span class="px-3 py-1 text-xs font-semibold tracking-wider text-blue-700 uppercase bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 rounded-full">
+                    Academic Assistant
                 </span>
             </div>
-            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                PNai
-            </h1>
-            <div class="flex items-center justify-center space-x-2">
-                <span class="h-px w-8 bg-academic-200 dark:bg-gray-700"></span>
-                <p class="text-sm font-medium text-academic-600 dark:text-academic-400 uppercase tracking-[0.2em]">
-                    Pyin Nyar AI
-                </p>
-                <span class="h-px w-8 bg-academic-200 dark:bg-gray-700"></span>
-            </div>
-            <p class="text-gray-500 dark:text-gray-400 italic text-sm">
-                Your Agentic Teaching Companion
-            </p>
-        </header>
-
-        <main class="glass-effect dark:bg-gray-800/90 rounded-[2rem] shadow-2xl shadow-blue-900/10 border border-white/50 dark:border-gray-700 overflow-hidden">
-            <div class="p-8 sm:p-10">
-                <div class="text-center mb-8">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-                        Facilitating Excellence in Instruction
-                    </h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        Streamline your academic workflow with AI.
-                    </p>
-                </div>
-
-                <div class="space-y-4">
-                    <a href="{{ url_for('auth.google_login') }}" 
-                       class="group relative flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-academic-500 dark:hover:border-academic-400 text-gray-700 dark:text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 hover:shadow-lg active:scale-[0.98]">
-                        <svg class="w-5 h-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                        <span>Continue with Google</span>
-                    </a>
-                    
-                    <p class="text-[10px] text-center text-gray-400 uppercase tracking-widest leading-tight">
-                        Secure Workspace Integration Required<br>
-                        (Docs, Forms, Gmail, Calendar)
-                    </p>
-                </div>
-
-                <div class="relative my-10">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-gray-100 dark:border-gray-700"></div>
-                    </div>
-                    <div class="relative flex justify-center text-xs">
-                        <span class="px-4 bg-white dark:bg-gray-800 text-gray-400 font-medium italic">Instructor Core Capabilities</span>
-                    </div>
-                </div>
-
-                <ul class="grid grid-cols-1 gap-4">
-                    <li class="flex items-start gap-4 group">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Automated Pedagogy</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lesson plans and curriculum mapping.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-4 group">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Academic Sync</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Calendar and batch management.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-4 group">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Smart Assessments</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Instant Google Forms generation.</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
             
-            <div class="h-2 w-full bg-gradient-to-r from-academic-600 via-indigo-600 to-purple-600"></div>
-        </main>
-
-        <footer class="text-center space-y-4">
-            <p class="text-xs text-gray-500 dark:text-gray-500">
-                By signing in, you agree to our 
-                <a href="#" class="font-semibold text-academic-600 hover:underline">Terms of Service</a> & 
-                <a href="#" class="font-semibold text-academic-600 hover:underline">Privacy Policy</a>
+            <h1 class="text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">PNai</h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 italic">
+                Pyin Nyar AI — <span class="not-italic">Derived from the Pali term for wisdom and knowledge.</span>
             </p>
-            <div class="flex items-center justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">
-                <a href="#" class="hover:text-academic-600 transition-colors">University Help Desk</a>
-                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                <a href="#" class="hover:text-academic-600 transition-colors">Contact Support</a>
+
+            <div class="space-y-6">
+                <div class="flex gap-4">
+                    <div class="text-blue-600 dark:text-blue-400 mt-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-gray-200">Institutional Efficiency</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Automate lesson plans and assessment rubrics directly in your university’s standard formats.</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="text-blue-600 dark:text-blue-400 mt-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-gray-200">Agentic Batch Management</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Intelligent AI agents to help manage student communication and course cohorts.</p>
+                    </div>
+                </div>
             </div>
-        </footer>
+
+            <div class="mt-12 pt-8 border-t border-slate-200 dark:border-gray-700">
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-medium">Integration Partners</p>
+                <div class="flex gap-4 mt-4 opacity-50 grayscale">
+                   <div class="text-xs font-bold border border-slate-400 px-2 py-1 rounded">Google Docs</div>
+                   <div class="text-xs font-bold border border-slate-400 px-2 py-1 rounded">Forms</div>
+                   <div class="text-xs font-bold border border-slate-400 px-2 py-1 rounded">Calendar</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 md:p-16 flex flex-col justify-center">
+            <div class="text-center md:text-left mb-10">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Faculty Portal</h2>
+                <p class="text-slate-500 dark:text-slate-400">Secure access for university lecturers and instructors.</p>
+            </div>
+
+            <div class="space-y-6">
+                <a href="{{ url_for('auth.google_login') }}"
+                    class="flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-700 text-slate-700 dark:text-white font-semibold py-4 px-4 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border-b-4 active:border-b-0 active:translate-y-[2px]">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    Continue with Institution Email
+                </a>
+
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                    <div class="flex gap-3">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                            <strong>Note on Permissions:</strong> To generate course documents and assessments, PNai requires standard Google Workspace scopes. We prioritize your institutional data privacy and comply with academic security standards.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="mt-auto pt-10 text-xs text-slate-400 text-center md:text-left space-y-4">
+                <div class="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-2 uppercase tracking-widest font-semibold">
+                    <a href="#" class="hover:text-blue-600 transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Compliance</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Support</a>
+                </div>
+                <p>&copy; 2025 Pyin Nyar AI. All rights reserved.</p>
+            </footer>
+        </div>
     </div>
 
 </body>
