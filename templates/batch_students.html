@@ -46,36 +46,58 @@ endblock %} {% block content %}
   </div>
 </div>
 
-<div class="table-container">
+<div
+  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+>
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-slate-100">
-      <thead class="table-header" style="background: #2d3748">
-        <tr class="text-white">
-          <th class="px-6 py-3">Name</th>
-          <th class="px-6 py-3">Email</th>
-          <th class="px-6 py-3 text-right">Actions</th>
+      <thead class="bg-slate-50">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Name
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >
+            Email
+          </th>
+          <th scope="col" class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
         </tr>
       </thead>
-      <tbody id="students-tbody" class="divide-y divide-slate-100 bg-white">
+
+      <tbody id="students-tbody" class="bg-white divide-y divide-slate-100">
         {% if students and students|length > 0 %} {% for s in students %}
+
         <tr
-          class="table-row group"
+          class="hover:bg-slate-50/80 transition-colors duration-150 group"
           data-row-id="{{ s.id }}"
           data-name="{{ s.name }}"
           data-email="{{ s.email }}"
         >
-          <td class="px-6 py-4 text-sm font-medium text-slate-800">
-            {{ s.name }}
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-slate-900">{{ s.name }}</div>
           </td>
-          <td class="px-6 py-4 text-sm text-slate-500">{{ s.email }}</td>
-          <td class="px-6 py-4 text-right">
+
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+            {{ s.email }}
+          </td>
+
+          <td
+            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+          >
             <button
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-md border border-brand-100 hover:bg-brand-600 hover:text-white transition-colors"
+              class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               data-send="{{ s.id }}"
             >
-              <span>Email</span>
+              <span class="mr-1">Email</span>
               <svg
-                class="w-3 h-3"
+                class="w-3 h-3 text-slate-500"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -90,7 +112,9 @@ endblock %} {% block content %}
             </button>
           </td>
         </tr>
+
         {% endfor %} {% else %}
+
         <tr>
           <td colspan="3" class="px-6 py-12 text-center text-slate-400">
             <div class="flex flex-col items-center gap-2">
@@ -111,6 +135,7 @@ endblock %} {% block content %}
             </div>
           </td>
         </tr>
+
         {% endif %}
       </tbody>
     </table>
@@ -175,7 +200,7 @@ endblock %} {% block content %}
             <input
               id="email-to"
               type="email"
-              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
               placeholder="student@example.com"
             />
             <div
@@ -190,7 +215,7 @@ endblock %} {% block content %}
               <input
                 id="email-cc"
                 type="text"
-                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
                 placeholder="Optional"
               />
             </div>
@@ -201,7 +226,7 @@ endblock %} {% block content %}
               <input
                 id="email-bcc"
                 type="text"
-                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
                 placeholder="Optional"
               />
             </div>
@@ -214,7 +239,7 @@ endblock %} {% block content %}
             <input
               id="email-subject"
               type="text"
-              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
               placeholder="Enter subject line..."
             />
           </div>
@@ -225,8 +250,8 @@ endblock %} {% block content %}
             >
             <textarea
               id="email-notes"
-              rows="4"
-              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+              rows="5"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
               placeholder="Tell the AI what this email is about (e.g., 'Remind them about the quiz on Friday')..."
             ></textarea>
             <p class="text-xs text-slate-400">
@@ -241,7 +266,7 @@ endblock %} {% block content %}
               >
               <select
                 id="email-tone"
-                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
               >
                 <option selected>Professional & Friendly</option>
                 <option>Concise & Formal</option>
