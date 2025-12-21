@@ -3,7 +3,7 @@ url_for('main.index')}, {'label': 'Generate Assessment', 'url': None} ] %} {%
 block title %}Generate Assessment — AI Lesson Planner{% endblock %} {% block
 content %}
 
-<div class="max-w-2xl mx-auto md:mx-0">
+<div class="w-full max-w-full mx-auto md:mx-0">
   <div class="mb-8">
     <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
       Generate Assessment From PDF
@@ -162,7 +162,7 @@ content %}
 
 <section
   id="result-wrapper"
-  class="mt-8 hidden animate-fade-in-up max-w-4xl mx-auto md:mx-0"
+  class="mt-8 hidden animate-fade-in-up w-full max-w-full mx-auto md:mx-0"
 >
   <div
     class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4"
@@ -422,14 +422,47 @@ content %}
             });
           }
 
-          // optional answer note or explanation
-          if (q.explanation || q.answer_text || q.answer_note) {
-            const note = q.explanation || q.answer_text || q.answer_note;
-            parts.push(
-              `<div class="mt-3 text-xs text-slate-500">${escapeHtml(
-                note
-              )}</div>`
-            );
+          // explicit Answer and Explanation rendering
+          try {
+            let answerText = "";
+            if (
+              typeof correctIndex === "number" &&
+              correctIndex >= 0 &&
+              Array.isArray(opts) &&
+              opts[correctIndex] != null
+            ) {
+              answerText = opts[correctIndex];
+            } else if (q.answer_text) {
+              answerText = q.answer_text;
+            } else if (q.answer != null && typeof q.answer !== "object") {
+              answerText = String(q.answer);
+            } else if (q.correct != null && typeof q.correct !== "object") {
+              answerText = String(q.correct);
+            }
+
+            if (answerText) {
+              parts.push(
+                `<div class="mt-3 text-sm font-medium text-slate-700">Answer: ${escapeHtml(
+                  answerText
+                )}</div>`
+              );
+            }
+
+            if (q.explanation) {
+              parts.push(
+                `<div class="mt-2 text-xs text-slate-500">Explanation: ${escapeHtml(
+                  q.explanation
+                )}</div>`
+              );
+            } else if (q.answer_note && !q.explanation) {
+              parts.push(
+                `<div class="mt-2 text-xs text-slate-500">${escapeHtml(
+                  q.answer_note
+                )}</div>`
+              );
+            }
+          } catch (e) {
+            // swallow any rendering errors for a question
           }
 
           parts.push("</div>");
@@ -452,6 +485,12 @@ content %}
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    }
+
+    // disable download until results are rendered
+    if (downloadPdfBtn) {
+      downloadPdfBtn.disabled = true;
+      downloadPdfBtn.classList.add("opacity-50", "cursor-not-allowed");
     }
 
     // Generate Handler
@@ -524,6 +563,12 @@ content %}
           resultEl.innerHTML = DOMPurify.sanitize(marked.parse(md));
         }
         resultWrapper.classList.remove("hidden");
+
+        // enable download now that results are shown
+        if (downloadPdfBtn) {
+          downloadPdfBtn.disabled = false;
+          downloadPdfBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
 
         // Smooth scroll
         setTimeout(() => {
@@ -610,39 +655,45 @@ content %}
       }
     }
 
-    copyMdBtn.addEventListener("click", () =>
-      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
-    );
-    copyPlainBtn.addEventListener("click", () =>
-      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
-    );
+    if (copyMdBtn) {
+      copyMdBtn.addEventListener("click", () =>
+        copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
+      );
+    }
+    if (copyPlainBtn) {
+      copyPlainBtn.addEventListener("click", () =>
+        copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
+      );
+    }
 
     // PDF Download
-    downloadPdfBtn.addEventListener("click", () => {
-      if (typeof html2pdf === "undefined") {
-        alert("PDF generator not loaded yet.");
-        return;
-      }
-      const opt = {
-        margin: [15, 15],
-        filename: `${suggestedFileName}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
+    if (downloadPdfBtn) {
+      downloadPdfBtn.addEventListener("click", () => {
+        if (typeof html2pdf === "undefined") {
+          alert("PDF generator not loaded yet.");
+          return;
+        }
+        const opt = {
+          margin: [15, 15],
+          filename: `${suggestedFileName}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        };
 
-      const preview = resultEl.cloneNode(true);
-      preview.className = "prose prose-slate";
-      preview.style.cssText = `
-        background-color: #ffffff !important;
-        border: none !important;
-        padding: 0 !important;
-        width: 100% !important;
-        font-family: sans-serif;
-        color: #000;
-      `;
-      html2pdf().set(opt).from(preview).save();
-    });
+        const preview = resultEl.cloneNode(true);
+        preview.className = "prose prose-slate";
+        preview.style.cssText = `
+          background-color: #ffffff !important;
+          border: none !important;
+          padding: 0 !important;
+          width: 100% !important;
+          font-family: sans-serif;
+          color: #000;
+        `;
+        html2pdf().set(opt).from(preview).save();
+      });
+    }
   });
 </script>
 {% endblock %}

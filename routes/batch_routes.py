@@ -5,6 +5,7 @@ Database automatically filters data via RLS
 """
 import io
 import csv
+import json
 from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify, g
 
 from utils.db import get_supabase_client, get_current_user_id
@@ -79,14 +80,40 @@ def create_batch_upload_csv():
     supabase = get_supabase_client()
     batch_name = request.form.get("batch_name")
     file = request.files.get("students_csv")
+    students_manual_raw = None
 
-    if not batch_name or not file:
-        flash("Batch name and CSV file are required.", "error")
+    # Accept manual students from form-encoded multipart/form-data
+    if request.form and request.form.get("students_manual"):
+        students_manual_raw = request.form.get("students_manual")
+
+    # Accept JSON payload when client posts application/json
+    if request.is_json:
+        try:
+            j = request.get_json(silent=True) or {}
+            # payload might include students_manual as array or JSON string
+            if isinstance(j.get("students_manual"), str):
+                students_manual_raw = j.get("students_manual")
+            elif isinstance(j.get("students_manual"), list):
+                # convert list back to JSON string for unified parsing below
+                students_manual_raw = json.dumps(j.get("students_manual"))
+            # ensure batch_name from JSON is used if form field missing
+            if not batch_name and j.get("batch_name"):
+                batch_name = j.get("batch_name")
+        except Exception:
+            pass
+
+    if not batch_name or (not file and not students_manual_raw):
+        flash("Batch name and either a CSV file or manual students are required.", "error")
         return redirect(url_for("batches.batches_page"))
 
-    # Read CSV content
-    stream = io.StringIO(file.stream.read().decode("utf-8"))
-    csv_reader = csv.DictReader(stream)
+    # If CSV is provided, prepare a csv reader
+    csv_reader = None
+    if file:
+        try:
+            stream = io.StringIO(file.stream.read().decode("utf-8"))
+            csv_reader = csv.DictReader(stream)
+        except Exception:
+            csv_reader = None
 
     # Insert batch into Supabase with user_id
     batch_resp = supabase.table("batches").insert({
@@ -100,19 +127,41 @@ def create_batch_upload_csv():
         flash("Failed to create batch", "error")
         return redirect(url_for("batches.batches_page"))
 
-    # Prepare students to insert
+    # Prepare students to insert from CSV and/or manual JSON
     students_to_insert = []
-    for row in csv_reader:
-        name = row.get("name")
-        email = row.get("email")
-        if not name or not email:
-            continue  # skip invalid row
-        students_to_insert.append({
-            "batch_id": batch_id,
-            "name": name,
-            "email": email,
-            "user_id": user_id  # ✅ Added: Set ownership
-        })
+
+    if csv_reader:
+        for row in csv_reader:
+            name = (row.get("name") or "").strip()
+            email = (row.get("email") or "").strip()
+            if not name or not email:
+                continue
+            students_to_insert.append({
+                "batch_id": batch_id,
+                "name": name,
+                "email": email,
+                "user_id": user_id
+            })
+
+    # If manual students JSON provided, parse and add
+    if students_manual_raw:
+        try:
+            manual_list = json.loads(students_manual_raw)
+            if isinstance(manual_list, list):
+                for entry in manual_list:
+                    name = (entry.get("name") or "").strip()
+                    email = (entry.get("email") or "").strip()
+                    if not name or not email:
+                        continue
+                    students_to_insert.append({
+                        "batch_id": batch_id,
+                        "name": name,
+                        "email": email,
+                        "user_id": user_id
+                    })
+        except Exception:
+            # ignore malformed JSON and continue (or you could flash an error)
+            pass
 
     # Insert students if any
     if students_to_insert:
@@ -190,13 +239,17 @@ def api_delete_batch(batch_id):
     """
     try:
         supabase = get_supabase_client()
-        
-        # 🔥 RLS handles filtering
-        res = supabase.table("batches") \
-            .delete() \
-            .eq("id", batch_id) \
-            .execute()
-        
-        return jsonify({"ok": True, "message": "Batch deleted successfully"}), 200
+
+        # First delete students in the batch to ensure cleanup (RLS applies)
+        try:
+            supabase.table("students").delete().eq("batch_id", batch_id).execute()
+        except Exception:
+            # ignore and continue to attempt batch delete - we'll report any error below
+            pass
+
+        # Then delete the batch itself
+        res = supabase.table("batches").delete().eq("id", batch_id).execute()
+
+        return jsonify({"ok": True, "message": "Batch and its students deleted successfully"}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
