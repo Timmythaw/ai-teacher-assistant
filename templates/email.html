@@ -1,17 +1,79 @@
-{% extends "base.html" %} 
-{% block title %}Compose Email — AI Lesson Planner{% endblock %} 
+{% extends "base.html" %}
+{% block title %}Compose Email — AI Lesson Planner{% endblock %}
 
 {% block content %}
 
-<div class="max-w-auto mx-auto md:mx-0">
+<div class="max-w-3xl mx-auto md:mx-0">
   <div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Compose Email</h1>
-    <p class="text-sm text-slate-500 mt-1">Draft and send AI-assisted emails to students or colleagues.</p>
+    <h1 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+      <i data-lucide="mail-plus" class="w-5 h-5 text-amber-500"></i>
+      Compose Email
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      Draft and send AI-assisted emails to students or colleagues.
+    </p>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 w-full">
-    <form id="email-form" action="{{ url_for('email.email_compose') }}" method="post" class="space-y-6">
-      
+  <!-- Loading overlay -->
+  <div
+    id="email-loading-overlay"
+    class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center">
+    <div class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 px-6 py-5 flex items-center gap-4">
+      <div class="h-9 w-9 rounded-full border-4 border-amber-100 border-t-amber-500 animate-spin"></div>
+      <div class="text-left">
+        <p class="text-sm font-semibold text-amber-700">Processing your email…</p>
+        <p class="text-xs text-slate-500 mt-1">This usually takes just a few seconds.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback popup -->
+  <div
+    id="email-feedback"
+    class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center">
+    <div
+      id="email-feedback-card"
+      class="bg-white rounded-2xl shadow-xl border px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]">
+      <div id="email-feedback-icon" class="mt-0.5 shrink-0"></div>
+      <div class="flex-1">
+        <h3 id="email-feedback-title" class="text-sm font-semibold"></h3>
+        <p id="email-feedback-message" class="mt-1 text-xs text-slate-600"></p>
+        <div class="mt-3 flex justify-end">
+          <button
+            type="button"
+            id="email-feedback-close"
+            class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium
+                   bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div
+    class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-6
+           shadow-sm hover:shadow-xl hover:-translate-y-1
+           transition-transform transition-shadow transition-colors duration-300 w-full">
+    <!-- Glow background -->
+    <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+      <div class="absolute -top-16 -right-10 w-40 h-40 bg-amber-400/25 blur-3xl"></div>
+      <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-orange-400/20 blur-3xl"></div>
+    </div>
+    <!-- Hover ring -->
+    <div
+      class="absolute inset-0 rounded-2xl border border-transparent
+             group-hover:border-amber-400/80 group-hover:shadow-[0_0_0_1px_rgba(245,158,11,0.5)]
+             transition-all duration-300">
+    </div>
+
+    <form
+      id="email-form"
+      action="{{ url_for('email.email_compose') }}"
+      method="post"
+      class="relative z-10 space-y-6">
+
       <div class="grid sm:grid-cols-2 gap-6">
         <div>
           <label for="to_email" class="block text-sm font-semibold text-slate-700 mb-2">Recipient (To)</label>
@@ -21,16 +83,28 @@
             type="email"
             placeholder="student@example.com"
             required
-            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm placeholder:text-slate-400 py-3 px-2"
-          />
+            class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   shadow-inner shadow-white/60
+                   sm:text-sm placeholder:text-slate-400 py-3 px-3
+                   transition-colors transition-shadow transition-transform duration-200
+                   focus:-translate-y-0.5" />
         </div>
         <div>
           <label for="tone" class="block text-sm font-semibold text-slate-700 mb-2">Tone</label>
-          <select id="tone" name="tone" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-3 px-2">
-              <option value="professional, friendly" selected>Professional & Friendly</option>
-              <option value="concise, formal">Concise & Formal</option>
-              <option value="warm, encouraging">Warm & Encouraging</option>
-              <option value="direct, action-oriented">Urgent / Action-Oriented</option>
+          <select
+            id="tone"
+            name="tone"
+            class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   shadow-inner shadow-white/60
+                   sm:text-sm py-3 px-3
+                   transition-colors transition-shadow transition-transform duration-200
+                   focus:-translate-y-0.5">
+            <option value="professional, friendly" selected>Professional & Friendly</option>
+            <option value="concise, formal">Concise & Formal</option>
+            <option value="warm, encouraging">Warm & Encouraging</option>
+            <option value="direct, action-oriented">Urgent / Action-Oriented</option>
           </select>
         </div>
       </div>
@@ -42,144 +116,211 @@
           name="subject"
           type="text"
           placeholder="e.g., Assignment Due Date Reminder"
-          class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm placeholder:text-slate-400 py-3 px-2"
-        />
+          class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                 shadow-inner shadow-white/60
+                 sm:text-sm placeholder:text-slate-400 py-3 px-3
+                 transition-colors transition-shadow transition-transform duration-200
+                 focus:-translate-y-0.5" />
       </div>
 
       <div class="grid sm:grid-cols-2 gap-6">
         <div>
-          <label for="cc" class="block text-sm font-semibold text-slate-700 mb-2">CC <span class="font-normal text-slate-400">(Optional)</span></label>
+          <label for="cc" class="block text-sm font-semibold text-slate-700 mb-2">
+            CC <span class="font-normal text-slate-400">(Optional)</span>
+          </label>
           <input
             id="cc"
             name="cc"
             type="text"
             placeholder="colleague@school.edu"
-            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm placeholder:text-slate-400 py-3 px-2"
-          />
+            class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   shadow-inner shadow-white/60
+                   sm:text-sm placeholder:text-slate-400 py-3 px-3
+                   transition-colors transition-shadow transition-transform duration-200
+                   focus:-translate-y-0.5" />
         </div>
         <div>
-          <label for="bcc" class="block text-sm font-semibold text-slate-700 mb-2">BCC <span class="font-normal text-slate-400">(Optional)</span></label>
+          <label for="bcc" class="block text-sm font-semibold text-slate-700 mb-2">
+            BCC <span class="font-normal text-slate-400">(Optional)</span>
+          </label>
           <input
             id="bcc"
             name="bcc"
             type="text"
             placeholder=""
-            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm placeholder:text-slate-400 py-3 px-2"
-          />
+            class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   shadow-inner shadow-white/60
+                   sm:text-sm placeholder:text-slate-400 py-3 px-3
+                   transition-colors transition-shadow transition-transform duration-200
+                   focus:-translate-y-0.5" />
         </div>
       </div>
 
       <div>
         <label for="notes" class="block text-sm font-semibold text-slate-700 mb-2">
-            Key Points / Instructions
+          Key Points / Instructions
         </label>
         <div class="relative">
-            <textarea
+          <textarea
             id="notes"
             name="notes"
             rows="6"
             placeholder="Describe what you want to say. For example: 'Remind them about the quiz on Friday covering Chapter 3. Tell them to bring a calculator.'"
-            class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm placeholder:text-slate-400 py-3 px-2"
-            ></textarea>
-            <div class="absolute bottom-2 right-2">
-                <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
-            </div>
+            class="block w-full rounded-lg border border-slate-200 bg-slate-50
+                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   shadow-inner shadow-white/60
+                   sm:text-sm placeholder:text-slate-400 py-3 px-3
+                   transition-colors transition-shadow transition-transform duration-200
+                   focus:-translate-y-0.5 resize-y"></textarea>
+          <div class="pointer-events-none absolute bottom-2 right-2 opacity-80">
+            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+          </div>
         </div>
-        <p class="mt-2 text-xs text-slate-500">The AI will expand these notes into a full, polished email.</p>
+        <p class="mt-2 text-xs text-slate-500">
+          The AI will expand these notes into a full, polished email.
+        </p>
       </div>
 
-      <div class="pt-6  border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        
-        
-
+      <div class="pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <button
           id="submit-btn"
           type="submit"
-          class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed w-full sm:w-auto"
-        >
-          <svg class="w-4 h-4 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+          class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg
+                 text-white bg-blue-400 hover:bg-blue-500
+                 shadow-md hover:shadow-lg
+                 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]
+                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500
+                 disabled:opacity-70 disabled:cursor-not-allowed w-full sm:w-auto">
+          <svg class="w-4 h-4 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          </svg>
           Process Email
         </button>
       </div>
     </form>
   </div>
-
-  <div id="email-result" class="hidden mt-6 rounded-xl border p-4 animate-fade-in-up">
-      <div class="flex items-start gap-3">
-          <div id="result-icon" class="mt-0.5 shrink-0"></div>
-          <div class="flex-1 overflow-x-auto">
-              <h3 id="result-title" class="text-sm font-bold"></h3>
-              <pre id="result-body" class="mt-2 text-xs font-mono whitespace-pre-wrap break-words text-slate-600"></pre>
-          </div>
-      </div>
-  </div>
-
 </div>
 
-{% endblock %} 
+{% endblock %}
 
 {% block scripts %}
 <script>
   const form = document.getElementById("email-form");
-  const resultEl = document.getElementById("email-result");
-  const resultTitle = document.getElementById("result-title");
-  const resultBody = document.getElementById("result-body");
-  const resultIcon = document.getElementById("result-icon");
   const submitBtn = document.getElementById("submit-btn");
+
+  const loadingOverlay = document.getElementById("email-loading-overlay");
+  const feedback = document.getElementById("email-feedback");
+  const feedbackCard = document.getElementById("email-feedback-card");
+  const feedbackIcon = document.getElementById("email-feedback-icon");
+  const feedbackTitle = document.getElementById("email-feedback-title");
+  const feedbackMessage = document.getElementById("email-feedback-message");
+  const feedbackClose = document.getElementById("email-feedback-close");
+
+  function showLoading() {
+    loadingOverlay.classList.remove("hidden");
+    loadingOverlay.classList.add("flex");
+  }
+  function hideLoading() {
+    loadingOverlay.classList.add("hidden");
+    loadingOverlay.classList.remove("flex");
+  }
+
+  function showFeedback(type, title, message) {
+    if (type === "success") {
+      feedbackCard.className =
+        "bg-white rounded-2xl shadow-xl border border-green-200 px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]";
+      feedbackIcon.innerHTML =
+        `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round"
+                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>`;
+      feedbackTitle.className = "text-sm font-semibold text-green-800";
+    } else {
+      feedbackCard.className =
+        "bg-white rounded-2xl shadow-xl border border-red-200 px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]";
+      feedbackIcon.innerHTML =
+        `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round"
+                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>`;
+      feedbackTitle.className = "text-sm font-semibold text-red-800";
+    }
+    feedbackTitle.textContent = title;
+    feedbackMessage.textContent = message;
+    feedback.classList.remove("hidden");
+    feedback.classList.add("flex");
+  }
+
+  function hideFeedback() {
+    feedback.classList.add("hidden");
+    feedback.classList.remove("flex");
+  }
+
+  if (feedbackClose) {
+    feedbackClose.addEventListener("click", hideFeedback);
+  }
+  feedback?.addEventListener("click", (e) => {
+    if (e.target === feedback) hideFeedback();
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
-    // UI Loading State
-    resultEl.classList.add("hidden");
+
+    showLoading();
     submitBtn.disabled = true;
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
 
     const data = new FormData(form);
-    // Explicitly map 'mode' to 'action' if your backend expects 'action' (based on previous templates)
-    if(data.get('mode')) data.append('action', data.get('mode'));
+    if (data.get('mode')) data.append('action', data.get('mode'));
 
     try {
-        const url = form.action;
-        const res = await fetch(url, { method: "POST", body: data });
-        const text = await res.text();
-        
-        let json;
-        try { 
-            json = JSON.parse(text); 
-        } catch { 
-            json = { error: text }; 
-        }
+      const res = await fetch(form.action, { method: "POST", body: data });
+      const text = await res.text();
 
-        resultEl.classList.remove("hidden");
-        
-        if (res.ok && !json.error) {
-            // Success State
-            resultEl.className = "mt-6 rounded-xl border border-green-200 bg-green-50 p-4 animate-fade-in-up";
-            resultIcon.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-            resultTitle.className = "text-sm font-bold text-green-800";
-            resultTitle.textContent = "Success";
-            resultBody.textContent = JSON.stringify(json, null, 2);
-        } else {
-            // Error State
-            resultEl.className = "mt-6 rounded-xl border border-red-200 bg-red-50 p-4 animate-fade-in-up";
-            resultIcon.innerHTML = `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-            resultTitle.className = "text-sm font-bold text-red-800";
-            resultTitle.textContent = "Error";
-            resultBody.textContent = json.error || text;
-        }
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = { error: text };
+      }
 
+      hideLoading();
+
+      if (res.ok && !json.error) {
+        showFeedback(
+          "success",
+          "Email processed successfully",
+          "Your AI-generated email has been created. You can now send it from your email client or system."
+        );
+      } else {
+        showFeedback(
+          "error",
+          "Unable to process email",
+          json.error || "Something went wrong while generating your email. Please try again."
+        );
+      }
     } catch (err) {
-        resultEl.classList.remove("hidden");
-        resultEl.className = "mt-6 rounded-xl border border-red-200 bg-red-50 p-4 animate-fade-in-up";
-        resultIcon.innerHTML = `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
-        resultTitle.textContent = "Network Error";
-        resultBody.textContent = err.message;
+      hideLoading();
+      showFeedback(
+        "error",
+        "Network error",
+        err.message || "There was a problem connecting to the server. Please try again."
+      );
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
     }
   });
 </script>
 {% endblock %}
+
+

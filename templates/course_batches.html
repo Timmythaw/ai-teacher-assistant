@@ -1,7 +1,8 @@
-{% extends "base.html" %} {% block title %}Courses & Batches{% endblock %} {%
-block content %}
+{% extends "base.html" %}
+{% block title %}Courses & Batches{% endblock %}
+{% block content %}
 
-<div class="flex items-center justify-between mb-8">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
   <div>
     <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Batches</h1>
     <p class="text-sm text-slate-500 mt-1">
@@ -11,7 +12,7 @@ block content %}
 
   <button
     id="open-create"
-    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
   >
     <svg
       class="w-5 h-5 mr-2 -ml-1"
@@ -30,22 +31,14 @@ block content %}
   </button>
 </div>
 
-<!-- <div class="flex items-center justify-between mb-6">
-    <h2 class="text-lg font-semibold text-slate-800">Batches</h2>
-    <span
-      class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200"
-    >
-      {{ (batches|length) or 0 }} Total
-    </span>
-  </div> -->
 
 {% if batches and batches|length > 0 %}
 <div
-  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+  class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-shadow duration-200 hover:shadow-md"
 >
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-slate-100">
-      <thead class="bg-slate-50">
+      <thead class="bg-slate-50/90">
         <tr>
           <th
             scope="col"
@@ -65,15 +58,17 @@ block content %}
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-slate-100">
-        {% for batch in batches %} {% set count = 0 %} {% if batch.students and
-        batch.students|length > 0 %} {% set count = batch.students[0].count or 0
-        %} {% endif %}
+        {% for batch in batches %}
+          {% set count = 0 %}
+          {% if batch.students and batch.students|length > 0 %}
+            {% set count = batch.students[0].count or 0 %}
+          {% endif %}
 
-        <tr class="hover:bg-slate-50/80 transition-colors duration-150 group">
+        <tr class="group transition-all duration-150 hover:bg-slate-50/80">
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div
-                class="flex-shrink-0 h-8 w-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 border border-indigo-100"
+                class="flex-shrink-0 h-8 w-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 border border-indigo-100 group-hover:shadow-sm transition-shadow duration-150"
               >
                 <svg
                   class="w-4 h-4"
@@ -106,7 +101,7 @@ block content %}
 
           <td class="px-6 py-4 whitespace-nowrap text-center">
             <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 group-hover:bg-blue-50 group-hover:text-blue-700 transition-colors"
             >
               {{ count }} students
             </span>
@@ -170,7 +165,7 @@ block content %}
 </div>
 {% else %}
 <div
-  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+  class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
 >
   <div class="flex flex-col items-center justify-center py-16 text-center">
     <div
@@ -204,6 +199,7 @@ block content %}
 </div>
 {% endif %}
 
+{# -------------- CREATE / EDIT MODAL -------------- #}
 <div
   id="create-modal"
   class="fixed inset-0 z-50 hidden"
@@ -376,7 +372,9 @@ block content %}
   </div>
 </div>
 
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("create-modal");
@@ -412,9 +410,8 @@ block content %}
         manualListEl.appendChild(item);
       });
 
-      // attach remove handlers
       manualListEl.querySelectorAll(".remove-student").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", () => {
           const idx = Number(btn.getAttribute("data-index"));
           manualStudents.splice(idx, 1);
           renderManualList();
@@ -450,21 +447,9 @@ block content %}
 
     // Close when clicking backdrop
     modal.addEventListener("click", (e) => {
-      // The modal container inside is technically the 'target' if clicked directly
-      // but often clicks bubble. We want to close if the user clicks the
-      // grey backdrop, not the white panel.
-      // The backdrop is covered by the .fixed.inset-0 flex container.
-      // We need to check if the click target is the overlay container.
-      const overlay = modal.querySelector(".fixed.inset-0.z-10");
-      if (
-        e.target === overlay ||
-        e.target.classList.contains("backdrop-blur-sm")
-      ) {
-        // This is a bit tricky with nested divs, simpler check:
-        // If the closest .bg-white panel wasn't clicked
-        if (!e.target.closest(".bg-white")) {
-          closeModal();
-        }
+      const panel = e.target.closest(".bg-white");
+      if (!panel) {
+        closeModal();
       }
     });
 
@@ -493,7 +478,6 @@ block content %}
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // validation: require either CSV file or at least one manual student
       const hasFile = csvInput && csvInput.files && csvInput.files.length > 0;
       const hasManual = manualStudents.length > 0;
       if (!hasFile && !hasManual) {
@@ -511,7 +495,6 @@ block content %}
       try {
         let res;
 
-        // If only manual students (no file), send JSON payload instead of FormData
         if (hasManual && !hasFile) {
           const payload = {
             batch_name: form.batch_name.value,
@@ -563,7 +546,7 @@ block content %}
 
     // Delete batch handlers
     document.querySelectorAll(".delete-batch").forEach((btn) => {
-      btn.addEventListener("click", async (e) => {
+      btn.addEventListener("click", async () => {
         const url = btn.getAttribute("data-url");
         if (!url) return;
 
@@ -586,7 +569,6 @@ block content %}
             btn.disabled = false;
             return;
           }
-          // success — reload to reflect changes
           location.reload();
         } catch (err) {
           alert("Delete failed: " + (err && err.message ? err.message : err));

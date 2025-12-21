@@ -7,23 +7,28 @@
   <div>
     <h1 class="text-2xl font-bold text-slate-800 tracking-tight">{{ page_title }}</h1>
     <div class="flex items-center gap-3 mt-1.5 text-sm">
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-            ID: {{ assessment.id }}
-        </span>
-        
-        {% if form_url %}
-        <span class="text-slate-300">|</span>
-        <a href="{{ form_url }}" target="_blank" class="flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h10v2H7zM4 15h6v2H4zM4 7h16v2H4z"/><path d="M22 2H2v20h20V2zm-2 18H4V4h16v16z"/></svg>
-            Open Google Form
-        </a>
-        {% else %}
-        <span class="text-slate-300">|</span>
-        <span class="flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs border border-amber-100">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            No Form Linked
-        </span>
-        {% endif %}
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+        ID: {{ assessment.id }}
+      </span>
+      
+      {% if form_url %}
+      <span class="text-slate-300">|</span>
+      <a href="{{ form_url }}" target="_blank" class="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7 11h10v2H7zM4 15h6v2H4zM4 7h16v2H4z"/>
+          <path d="M22 2H2v20h20V2zm-2 18H4V4h16v16z"/>
+        </svg>
+        Open Google Form
+      </a>
+      {% else %}
+      <span class="text-slate-300">|</span>
+      <span class="flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs border border-amber-100">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        No Form Linked
+      </span>
+      {% endif %}
     </div>
   </div>
 
@@ -33,128 +38,186 @@
   </a>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-lg font-semibold text-slate-800">Student Responses</h2>
-    
-    <button id="btn-fetch" 
-        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        {% if not form_url and not form_id %}disabled{% endif %}>
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-      Sync Results
-    </button>
+<!-- Gamified emerald card for responses -->
+<div
+  class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90
+         shadow-sm hover:shadow-xl hover:-translate-y-1
+         transition-transform transition-shadow transition-colors duration-300 w-full">
+
+  <!-- Glow background -->
+  <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+    <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-300/18 blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-300/18 blur-3xl"></div>
   </div>
 
-  <div id="resp-state-container" class="space-y-4">
+  <!-- Hover ring -->
+  <div
+    class="absolute inset-0 rounded-2xl border border-transparent
+           group-hover:border-emerald-300/80 group-hover:shadow-[0_0_0_1px_rgba(16,185,129,0.45)]
+           transition-all duration-300">
+  </div>
+
+  <!-- Inner card content -->
+  <div class="relative z-10 bg-white rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-slate-800">Student Responses</h2>
+      
+      <button id="btn-fetch" 
+        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        {% if not form_url and not form_id %}disabled{% endif %}>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Sync Results
+      </button>
+    </div>
+
+    <div id="resp-state-container" class="space-y-4">
       <p id="resp-hint" class="text-sm text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-100 text-center">
         Click <span class="font-semibold text-slate-700">"Sync Results"</span> to fetch the latest submissions from Google Forms.
       </p>
 
       <div id="resp-summary" class="hidden text-sm font-medium text-emerald-600 bg-emerald-50 px-4 py-2 rounded-md border border-emerald-100">
-        </div>
+      </div>
 
       <div id="table-wrap" class="hidden overflow-hidden rounded-lg border border-slate-200">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-100">
+          <table class="min-w-full divide-y divide-slate-100">
             <thead class="bg-slate-50">
-                <tr>
+              <tr>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Student Email</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Submitted</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Score</th>
                 <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
-                </tr>
+              </tr>
             </thead>
             <tbody id="resp-tbody" class="bg-white divide-y divide-slate-100">
-                </tbody>
-            </table>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <p id="resp-status" class="text-xs text-slate-400 text-right h-4"></p>
-  </div>
-</div>
+    </div>
+  </div> <!-- inner responses card -->
+</div>   <!-- gamified wrapper -->
 
+<!-- Gamified emerald email modal -->
 <div id="email-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
   <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
   
   <div class="fixed inset-0 z-10 overflow-y-auto">
     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+      <div
+        class="relative group overflow-hidden rounded-2xl bg-white/90 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100">
+        
+        <!-- Glow -->
+        <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-300/20 blur-3xl"></div>
+          <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-300/16 blur-3xl"></div>
+        </div>
+
+        <!-- Hover ring -->
+        <div
+          class="absolute inset-0 rounded-2xl border border-transparent
+                 group-hover:border-emerald-300/80 group-hover:shadow-[0_0_0_1px_rgba(16,185,129,0.45)]
+                 transition-all duration-300">
+        </div>
+
+        <!-- Inner modal content -->
+        <div class="relative z-10 bg-white rounded-2xl">
+          <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 text-slate-800" id="email-modal-title">Compose Email</h3>
+            <button id="email-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form id="email-form" class="p-6 space-y-4">
+            <input type="hidden" id="email-student-name" />
             
-            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-                <h3 class="text-base font-semibold leading-6 text-slate-800" id="email-modal-title">Compose Email</h3>
-                <button id="email-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">To</label>
+              <input id="email-to" type="email"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+                placeholder="student@example.com" required />
             </div>
 
-            <form id="email-form" class="p-6 space-y-4">
-                <input type="hidden" id="email-student-name" />
-                
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">To</label>
-                    <input id="email-to" type="email" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="student@example.com" required />
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">CC</label>
+                <input id="email-cc" type="text"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+                  placeholder="Optional" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">BCC</label>
+                <input id="email-bcc" type="text"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+                  placeholder="Optional" />
+              </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">CC</label>
-                        <input id="email-cc" type="text" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Optional" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">BCC</label>
-                        <input id="email-bcc" type="text" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Optional" />
-                    </div>
-                </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+              <input id="email-subject" type="text"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+                placeholder="e.g., Feedback on your assessment" required />
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
-                    <input id="email-subject" type="text" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="e.g., Feedback on your assessment" required />
-                </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Notes / Instructions</label>
+              <textarea id="email-notes" rows="4"
+                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+                placeholder="Tell the AI what to write..."></textarea>
+              <p class="mt-1 text-xs text-slate-400">The AI will generate the email body based on these notes.</p>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Notes / Instructions</label>
-                    <textarea id="email-notes" rows="4" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Tell the AI what to write..."></textarea>
-                    <p class="mt-1 text-xs text-slate-400">The AI will generate the email body based on these notes.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tone</label>
+                <select id="email-tone"
+                  class="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">
+                  <option selected>Professional & Friendly</option>
+                  <option>Concise & Formal</option>
+                  <option>Warm & Encouraging</option>
+                  <option>Strict & Direct</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Action</label>
+                <div class="flex items-center gap-4 mt-2">
+                  <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="radio" name="email-action" value="send" checked
+                      class="text-emerald-600 focus:ring-emerald-500" />
+                    <span>Send Now</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="radio" name="email-action" value="draft"
+                      class="text-emerald-600 focus:ring-emerald-500" />
+                    <span>Draft</span>
+                  </label>
                 </div>
+              </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Tone</label>
-                        <select id="email-tone" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                            <option selected>Professional & Friendly</option>
-                            <option>Concise & Formal</option>
-                            <option>Warm & Encouraging</option>
-                            <option>Strict & Direct</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Action</label>
-                        <div class="flex items-center gap-4 mt-2">
-                            <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                                <input type="radio" name="email-action" value="send" checked class="text-blue-600 focus:ring-blue-500" />
-                                <span>Send Now</span>
-                            </label>
-                            <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                                <input type="radio" name="email-action" value="draft" class="text-blue-600 focus:ring-blue-500" />
-                                <span>Draft</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+            <div id="email-progress" class="hidden text-sm text-emerald-600 font-medium animate-pulse"></div>
 
-                <div id="email-progress" class="hidden text-sm text-blue-600 font-medium animate-pulse"></div>
-
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <button type="button" id="email-cancel" class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Cancel
-                    </button>
-                    <button type="submit" id="email-submit" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Send Email
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button type="button" id="email-cancel"
+                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                Cancel
+              </button>
+              <button type="submit" id="email-submit"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Send Email
+              </button>
+            </div>
+          </form>
+        </div> <!-- inner modal -->
+      </div>   <!-- gamified modal wrapper -->
     </div>
   </div>
 </div>
@@ -204,13 +267,9 @@
     
     // Close on backdrop click
     modal.addEventListener("click", (e) => {
-        // If clicking the wrapper (flex container) or the backdrop overlay
-        const backdrop = modal.querySelector('.fixed.inset-0.bg-slate-900\\/60');
-        const wrapper = modal.querySelector('.fixed.inset-0.z-10 > .flex');
-        // Only close if target is NOT inside the modal content
-        if (!e.target.closest('.bg-white')) {
-            closeEmailModal();
-        }
+      if (!e.target.closest('.bg-white')) {
+        closeEmailModal();
+      }
     });
 
     // --- Email Sending Logic ---
@@ -250,7 +309,7 @@
       try {
         progressEl.classList.remove("hidden");
         progressEl.textContent = action === "draft" ? "Creating draft..." : "Sending email...";
-        progressEl.className = "text-sm font-medium text-blue-600 animate-pulse block mb-2"; // ensure styling
+        progressEl.className = "text-sm font-medium text-emerald-600 animate-pulse block mb-2";
         
         await sendEmail({ to, subject, notes, tone, action, cc: ccEl.value, bcc: bccEl.value });
         
@@ -258,8 +317,8 @@
         progressEl.className = "text-sm font-medium text-green-600 block mb-2";
         
         setTimeout(() => {
-            closeEmailModal();
-            progressEl.classList.add("hidden");
+          closeEmailModal();
+          progressEl.classList.add("hidden");
         }, 1000);
       } catch (err) {
         progressEl.textContent = "Failed: " + (err?.message || err);
@@ -270,7 +329,7 @@
     // --- Fetch Responses Logic ---
     async function fetchResponses() {
       statusEl.textContent = "Syncing with Google Forms...";
-      statusEl.className = "text-xs text-blue-500 animate-pulse text-right h-4";
+      statusEl.className = "text-xs text-emerald-600 animate-pulse text-right h-4";
       
       const originalBtnText = btn.innerHTML;
       btn.disabled = true;
@@ -296,7 +355,6 @@
           tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">No responses found yet.</td></tr>`;
         } else {
           for (const r of rows) {
-            // Logic for Score Display
             let percent = r.percent;
             if ((percent == null || percent === "") && r.score != null && r.max_score) {
               const p = (Number(r.score) / Number(r.max_score)) * 100;
@@ -304,26 +362,25 @@
             }
 
             const isLow = typeof percent === "number" && percent < 50;
-            const scoreText = r.fraction ? r.fraction 
-                            : r.score != null && r.max_score ? `${r.score}/${r.max_score}` 
-                            : r.score != null ? String(r.score) : "0";
+            const scoreText = r.fraction
+              ? r.fraction 
+              : r.score != null && r.max_score ? `${r.score}/${r.max_score}` 
+              : r.score != null ? String(r.score) : "0";
 
             const tr = document.createElement("tr");
             tr.className = "hover:bg-slate-50 transition-colors duration-150 group";
             
-            // I'm using inline innerHTML for simplicity in this script block, 
-            // relying on the utility classes defined in base.html (or Tailwind).
             tr.innerHTML = `
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${escapeHtml(r.email || "Unknown")}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${escapeHtml(r.submitted || "-")}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}">
                   ${escapeHtml(scoreText)}${typeof percent === "number" ? ` (${percent}%)` : ""}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button type="button" 
-                    class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
                     data-email="${escapeAttr(r.email || "")}">
                     Send Email
                 </button>
@@ -342,7 +399,7 @@
         statusEl.className = "text-xs text-red-500 text-right h-4";
       } finally {
         btn.disabled = false;
-        btn.innerHTML = originalBtnText; // Restore icon/text
+        btn.innerHTML = originalBtnText;
       }
     }
 
