@@ -1,121 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AI Teaching Assistant</title>
-
-    <!-- Tailwind CSS CDN -->
+    <title>Login | PNai - Your Teaching Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Optional: Custom Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#4285f4',
-                        'primary-dark': '#3367d6',
+                        academic: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                        serif: ['Georgia', 'ui-serif', 'system-ui'],
+                    },
+                    animation: {
+                        'subtle-float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
                     }
                 }
             }
         }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
 </head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 min-h-screen flex items-center justify-center p-4">
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-
-    <div class="max-w-md w-full">
-        <!-- Logo/Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg mb-4">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                    </path>
-                </svg>
+    <div class="max-w-md w-full space-y-8">
+        
+        <header class="text-center space-y-2 animate-subtle-float">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-white dark:border-gray-700 mb-4 transition-transform hover:scale-105 duration-300">
+                <span class="text-4xl font-serif font-bold bg-clip-text text-transparent bg-gradient-to-tr from-academic-700 to-indigo-500">
+                    PN
+                </span>
             </div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">AI Teaching Assistant</h1>
-            <p class="text-gray-600">Sign in to manage your courses and assessments</p>
-        </div>
-
-        <!-- Login Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Welcome Back</h2>
-
-            <!-- Google Sign In Button -->
-
-            <a href="{{ url_for('auth.google_login') }}"
-                class="flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-sm hover:shadow-md">
-                <svg class="w-6 h-6" viewBox="0 0 24 24">
-                    <path fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                <span>Continue with Google</span>
-            </a>
-
-            <!-- Divider -->
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-gray-500">Secure sign in with your Google account</span>
-                </div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                PNai
+            </h1>
+            <div class="flex items-center justify-center space-x-2">
+                <span class="h-px w-8 bg-academic-200 dark:bg-gray-700"></span>
+                <p class="text-sm font-medium text-academic-600 dark:text-academic-400 uppercase tracking-[0.2em]">
+                    Pyin Nyar AI
+                </p>
+                <span class="h-px w-8 bg-academic-200 dark:bg-gray-700"></span>
             </div>
-
-            <!-- Features List -->
-            <div class="space-y-3 text-sm text-gray-600">
-                <div class="flex items-start gap-2">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span>Generate AI-powered assessments</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span>Create lesson plans automatically</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span>Manage batches and students</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span>Schedule classes with Google Calendar</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-center mt-6 text-sm text-gray-600">
-            <p>By signing in, you agree to our <a href="#" class="text-blue-600 hover:underline">Terms of Service</a>
+            <p class="text-gray-500 dark:text-gray-400 italic text-sm">
+                Your Agentic Teaching Companion
             </p>
-            <p class="mt-2">Need help? <a href="#" class="text-blue-600 hover:underline">Contact Support</a></p>
-        </div>
+        </header>
+
+        <main class="glass-effect dark:bg-gray-800/90 rounded-[2rem] shadow-2xl shadow-blue-900/10 border border-white/50 dark:border-gray-700 overflow-hidden">
+            <div class="p-8 sm:p-10">
+                <div class="text-center mb-8">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                        Facilitating Excellence in Instruction
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        Streamline your academic workflow with AI.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <a href="{{ url_for('auth.google_login') }}" 
+                       class="group relative flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-academic-500 dark:hover:border-academic-400 text-gray-700 dark:text-white font-semibold py-4 px-4 rounded-xl transition-all duration-300 hover:shadow-lg active:scale-[0.98]">
+                        <svg class="w-5 h-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        <span>Continue with Google</span>
+                    </a>
+                    
+                    <p class="text-[10px] text-center text-gray-400 uppercase tracking-widest leading-tight">
+                        Secure Workspace Integration Required<br>
+                        (Docs, Forms, Gmail, Calendar)
+                    </p>
+                </div>
+
+                <div class="relative my-10">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-100 dark:border-gray-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-4 bg-white dark:bg-gray-800 text-gray-400 font-medium italic">Instructor Core Capabilities</span>
+                    </div>
+                </div>
+
+                <ul class="grid grid-cols-1 gap-4">
+                    <li class="flex items-start gap-4 group">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Automated Pedagogy</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lesson plans and curriculum mapping.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4 group">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Academic Sync</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Calendar and batch management.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4 group">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none">Smart Assessments</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Instant Google Forms generation.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="h-2 w-full bg-gradient-to-r from-academic-600 via-indigo-600 to-purple-600"></div>
+        </main>
+
+        <footer class="text-center space-y-4">
+            <p class="text-xs text-gray-500 dark:text-gray-500">
+                By signing in, you agree to our 
+                <a href="#" class="font-semibold text-academic-600 hover:underline">Terms of Service</a> & 
+                <a href="#" class="font-semibold text-academic-600 hover:underline">Privacy Policy</a>
+            </p>
+            <div class="flex items-center justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">
+                <a href="#" class="hover:text-academic-600 transition-colors">University Help Desk</a>
+                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                <a href="#" class="hover:text-academic-600 transition-colors">Contact Support</a>
+            </div>
+        </footer>
     </div>
 
 </body>
-
 </html>

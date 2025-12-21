@@ -81,41 +81,45 @@
 
 <body class="min-h-screen bg-primary text-slate-800 font-sans">
   <div class="flex min-h-screen">
-    <aside class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-blue-200/50 bg-white h-screen sticky top-0">
-      <div class="h-16 flex items-center p-6 mt-4 flex-shrink-0">
-        <a href="{{ url_for('main.index') }}" class="text-xl font-bold text-slate-800 tracking-tight">AI Teacher
-          Assistant</a>
+    <aside id="mainSidebar" class="hidden md:flex flex-col border-r border-blue-200/50 bg-white h-screen sticky top-0 transition-all duration-300 ease-in-out w-72">
+
+      <div class="h-16 flex items-center p-6 mt-4 flex-shrink-0 overflow-hidden whitespace-nowrap transition-all duration-300" id="sidebar-logo-row">
+        <span class="sidebar-logo flex items-center justify-center w-full transition-all duration-300" id="sidebar-logo-link">
+          <a href="{{ url_for('main.index') }}" class="sidebar-logo-text text-xl font-bold text-slate-800 tracking-tight transition-all duration-300">AI Teacher Assistant</a>
+          <button type="button" onclick="toggleDesktopSidebar()" class="sidebar-logo-icon hidden transition-all p-1 rounded hover:bg-slate-100" aria-label="Expand sidebar">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+        </span>
+        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="ml-2 p-2 rounded-lg hover:bg-slate-100 text-slate-500 border border-slate-200 transition-all active:scale-95 hidden md:inline-flex" title="Toggle sidebar">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
       </div>
 
-      <nav class="flex-1 p-4 space-y-3 overflow-y-auto">
-        <a href="{{ url_for('main.index') }}"
-          class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
-          <i data-lucide="home" class="w-5 h-5"></i>
-          <span>Dashboard</span>
-        </a>
+     <nav class="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
 
+        <a href="{{ url_for('main.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-brand-50 hover:text-brand-700 transition-colors whitespace-nowrap group">
+            <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="sidebar-text transition-opacity duration-200">Dashboard</span>
+        </a>
         <a href="{{ url_for('batches.batches_page') }}"
           class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
           <i data-lucide="users" class="w-5 h-5"></i>
-          <span>Batches</span>
+          <span class="sidebar-text transition-opacity duration-200">Batches</span>
         </a>
-
         <a href="{{ url_for('lesson_plans.list_lesson_plans') }}"
           class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
           <i data-lucide="book-open" class="w-5 h-5"></i>
-          <span>Lesson Plans</span>
+          <span class="sidebar-text transition-opacity duration-200">Lesson Plans</span>
         </a>
-
         <a href="{{ url_for('assessments.list_assessments') }}"
           class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
           <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-          <span>Assessments</span>
+          <span class="sidebar-text transition-opacity duration-200">Assessments</span>
         </a>
-
         <a href="{{ url_for('email.email_page') }}"
           class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
           <i data-lucide="mail" class="w-5 h-5"></i>
-          <span>Send Emails</span>
+          <span class="sidebar-text transition-opacity duration-200">Send Emails</span>
         </a>
 
         <!-- {% if user %}
@@ -138,17 +142,19 @@
       </nav>
 
       <!-- Profile fixed at bottom -->
-      <div class="px-4 py-4 border-t border-slate-100 flex-shrink-0">
-        <div class="flex items-center gap-3 text-sm rounded-lg hover:bg-slate-50 p-2">
-          {% if session.get('picture') %}
-          <img src="{{ session.get('picture') }}" alt="Avatar"
-            class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
-          {% else %}
-          <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-600 text-white">
-            <i data-lucide="user" class="w-5 h-5"></i>
-          </span>
-          {% endif %}
-          <div class="flex-1 min-w-0">
+      <div class="px-4 py-4 border-t border-slate-100 flex-shrink-0 transition-all duration-300" id="sidebar-profile-row">
+        <div class="flex items-center gap-3 text-sm rounded-lg hover:bg-slate-50 p-2 transition-all duration-300 sidebar-profile-content">
+          <div class="sidebar-profile-avatar">
+            {% if session.get('picture') %}
+            <img src="{{ session.get('picture') }}" alt="Avatar"
+              class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
+            {% else %}
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-600 text-white">
+              <i data-lucide="user" class="w-5 h-5"></i>
+            </span>
+            {% endif %}
+          </div>
+          <div class="sidebar-profile-text flex-1 min-w-0 transition-all duration-300">
             <div class="text-sm font-medium text-slate-800 truncate">
               {{ session.get('name') or 'Profile' }}
             </div>
@@ -157,12 +163,11 @@
             </div>
           </div>
           <a href="{{ url_for('auth.logout') }}"
-            class="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+            class="sidebar-logout-btn p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors ml-2"
             onclick="return confirm('Are you sure you want to logout?');" title="Logout">
             <i data-lucide="log-out" class="w-4 h-4"></i>
           </a>
         </div>
-
       </div>
     </aside>
 
@@ -206,6 +211,8 @@
 
           {% block content %}{% endblock %}
         </div>
+
+        <!-- Removed duplicate sidebar toggle button from header -->
       </main>
 
       <!-- <footer
@@ -221,13 +228,11 @@
     <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" data-close></div>
     <div class="fixed inset-0 flex">
       <div class="relative flex w-full max-w-xs flex-1 flex-col bg-white pb-4 pt-5 shadow-xl">
-        <div class="absolute top-0 right-0 -mr-12 pt-2">
+        <div class="absolute top-4 right-4 z-50">
           <button type="button"
-            class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-            data-close>
-            <span class="sr-only">Close sidebar</span>
-            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-              aria-hidden="true">
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 hover:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500 shadow transition"
+            data-close aria-label="Close sidebar">
+            <svg class="h-7 w-7 text-slate-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -343,6 +348,70 @@
           drawer.classList.add("hidden");
         });
       });
+    }
+
+    function toggleDesktopSidebar() {
+      const sidebar = document.getElementById("mainSidebar");
+      const labels = document.querySelectorAll(".sidebar-text");
+      const logoText = document.querySelector(".sidebar-logo-text");
+      const logoIcon = document.querySelector(".sidebar-logo-icon");
+      const profileText = document.querySelector(".sidebar-profile-text");
+      const logoutBtn = document.querySelector(".sidebar-logout-btn");
+      const toggleBtn = document.getElementById("sidebar-toggle-btn");
+      const profileAvatar = document.querySelector(".sidebar-profile-avatar");
+      if (sidebar.classList.contains("w-72")) {
+        // COLLAPSE
+        sidebar.classList.replace("w-72", "w-20");
+        labels.forEach(l => {
+          l.style.width = 0;
+          l.style.opacity = 0;
+          l.style.position = "absolute";
+          l.setAttribute("aria-hidden", "true");
+        });
+        if (logoText && logoIcon) {
+          logoText.style.display = "none";
+          logoIcon.classList.remove("hidden");
+        }
+        if (profileText) {
+          profileText.style.display = "none";
+        }
+        if (profileAvatar) {
+          profileAvatar.style.display = "none";
+        }
+        if (logoutBtn) {
+          logoutBtn.style.display = null;
+        }
+        if (toggleBtn) {
+          toggleBtn.style.display = "none";
+        }
+      } else {
+        // EXPAND
+        sidebar.classList.replace("w-20", "w-72");
+        setTimeout(() => {
+          labels.forEach(l => {
+            l.style.width = null;
+            l.style.opacity = 1;
+            l.style.position = null;
+            l.removeAttribute("aria-hidden");
+          });
+          if (logoText && logoIcon) {
+            logoText.style.display = null;
+            logoIcon.classList.add("hidden");
+          }
+          if (profileText) {
+            profileText.style.display = null;
+          }
+          if (profileAvatar) {
+            profileAvatar.style.display = null;
+          }
+          if (logoutBtn) {
+            logoutBtn.style.display = null;
+          }
+          if (toggleBtn) {
+            toggleBtn.style.display = null;
+          }
+        }, 150);
+      }
     }
   </script>
   {% block scripts %}{% endblock %}
