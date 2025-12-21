@@ -11,7 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&family=Spline+Sans:wght@300..700&display=swap"
     rel="stylesheet" />
 
-  <!-- Tailwind CDN (quick prototyping) + custom config so utility classes work -->
+  <!-- Tailwind config + CDN -->
   <script>
     tailwind = tailwind || {};
     tailwind.config = {
@@ -50,112 +50,176 @@
     });
   </script>
 
-  <!-- Link global fallback CSS so .btn-primary etc. work without Tailwind build -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
 
   {% block head_extra %}{% endblock %}
 
   <style>
-    /* Scrollbar Styling */
     ::-webkit-scrollbar {
       width: 8px;
-      /* Slightly thinner */
       height: 8px;
     }
 
     ::-webkit-scrollbar-thumb {
       background: #cbd5e1;
-      /* Blue-gray-300 */
       border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
-      /* Blue-gray-400 */
     }
-
-    /* Minimal inline helpers only; component styles moved to `static/css/global.css` */
   </style>
   {% block styles %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-primary text-slate-800 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-primary via-sky-50 to-secondary text-slate-800 font-sans">
   <div class="flex min-h-screen">
-    <aside id="mainSidebar" class="hidden md:flex flex-col border-r border-blue-200/50 bg-white h-screen sticky top-0 transition-all duration-300 ease-in-out w-72">
+    <!-- DESKTOP SIDEBAR -->
+    <aside id="mainSidebar" class="hidden md:flex flex-col border-r border-blue-200/60 bg-white/80 backdrop-blur-xl h-screen sticky top-0
+             transition-all duration-300 ease-in-out w-72 shadow-[10px_0_40px_rgba(15,23,42,0.08)]">
 
-      <div class="h-16 flex items-center p-6 mt-4 flex-shrink-0 overflow-hidden whitespace-nowrap transition-all duration-300" id="sidebar-logo-row">
-        <span class="sidebar-logo flex items-center justify-center w-full transition-all duration-300" id="sidebar-logo-link">
-          <a href="{{ url_for('main.index') }}" class="sidebar-logo-text text-xl font-bold text-slate-800 tracking-tight transition-all duration-300">AI Teacher Assistant</a>
-          <button type="button" onclick="toggleDesktopSidebar()" class="sidebar-logo-icon hidden transition-all p-1 rounded hover:bg-slate-100" aria-label="Expand sidebar">
+      <!-- Logo row -->
+      <div
+        class="h-16 flex items-center p-6 mt-4 flex-shrink-0 overflow-hidden whitespace-nowrap transition-all duration-300"
+        id="sidebar-logo-row">
+        <span class="sidebar-logo flex items-center justify-between w-full transition-all duration-300"
+          id="sidebar-logo-link">
+          <a href="{{ url_for('main.index') }}" class="sidebar-logo-text text-xl font-bold tracking-tight text-slate-900
+                   bg-gradient-to-r from-brand-600 to-brand-800 bg-clip-text">
+            AI Teacher Assistant
+          </a>
+          <button type="button" onclick="toggleDesktopSidebar()"
+            class="sidebar-logo-icon hidden transition-all p-1 rounded-lg hover:bg-slate-100"
+            aria-label="Expand sidebar">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
         </span>
-        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="ml-2 p-2 rounded-lg hover:bg-slate-100 text-slate-500 border border-slate-200 transition-all active:scale-95 hidden md:inline-flex" title="Toggle sidebar">
+        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="ml-2 p-2 rounded-xl hover:bg-slate-100 text-slate-500 border border-slate-200/80
+                 transition-all active:scale-95 hidden md:inline-flex shadow-sm" title="Toggle sidebar">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
 
-     <nav class="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
-
-        <a href="{{ url_for('main.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-brand-50 hover:text-brand-700 transition-colors whitespace-nowrap group">
-            <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i>
-            <span class="sidebar-text transition-opacity duration-200">Dashboard</span>
+      <!-- NAV -->
+      <nav class="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden">
+        <!-- Dashboard -->
+        <a href="{{ url_for('main.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                 {% if request.endpoint == 'main.index' %}
+                   text-brand-800 bg-gradient-to-r from-brand-100 to-sky-100
+                   border border-brand-300 shadow-md -translate-y-0.5
+                 {% else %}
+                   text-slate-700 bg-gradient-to-r from-brand-50 to-sky-50
+                   border border-transparent hover:border-brand-200
+                   hover:shadow-md hover:-translate-y-0.5
+                 {% endif %}
+                 transition-all">
+          <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-200/40 via-sky-200/30 to-transparent
+                   {% if request.endpoint == 'main.index' %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %}
+                   transition-opacity pointer-events-none">
+          </span>
+          <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
+                   {% if request.endpoint == 'main.index' %}text-brand-700{% else %}text-brand-600{% endif %}">
+          </i>
+          <span class="relative sidebar-text transition-opacity duration-200">Dashboard</span>
         </a>
-        <a href="{{ url_for('batches.batches_page') }}"
-          class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
-          <i data-lucide="users" class="w-5 h-5"></i>
+
+        <!-- Batches – DESKTOP -->
+        <a href="{{ url_for('batches.batches_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+         {% if request.endpoint == 'batches.batches_page' %}
+           text-slate-900 bg-blue-100
+           border border-blue-300 shadow-md -translate-y-0.5
+         {% else %}
+           text-slate-800 hover:text-slate-900
+           hover:bg-blue-50
+           border border-transparent hover:border-blue-200
+           hover:shadow-sm hover:-translate-y-0.5
+         {% endif %}
+         transition-all">
+          <i data-lucide="users" class="w-5 h-5
+           {% if request.endpoint == 'batches.batches_page' %}text-blue-700{% else %}text-slate-500 group-hover:text-blue-600{% endif %}
+           transition-colors">
+          </i>
           <span class="sidebar-text transition-opacity duration-200">Batches</span>
         </a>
-        <a href="{{ url_for('lesson_plans.list_lesson_plans') }}"
-          class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
-          <i data-lucide="book-open" class="w-5 h-5"></i>
+
+
+
+        <!-- Lesson Plans -->
+        <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                 {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}
+                   text-indigo-800 bg-gradient-to-r from-indigo-100 to-white
+                   border border-indigo-300 shadow-md -translate-y-0.5
+                 {% else %}
+                   text-slate-600 hover:text-slate-900
+                   hover:bg-gradient-to-r hover:from-white hover:via-indigo-50/60 hover:to-white
+                   border border-transparent hover:border-slate-200
+                   hover:shadow-sm hover:-translate-y-0.5
+                 {% endif %}
+                 transition-all">
+          <i data-lucide="book-open" class="w-5 h-5
+                   {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-indigo-700{% else %}text-slate-500 group-hover:text-indigo-600{% endif %}
+                   transition-colors">
+          </i>
           <span class="sidebar-text transition-opacity duration-200">Lesson Plans</span>
         </a>
-        <a href="{{ url_for('assessments.list_assessments') }}"
-          class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
-          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+
+        <!-- Assessments -->
+        <a href="{{ url_for('assessments.list_assessments') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                 {% if request.endpoint == 'assessments.list_assessments' %}
+                   text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                   border border-emerald-300 shadow-md -translate-y-0.5
+                 {% else %}
+                   text-slate-600 hover:text-slate-900
+                   hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                   border border-transparent hover:border-slate-200
+                   hover:shadow-sm hover:-translate-y-0.5
+                 {% endif %}
+                 transition-all">
+          <i data-lucide="bar-chart-3" class="w-5 h-5
+                   {% if request.endpoint == 'assessments.list_assessments' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
+                   transition-colors">
+          </i>
           <span class="sidebar-text transition-opacity duration-200">Assessments</span>
         </a>
-        <a href="{{ url_for('email.email_page') }}"
-          class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-white/50 hover:text-slate-900">
-          <i data-lucide="mail" class="w-5 h-5"></i>
+
+        <!-- Send Emails -->
+        <a href="{{ url_for('email.email_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                 {% if request.endpoint == 'email.email_page' %}
+                   text-amber-800 bg-gradient-to-r from-amber-100 to-white
+                   border border-amber-300 shadow-md -translate-y-0.5
+                 {% else %}
+                   text-slate-600 hover:text-slate-900
+                   hover:bg-gradient-to-r hover:from-white hover:via-amber-50/60 hover:to-white
+                   border border-transparent hover:border-slate-200
+                   hover:shadow-sm hover:-translate-y-0.5
+                 {% endif %}
+                 transition-all">
+          <i data-lucide="mail" class="w-5 h-5
+                   {% if request.endpoint == 'email.email_page' %}text-amber-700{% else %}text-slate-500 group-hover:text-amber-600{% endif %}
+                   transition-colors">
+          </i>
           <span class="sidebar-text transition-opacity duration-200">Send Emails</span>
         </a>
-
-        <!-- {% if user %}
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl px-4 py-3 shadow-sm border border-slate-100">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <p class="text-xs text-slate-500 mb-1">Available Credits</p>
-              <p class="text-3xl font-bold text-slate-800">{{ credits|default(0) }}</p>
-            </div>
-            <div
-              class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        {% endif %} -->
       </nav>
 
-      <!-- Profile fixed at bottom -->
-      <div class="px-4 py-4 border-t border-slate-100 flex-shrink-0 transition-all duration-300" id="sidebar-profile-row">
-        <div class="flex items-center gap-3 text-sm rounded-lg hover:bg-slate-50 p-2 transition-all duration-300 sidebar-profile-content">
+      <!-- PROFILE -->
+      <div class="px-4 py-4 border-t border-slate-100 flex-shrink-0 transition-all duration-300"
+        id="sidebar-profile-row">
+        <div class="flex items-center gap-3 text-sm rounded-xl hover:bg-slate-50/80 p-2
+                 transition-all duration-300 sidebar-profile-content">
           <div class="sidebar-profile-avatar">
             {% if session.get('picture') %}
             <img src="{{ session.get('picture') }}" alt="Avatar"
               class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
             {% else %}
-            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-600 text-white">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full
+                     bg-gradient-to-tr from-brand-500 to-brand-700 text-white shadow-md shadow-brand-300/70">
               <i data-lucide="user" class="w-5 h-5"></i>
             </span>
             {% endif %}
           </div>
           <div class="sidebar-profile-text flex-1 min-w-0 transition-all duration-300">
-            <div class="text-sm font-medium text-slate-800 truncate">
+            <div class="text-sm font-semibold text-slate-800 truncate">
               {{ session.get('name') or 'Profile' }}
             </div>
             <div class="text-xs text-slate-500 truncate">
@@ -171,18 +235,20 @@
       </div>
     </aside>
 
-
+    <!-- MAIN AREA -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <header
-        class="md:hidden h-16 bg-secondary/90 backdrop-blur-sm border-b border-blue-200/50 flex items-center justify-between px-4 sticky top-0 z-20">
-        <button id="openSidebar"
-          class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:bg-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500"
-          aria-label="Open menu">
+      <!-- MOBILE HEADER -->
+      <header class="md:hidden h-16 bg-white/80 backdrop-blur-xl border-b border-blue-200/60
+               flex items-center justify-between px-4 sticky top-0 z-20 shadow-[0_4px_20px_rgba(148,163,184,0.35)]">
+        <button id="openSidebar" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-600 hover:bg-blue-50
+                 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500" aria-label="Open menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <a href="{{ url_for('main.index') }}" class="text-lg font-bold text-slate-800">AI Lesson Planner</a>
+        <a href="{{ url_for('main.index') }}" class="text-lg font-bold text-slate-900 tracking-tight">
+          AI Lesson Planner
+        </a>
         <div class="w-10"></div>
       </header>
 
@@ -193,16 +259,18 @@
           <div class="space-y-3 mb-6">
             {% for category, message in messages %}
             {% if category == 'success' or category == 'ok' %}
-            {% set color_class = 'bg-green-50 text-green-800 border-green-200' %}
+            {% set color_class = 'border-green-200/80 bg-gradient-to-r from-green-50 to-emerald-50 text-green-800' %}
             {% elif category == 'warning' %}
-            {% set color_class = 'bg-amber-50 text-amber-800 border-amber-200' %}
+            {% set color_class = 'border-amber-200/80 bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800' %}
             {% elif category == 'error' or category == 'danger' %}
-            {% set color_class = 'bg-red-50 text-red-800 border-red-200' %}
+            {% set color_class = 'border-red-200/80 bg-gradient-to-r from-red-50 to-rose-50 text-red-800' %}
             {% else %}
-            {% set color_class = 'bg-blue-50 text-blue-800 border-blue-200' %}
+            {% set color_class = 'border-blue-200/80 bg-gradient-to-r from-blue-50 to-sky-50 text-blue-800' %}
             {% endif %}
-            <div class="border px-4 py-3 rounded-md shadow-sm text-sm font-medium {{ color_class }} flex items-center">
-              {{ message }}
+            <div
+              class="border px-4 py-3 rounded-xl shadow-sm text-sm font-medium {{ color_class }} flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-current/70"></span>
+              <span>{{ message }}</span>
             </div>
             {% endfor %}
           </div>
@@ -211,95 +279,136 @@
 
           {% block content %}{% endblock %}
         </div>
-
-        <!-- Removed duplicate sidebar toggle button from header -->
       </main>
-
-      <!-- <footer
-          class="border-t border-blue-200/30 bg-white/50 text-xs text-slate-400 px-8 py-4 text-center"
-        >
-          &copy; {{ current_year or 2025 }} AI Lesson Planner
-        </footer> -->
     </div>
   </div>
 
-  <!-- Mobile Responsive Part -->
+  <!-- MOBILE DRAWER -->
   <div id="drawer" class="relative z-50 hidden md:hidden" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" data-close></div>
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" data-close></div>
     <div class="fixed inset-0 flex">
-      <div class="relative flex w-full max-w-xs flex-1 flex-col bg-white pb-4 pt-5 shadow-xl">
+      <div class="relative flex w-full max-w-xs flex-1 flex-col bg-white pb-4 pt-5 shadow-2xl rounded-r-2xl">
+
         <div class="absolute top-4 right-4 z-50">
-          <button type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 hover:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500 shadow transition"
-            data-close aria-label="Close sidebar">
-            <svg class="h-7 w-7 text-slate-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+          <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 hover:bg-slate-50
+                   focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500 shadow transition" data-close
+            aria-label="Close sidebar">
+            <svg class="h-6 w-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+              aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <div class="flex flex-shrink-0 items-center px-4 mb-5">
-          <span class="text-xl font-bold text-slate-800 tracking-tight">AI Teacher Assistant</span>
+          <span class="text-xl font-bold text-slate-900 tracking-tight">
+            AI Teacher Assistant
+          </span>
         </div>
 
         <div class="flex-1 overflow-y-auto">
-          <nav class="space-y-1 px-4">
-            <a href="{{ url_for('main.index') }}"
-              class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-              <i data-lucide="home" class="w-5 h-5"></i>
-              <span>Dashboard</span>
+          <nav class="space-y-2 px-4 pb-4">
+            <!-- Dashboard -->
+            <a href="{{ url_for('main.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                     {% if request.endpoint == 'main.index' %}
+                       text-brand-800 bg-gradient-to-r from-brand-100 to-sky-100
+                       border border-brand-300 shadow-md -translate-y-0.5
+                     {% else %}
+                       text-slate-700 bg-gradient-to-r from-brand-50 to-sky-50
+                       border border-transparent hover:border-brand-200
+                       hover:shadow-md hover:-translate-y-0.5
+                     {% endif %}
+                     transition-all">
+              <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-200/40 via-sky-200/30 to-transparent
+                       {% if request.endpoint == 'main.index' %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %}
+                       transition-opacity pointer-events-none">
+              </span>
+              <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
+                       {% if request.endpoint == 'main.index' %}text-brand-700{% else %}text-brand-600{% endif %}">
+              </i>
+              <span class="relative">Dashboard</span>
             </a>
 
-            <a href="{{ url_for('batches.batches_page') }}"
-              class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-              <i data-lucide="users" class="w-5 h-5"></i>
+            <!-- Batches – MOBILE DRAWER -->
+            <a href="{{ url_for('batches.batches_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+         {% if request.endpoint == 'batches.batches_page' %}
+           text-slate-900 bg-blue-100
+           border border-blue-300 shadow-md -translate-y-0.5
+         {% else %}
+           text-slate-800 hover:text-slate-900
+           hover:bg-blue-50
+           border border-transparent hover:border-blue-200
+           hover:shadow-sm hover:-translate-y-0.5
+         {% endif %}
+         transition-all">
+              <i data-lucide="users" class="w-5 h-5
+           {% if request.endpoint == 'batches.batches_page' %}text-blue-700{% else %}text-slate-500 group-hover:text-blue-600{% endif %}
+           transition-colors">
+              </i>
               <span>Batches</span>
             </a>
 
-            <a href="{{ url_for('lesson_plans.list_lesson_plans') }}"
-              class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-              <i data-lucide="book-open" class="w-5 h-5"></i>
+
+            <!-- Lesson Plans -->
+            <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                     {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}
+                       text-indigo-800 bg-gradient-to-r from-indigo-100 to-white
+                       border border-indigo-300 shadow-md -translate-y-0.5
+                     {% else %}
+                       text-slate-600 hover:text-slate-900
+                       hover:bg-gradient-to-r hover:from-white hover:via-indigo-50/60 hover:to-white
+                       border border-transparent hover:border-slate-200
+                       hover:shadow-sm hover:-translate-y-0.5
+                     {% endif %}
+                     transition-all">
+              <i data-lucide="book-open" class="w-5 h-5
+                       {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-indigo-700{% else %}text-slate-500 group-hover:text-indigo-600{% endif %}
+                       transition-colors">
+              </i>
               <span>Lesson Plans</span>
             </a>
 
-            <a href="{{ url_for('assessments.list_assessments') }}"
-              class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+            <!-- Assessments -->
+            <a href="{{ url_for('assessments.list_assessments') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                     {% if request.endpoint == 'assessments.list_assessments' %}
+                       text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                       border border-emerald-300 shadow-md -translate-y-0.5
+                     {% else %}
+                       text-slate-600 hover:text-slate-900
+                       hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                       border border-transparent hover:border-slate-200
+                       hover:shadow-sm hover:-translate-y-0.5
+                     {% endif %}
+                     transition-all">
+              <i data-lucide="bar-chart-3" class="w-5 h-5
+                       {% if request.endpoint == 'assessments.list_assessments' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
+                       transition-colors">
+              </i>
               <span>Assessments</span>
             </a>
 
-            <a href="{{ url_for('email.email_page') }}"
-              class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-              <i data-lucide="mail" class="w-5 h-5"></i>
+            <!-- Send Emails -->
+            <a href="{{ url_for('email.email_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
+                     {% if request.endpoint == 'email.email_page' %}
+                       text-amber-800 bg-gradient-to-r from-amber-100 to-white
+                       border border-amber-300 shadow-md -translate-y-0.5
+                     {% else %}
+                       text-slate-600 hover:text-slate-900
+                       hover:bg-gradient-to-r hover:from-white hover:via-amber-50/60 hover:to-white
+                       border border-transparent hover:border-slate-200
+                       hover:shadow-sm hover:-translate-y-0.5
+                     {% endif %}
+                     transition-all">
+              <i data-lucide="mail" class="w-5 h-5
+                       {% if request.endpoint == 'email.email_page' %}text-amber-700{% else %}text-slate-500 group-hover:text-amber-600{% endif %}
+                       transition-colors">
+              </i>
               <span>Send Emails</span>
             </a>
           </nav>
         </div>
 
-        <!-- Credits + Profile at bottom of drawer -->
         <div class="mt-auto px-4 py-3 border-t border-slate-100 space-y-3">
-          <!-- Credits Card -->
-          <!-- {% if user %}
-          <div
-            class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl px-4 py-3 shadow-sm border border-slate-100">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="text-xs text-slate-500 mb-1">Available Credits</p>
-                <p class="text-3xl font-bold text-slate-800">{{ credits|default(0) }}</p>
-              </div>
-              <div
-                class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          {% endif %} -->
-
-          <!-- Profile with Logout -->
           <div class="flex items-center gap-3 text-sm rounded-lg hover:bg-slate-50 p-2">
             {% if session.get('picture') %}
             <img src="{{ session.get('picture') }}" alt="Avatar"
@@ -327,10 +436,6 @@
       </div>
     </div>
   </div>
-
-
-
-  <!-- Removed CDN prototyping scripts (use local/static assets) -->
 
   {% block scripts_before %}{% endblock %}
 
@@ -414,6 +519,7 @@
       }
     }
   </script>
+
   {% block scripts %}{% endblock %}
 </body>
 

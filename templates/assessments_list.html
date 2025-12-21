@@ -1,5 +1,6 @@
-{% extends "base.html" %} {% block title %}Assessments — AI Lesson Planner{%
-endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Assessments — AI Lesson Planner{% endblock %}
+{% block content %}
 
 <div class="flex items-center justify-between mb-8">
   <div>
@@ -11,123 +12,76 @@ endblock %} {% block content %}
     </p>
   </div>
 
-  <a
-    href="{{ url_for('assessments.assessment_page') }}"
-    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-  >
-    <svg
-      class="w-5 h-5 mr-2 -ml-1"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M12 4.5v15m7.5-7.5h-15"
-      />
+  <a href="{{ url_for('assessments.assessment_page') }}"
+    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
     Generate New
   </a>
 </div>
 
-<div
-  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
   {% if assessments and assessments|length > 0 %}
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-slate-100">
       <thead class="bg-slate-50">
         <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Title
           </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Created
           </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Questions
           </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Google Form
           </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
+          <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Actions
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-slate-100">
-        {% for asmt in assessments %} {% set qcount =
-        asmt.result.questions|length if asmt.result and asmt.result.questions
-        else 0 %} {% set has_form = asmt.google_form and
-        asmt.google_form.formUrl %} {% set detail_url =
-        url_for('assessments.assessment_detail', assessment_id=asmt.id) %}
+        {% for asmt in assessments %}
+        {% set qcount = asmt.result.questions|length if asmt.result and asmt.result.questions else 0 %}
+        {% set has_form = asmt.google_form and asmt.google_form.formUrl %}
+        {% set detail_url = url_for('assessments.assessment_detail', assessment_id=asmt.id) %}
 
         <tr class="hover:bg-slate-50/80 transition-colors duration-150 group">
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div
-                class="flex-shrink-0 h-8 w-8 rounded bg-purple-50 text-purple-600 flex items-center justify-center mr-3 border border-purple-100"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
+                class="flex-shrink-0 h-8 w-8 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center mr-3 border border-emerald-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <div
-                class="font-medium text-slate-900 group-hover:text-blue-600 transition-colors"
-              >
+              <div class="font-medium text-slate-900 group-hover:text-emerald-600 transition-colors">
                 {{ asmt.original_filename or "Untitled Assessment" }}
               </div>
             </div>
           </td>
 
           <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-            {% if asmt.created_at %} {{ asmt.created_at | format_datetime }} {%
-            else %} - {% endif %}
+            {% if asmt.created_at %} {{ asmt.created_at | format_datetime }} {% else %} - {% endif %}
           </td>
 
           <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
             <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
-            >
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
               {{ qcount }} Qs
             </span>
           </td>
 
           <td class="px-6 py-4 whitespace-nowrap text-sm">
             {% if has_form %}
-            <a
-              href="{{ asmt.google_form.formUrl }}"
-              target="_blank"
+            <a href="{{ asmt.google_form.formUrl }}" target="_blank"
               class="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium"
-              onclick="event.stopPropagation();"
-            >
+              onclick="event.stopPropagation();">
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M7 11h10v2H7zM4 15h6v2H4zM4 7h16v2H4z" />
                 <path d="M22 2H2v20h20V2zm-2 18H4V4h16v16z" />
@@ -139,108 +93,47 @@ endblock %} {% block content %}
             {% endif %}
           </td>
 
-          <td
-            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-          >
-            <div
-              class="flex items-center justify-end gap-2"
-              onclick="event.stopPropagation();"
-            >
-              <a
-                href="{{ detail_url }}"
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex items-center justify-end gap-2" onclick="event.stopPropagation();">
+              <a href="{{ detail_url }}"
                 class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
-                onclick="event.stopPropagation();"
-              >
-                <svg
-                  class="w-3 h-3 mr-1.5 text-slate-500"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                  />
+                onclick="event.stopPropagation();">
+                <svg class="w-3 h-3 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                 </svg>
                 View
               </a>
               {% if not has_form %}
-              <form
-                method="post"
-                action="{{ url_for('assessments.create_form_for_assessment', id=asmt.id) }}"
-                data-create-form
-                class="inline-block"
-              >
-                <button
-                  type="submit"
-                  data-create-btn
-                  class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
-                >
-                  <svg
-                    class="w-3 h-3 mr-1.5 text-slate-500"
-                    data-spinner-icon
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
+              <form method="post" action="{{ url_for('assessments.create_form_for_assessment', id=asmt.id) }}"
+                data-create-form class="inline-block">
+                <button type="submit" data-create-btn
+                  class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                  <svg class="w-3 h-3 mr-1.5 text-slate-500" data-spinner-icon fill="none" stroke="currentColor"
+                    stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
-                  <svg
-                    class="w-3 h-3 mr-1.5 animate-spin hidden text-blue-600"
-                    data-spinner-active
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                  <svg class="w-3 h-3 mr-1.5 animate-spin hidden text-blue-600" data-spinner-active fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
                   </svg>
                   <span data-label>Create Form</span>
                 </button>
               </form>
               {% endif %}
 
-              <button
-                type="button"
-                data-send-btn
-                data-asmt-id="{{ asmt.id }}"
+              <button type="button" data-send-btn data-asmt-id="{{ asmt.id }}"
                 data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
-                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
-              >
-                <svg
-                  class="w-3 h-3 mr-1.5 text-slate-500"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                  />
+                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <svg class="w-3 h-3 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>
                 Send Email
               </button>
@@ -253,76 +146,39 @@ endblock %} {% block content %}
   </div>
   {% else %}
   <div class="flex flex-col items-center justify-center py-16 text-center">
-    <div
-      class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4"
-    >
-      <svg
-        class="w-8 h-8 text-slate-300"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-        />
+    <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+      <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>
     <h3 class="text-sm font-medium text-slate-900">No assessments found</h3>
     <p class="mt-1 text-sm text-slate-500 mb-6">
       Create your first quiz or exam from any PDF.
     </p>
-    <a
-      href="{{ url_for('assessments.assessment_page') }}"
-      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-    >
+    <a href="{{ url_for('assessments.assessment_page') }}"
+      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
       Create Assessment
     </a>
   </div>
   {% endif %}
 </div>
 
-<div
-  id="send-modal"
-  class="fixed inset-0 z-50 hidden"
-  role="dialog"
-  aria-modal="true"
->
-  <div
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
-  ></div>
+<div id="send-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
 
   <div class="fixed inset-0 z-10 overflow-y-auto">
-    <div
-      class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
-    >
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
       <div
-        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
-      >
-        <div
-          class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between"
-        >
+        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+        <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-base font-semibold leading-6 text-slate-800">
             Send Assessment to Batch
           </h3>
-          <button
-            id="send-close"
-            class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
+          <button id="send-close"
+            class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-slate-200 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
@@ -331,91 +187,53 @@ endblock %} {% block content %}
           <input type="hidden" id="send-asmt-id" />
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1"
-              >Target Batch</label
-            >
-            <select
-              id="send-batch"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 sm:text-base"
-              required
-            >
+            <label class="block text-sm font-medium text-slate-700 mb-1">Target Batch</label>
+            <select id="send-batch" class="block w-full rounded-md border border-slate-300 bg-slate-50 shadow-sm
+         focus:bg-white 
+         py-2.5 px-2 sm:text-sm" required>
+
               <option value="">Loading batches...</option>
             </select>
             <p id="send-batch-hint" class="mt-1 text-xs text-slate-500"></p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1"
-              >Email Subject</label
-            >
-            <input
-              id="send-subject"
-              type="text"
-              required
-              placeholder="e.g. Quiz Reminder: Introduction to Physics"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 sm:text-base"
-            />
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email Subject</label>
+            <input id="send-subject" type="text" required placeholder="e.g. Quiz Reminder: Introduction to Physics"
+              class="block w-full rounded-md border border-slate-300 bg-slate-50 shadow-sm py-2.5 px-2 sm:text-sm" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1"
-              >Tone (Optional)</label
-            >
-            <input
-              id="send-tone"
-              type="text"
-              placeholder="professional, encouraging"
-              value="professional, friendly"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 sm:text-base"
-            />
+            <label class="block text-sm font-medium text-slate-700 mb-1">Tone (Optional)</label>
+            <input id="send-tone" type="text" placeholder="professional, encouraging" value="professional, friendly"
+              class="block w-full rounded-md border border-slate-300 bg-slate-50 shadow-sm py-2.5 px-2 sm:text-sm" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1"
-              >Message Notes</label
-            >
-            <textarea
-              id="send-notes"
-              rows="5"
+            <label class="block text-sm font-medium text-slate-700 mb-1">Message Notes</label>
+            <textarea id="send-notes" rows="5"
               placeholder="Briefly describe what this email is about. AI will write the full body."
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 sm:text-base"
-            ></textarea>
+              class="block w-full rounded-md border border-slate-300 bg-slate-50 shadow-sm py-2.5 px-2 sm:text-sm"></textarea>
             <p class="mt-1 text-xs text-slate-400">
               Context like "Due this Friday" helps the AI write better emails.
             </p>
           </div>
 
           <div class="flex items-center gap-2 pt-2">
-            <input
-              id="send-draft"
-              type="checkbox"
-              class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label for="send-draft" class="text-sm text-slate-700"
-              >Save as Drafts (don't send yet)</label
-            >
+            <input id="send-draft" type="checkbox"
+              class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+            <label for="send-draft" class="text-sm text-slate-700">Save as Drafts (don't send yet)</label>
           </div>
 
-          <div
-            class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2"
-          >
-            <span
-              id="send-status"
-              class="text-xs font-medium text-blue-600"
-            ></span>
+          <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2">
+            <span id="send-status" class="text-xs font-medium text-blue-600"></span>
             <div class="flex gap-3">
-              <button
-                type="button"
-                id="send-cancel"
-                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <button type="button" id="send-cancel"
+                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 Cancel
               </button>
-              <button
-                type="submit"
-                id="send-submit"
-                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <button type="submit" id="send-submit"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 Send Emails
               </button>
             </div>
@@ -426,10 +244,11 @@ endblock %} {% block content %}
   </div>
 </div>
 
-{% endblock %} {% block scripts %}
+{% endblock %}
+{% block scripts %}
+<!-- script block unchanged from your version -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // 1. Create Google Form Handler
     const table = document.querySelector("table");
     table?.addEventListener("submit", async (e) => {
       const form = e.target.closest("form[data-create-form]");
@@ -441,7 +260,6 @@ endblock %} {% block content %}
       const icon = btn?.querySelector("[data-spinner-icon]");
       const spinner = btn?.querySelector("[data-spinner-active]");
 
-      // Loading UI
       btn.disabled = true;
       icon?.classList.add("hidden");
       spinner?.classList.remove("hidden");
@@ -458,15 +276,14 @@ endblock %} {% block content %}
           ? await res.json()
           : { ok: res.ok, error: await res.text() };
 
-        if (!res.ok || !data.ok)
-          throw new Error(data.error || `HTTP ${res.status}`);
+        if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
         const formUrl =
           data.google_form?.formUrl || data.updated?.google_form?.formUrl;
         if (!formUrl) throw new Error("Form created but URL missing.");
 
         window.open(formUrl, "_blank");
-        location.reload(); // Refresh to update row state
+        location.reload();
       } catch (err) {
         alert("Error: " + (err.message || err));
         btn.disabled = false;
@@ -476,7 +293,6 @@ endblock %} {% block content %}
       }
     });
 
-    // 2. Send Modal Logic
     const modal = document.getElementById("send-modal");
     const btnClose = document.getElementById("send-close");
     const btnCancel = document.getElementById("send-cancel");
@@ -508,7 +324,7 @@ endblock %} {% block content %}
 
     document.querySelectorAll("[data-send-btn]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
-        e.stopPropagation(); // Prevent row click
+        e.stopPropagation();
         const asmtId = btn.getAttribute("data-asmt-id");
         const asmtTitle = btn.getAttribute("data-asmt-title");
         openModal({ asmtId, asmtTitle });
@@ -583,9 +399,8 @@ endblock %} {% block content %}
         if (!res.ok || !data.ok) throw new Error(data.error || "Server Error");
 
         const s = data.summary || {};
-        sendStatus.textContent = `Success! Sent: ${s.sent || 0}, Drafts: ${
-          s.drafted || 0
-        }`;
+        sendStatus.textContent = `Success! Sent: ${s.sent || 0}, Drafts: ${s.drafted || 0
+          }`;
         sendStatus.className = "text-xs font-medium text-green-600";
 
         setTimeout(closeModal, 1500);

@@ -1,5 +1,7 @@
-{% extends "base.html" %} {% block title %}Lesson Plans — AI Lesson Planner{%
-endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Lesson Plans — AI Lesson Planner{% endblock %}
+{% block content %}
+
 <div class="flex items-center justify-between mb-8">
   <div>
     <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
@@ -12,7 +14,7 @@ endblock %} {% block content %}
 
   <a
     href="{{ url_for('lesson_plans.lesson_generator_page') }}"
-    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
   >
     <svg
       class="w-5 h-5 mr-2 -ml-1"
@@ -55,149 +57,174 @@ endblock %} {% block content %}
 </div>
 {% endif %}
 
+{# ---------- GLOW-STYLE CARD WRAPPING TABLE / EMPTY STATE ---------- #}
 <div
-  class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+  class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow transition-colors duration-300"
 >
-  {% if lesson_plans and lesson_plans|length > 0 %}
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-slate-100">
-      <thead class="bg-slate-50">
-        <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
-            Title
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
-            Created
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
-            Duration
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-          >
-            Workload
-          </th>
-          <th scope="col" class="relative px-6 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-slate-100">
-        {% for lp in lesson_plans %} {% set r = lp.result or {} %}
-        <tr class="hover:bg-slate-50/80 transition-colors duration-150 group">
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <div
-                class="flex-shrink-0 h-8 w-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3 border border-blue-100"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                  />
-                </svg>
-              </div>
-              <div
-                class="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors"
-              >
-                {{ r.title or r.name or lp.original_filename or "Untitled Plan"
-                }}
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-            {% if lp.created_at %} {{ lp.created_at | format_datetime }} {% else
-            %} - {% endif %}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-            {% set weeks = r.total_duration or r.weeks or r.duration_weeks or
-            (lp.options.weeks if lp.options and lp.options.weeks) or "-" %}
-            <span
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800"
-            >
-              {{ weeks }} Weeks
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-            {{ r.sections_per_week or (lp.options.sections if lp.options and
-            lp.options.sections) or "-" }} Sections/Week
-          </td>
-          <td
-            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
-          >
-            <button
-              type="button"
-              class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              data-preview-id="lp-{{ lp.id }}"
-              data-lp-id="{{ lp.id }}"
-              data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}"
-            >
-              Preview
-            </button>
-          </td>
-        </tr>
-        <script id="lp-{{ lp.id }}" type="application/json">
-          {{ r | tojson }}
-        </script>
-        <script id="lp-json-{{ lp.id }}" type="application/json">
-          {{ r | tojson(indent=2) }}
-        </script>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="flex flex-col items-center justify-center py-16 text-center">
+  <!-- Glow background -->
+  <div
+    class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+  >
     <div
-      class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4"
-    >
-      <svg
-        class="w-8 h-8 text-slate-300"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-        />
-      </svg>
-    </div>
-    <h3 class="text-sm font-medium text-slate-900">
-      No lesson plans saved yet
-    </h3>
-    <p class="mt-1 text-sm text-slate-500 mb-6">
-      Create your first AI-generated curriculum today.
-    </p>
-    <a
-      href="{{ url_for('lesson_plans.lesson_generator_page') }}"
-      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-    >
-      Generate Lesson Plan
-    </a>
+      class="absolute -top-16 -right-10 w-40 h-40 bg-indigo-400/22 blur-3xl"
+    ></div>
+    <div
+      class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-400/20 blur-3xl"
+    ></div>
   </div>
-  {% endif %}
+
+  <!-- Hover ring -->
+  <div
+    class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-indigo-300 group-hover:shadow-[0_0_0_1px_rgba(79,70,229,0.45)] transition-all duration-300"
+  ></div>
+
+  <!-- Inner content -->
+  <div class="relative z-10 rounded-2xl bg-white">
+    {% if lesson_plans and lesson_plans|length > 0 %}
+    <div class="overflow-x-auto rounded-2xl">
+      <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/90">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >
+              Title
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >
+              Created
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >
+              Duration
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >
+              Workload
+            </th>
+            <th scope="col" class="relative px-6 py-3">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-100">
+          {% for lp in lesson_plans %}
+            {% set r = lp.result or {} %}
+          <tr class="group hover:bg-slate-50/90 transition-all duration-150">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div
+                  class="flex-shrink-0 h-8 w-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3 border border-indigo-100 group-hover:shadow-sm transition-shadow duration-150"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                    />
+                  </svg>
+                </div>
+                <div
+                  class="text-sm font-medium text-slate-900 group-hover:text-indigo-700 transition-colors"
+                >
+                  {{ r.title or r.name or lp.original_filename or "Untitled Plan" }}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+              {% if lp.created_at %}
+                {{ lp.created_at | format_datetime }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+              {% set weeks = r.total_duration or r.weeks or r.duration_weeks or
+                  (lp.options.weeks if lp.options and lp.options.weeks) or "-" %}
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors"
+              >
+                {{ weeks }} Weeks
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+              {{ r.sections_per_week or (lp.options.sections if lp.options and
+              lp.options.sections) or "-" }} Sections/Week
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"
+            >
+              <button
+                type="button"
+                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                data-preview-id="lp-{{ lp.id }}"
+                data-lp-id="{{ lp.id }}"
+                data-title="{{ r.title or r.name or lp.original_filename or 'Lesson Plan' }}"
+              >
+                Preview
+              </button>
+            </td>
+          </tr>
+          <script id="lp-{{ lp.id }}" type="application/json">
+            {{ r | tojson }}
+          </script>
+          <script id="lp-json-{{ lp.id }}" type="application/json">
+            {{ r | tojson(indent=2) }}
+          </script>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-16 text-center">
+      <div
+        class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4"
+      >
+        <svg
+          class="w-8 h-8 text-slate-300"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+          />
+        </svg>
+      </div>
+      <h3 class="text-sm font-medium text-slate-900">
+        No lesson plans saved yet
+      </h3>
+      <p class="mt-1 text-sm text-slate-500 mb-6">
+        Create your first AI-generated curriculum today.
+      </p>
+      <a
+        href="{{ url_for('lesson_plans.lesson_generator_page') }}"
+        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Generate Lesson Plan
+      </a>
+    </div>
+    {% endif %}
+  </div>
 </div>
 
+{# --------- PREVIEW MODAL (unchanged layout) --------- #}
 <div
   id="lp-modal"
   class="fixed inset-0 z-50 hidden"
@@ -272,6 +299,7 @@ endblock %} {% block content %}
   </div>
 </div>
 
+{# --------- JSON MODAL (unchanged layout) --------- #}
 <div
   id="json-modal"
   class="fixed inset-0 z-50 hidden"
@@ -346,12 +374,13 @@ endblock %} {% block content %}
   </div>
 </div>
 
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Modal elements
     const previewModal = document.getElementById("lp-modal");
     const previewTitle = document.getElementById("lp-modal-title");
     const previewBody = document.getElementById("lp-modal-body");
@@ -369,7 +398,6 @@ endblock %} {% block content %}
     let lastMarkdown = "";
     let lastJson = "";
 
-    // Helper functions
     const pick = (obj, keys) => {
       for (const key of keys) {
         if (
@@ -431,7 +459,6 @@ endblock %} {% block content %}
           const label = pick(w, ["week", "label"]) ?? i + 1;
           const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
           lines.push(`### Week ${label}: ${topic}`);
-          // Add content description if available
           if (w.content) lines.push(w.content);
           if (w.objectives) lines.push(`*Objectives: ${w.objectives}*`);
         });
@@ -469,17 +496,7 @@ endblock %} {% block content %}
       lastJson = "";
     }
 
-    // Click handlers
     document.body.addEventListener("click", (e) => {
-      // Backdrop close
-      if (
-        e.target === previewModal ||
-        e.target.querySelector("#lp-modal > div")
-      )
-        closePreviewModal();
-      if (e.target === jsonModal || e.target.querySelector("#json-modal > div"))
-        closeJsonModal();
-
       // Preview Button
       const previewBtn = e.target.closest("button[data-preview-id]");
       if (previewBtn) {
@@ -522,7 +539,7 @@ endblock %} {% block content %}
         return;
       }
 
-      // JSON Button
+      // JSON Button (if you wire one later)
       const jsonBtn = e.target.closest("button[data-json-id]");
       if (jsonBtn) {
         const id = jsonBtn.getAttribute("data-json-id");
@@ -539,15 +556,13 @@ endblock %} {% block content %}
       }
     });
 
-    // Close buttons
     if (previewClose) previewClose.addEventListener("click", closePreviewModal);
     if (previewClose2)
       previewClose2.addEventListener("click", closePreviewModal);
     if (jsonClose) jsonClose.addEventListener("click", closeJsonModal);
     if (jsonClose2) jsonClose2.addEventListener("click", closeJsonModal);
 
-    // Copy buttons
-    async function copyText(text, btn, originalLabel) {
+    async function copyText(text, btn) {
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
@@ -569,12 +584,10 @@ endblock %} {% block content %}
 
     if (previewCopy)
       previewCopy.addEventListener("click", () =>
-        copyText(lastMarkdown, previewCopy, "Copy Markdown")
+        copyText(lastMarkdown, previewCopy)
       );
     if (jsonCopy)
-      jsonCopy.addEventListener("click", () =>
-        copyText(lastJson, jsonCopy, "Copy JSON")
-      );
+      jsonCopy.addEventListener("click", () => copyText(lastJson, jsonCopy));
   });
 </script>
 {% endblock %}
