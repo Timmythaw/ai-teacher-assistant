@@ -19,104 +19,196 @@
         .dashboard-shadow {
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
+
+        /* Hero section background restricted to the left side only */
+        .hero-left-branding {
+            position: relative;
+            background-color: #E0F1FF;
+            overflow: hidden;
+        }
+
+        .hero-left-branding > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-left-branding::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("{{ url_for('static', filename='img/PNai logo.png') }}");
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0.45;
+            filter: saturate(1.1) contrast(1.05);
+            z-index: 0;
+        }
+
+        .hero-left-branding::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.4) 0%, rgba(224, 241, 255, 0.2) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Responsive adjustments for different screen sizes */
+        @media (max-width: 1024px) {
+            .hero-left-branding::after {
+                opacity: 0.34;
+                background-position: center center;
+                background-size: cover;
+            }
+            .hero-left-branding::before {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Readability: make hero text darker + add a subtle light "glow" against busy backgrounds */
+        .hero-content h1,
+        .hero-content h3 {
+            color: #0b1220; /* deep slate */
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.85),
+                0 10px 28px rgba(255, 255, 255, 0.75);
+        }
+
+        .hero-content p {
+            color: #1f2937; /* gray-800 */
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.75),
+                0 8px 22px rgba(255, 255, 255, 0.65);
+        }
+
+        /* Login Block Styling */
+        .login-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
-<body class="academic-bg min-h-screen flex items-center justify-center p-6 lg:p-12">
+<body class="academic-bg h-screen flex overflow-hidden no-scrollbar">
 
-    <div class="max-w-7xl w-full min-h-[700px] grid lg:grid-cols-5 bg-white rounded-[40px] dashboard-shadow overflow-hidden border border-white/50">
-        
-        <div class="hidden lg:flex lg:col-span-3 flex-col justify-between p-16 bg-white relative overflow-hidden border-r border-slate-100">
-            <div class="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 bg-blue-50 rounded-full blur-3xl opacity-60"></div>
+    <!-- Hero Content (Left Side) -->
+    <div class="hidden lg:flex flex-1 flex-col justify-between p-12 xl:p-20 hero-left-branding h-full">
+        <div>
+            <div class="mb-10">
+                <span class="px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] text-blue-700 uppercase border border-blue-200 rounded-full bg-blue-50/80 backdrop-blur-sm">
+                    Academic Assistant
+                </span>
+            </div>
             
-            <div class="relative z-10">
-                <div class="mb-12">
-                    <span class="px-4 py-1.5 text-xs font-bold tracking-[0.2em] text-blue-700 uppercase border border-blue-200 rounded-full bg-blue-50">
-                        Academic Assistant
-                    </span>
-                </div>
-                
-                <h1 class="text-7xl font-bold mb-6 tracking-tighter serif-title text-slate-900">PNai</h1>
-                <p class="text-2xl text-slate-700 mb-12 max-w-xl leading-relaxed">
-                    <span class="text-blue-600 italic font-semibold">Pyin Nyar AI</span> — Derived from the Pali term for wisdom, purpose-built for the modern educator.
-                </p>
+            <h1 class="text-7xl xl:text-8xl font-bold mb-6 tracking-tighter serif-title">PNai</h1>
+            <p class="text-2xl xl:text-3xl mb-12 max-w-2xl leading-relaxed">
+                <span class="text-blue-600 italic font-semibold">Pyin Nyar AI</span> — Wisdom for the modern educator.
+            </p>
 
-                <div class="grid grid-cols-2 gap-10">
-                    <div class="space-y-3">
-                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Institutional Efficiency</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed font-medium">Automate lesson structures and rubrics into institutional standard formats.</p>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 bg-blue-50/80 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm backdrop-blur-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
-
-                    <div class="space-y-3">
-                        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Batch Automation</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed font-medium">Manage student cohorts and communication through agentic AI workflows.</p>
-                    </div>
+                    <h3 class="text-xl font-bold">Institutional Efficiency</h3>
+                    <p class="text-sm leading-relaxed font-medium">Automate lesson structures and rubrics into institutional formats.</p>
                 </div>
-            </div>
 
-            <div class="relative z-10 pt-12 border-t border-slate-100">
-                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-4">Integration Partners</p>
-                <div class="flex items-center gap-8 text-slate-500 font-bold">
-                   <span class="text-sm tracking-tighter hover:text-blue-600 transition-colors cursor-default">GOOGLE DOCS</span>
-                   <span class="text-sm tracking-tighter hover:text-blue-600 transition-colors cursor-default">GOOGLE FORMS</span>
-                   <span class="text-sm tracking-tighter hover:text-blue-600 transition-colors cursor-default">WORKSPACE</span>
+                <div class="space-y-3">
+                    <div class="w-12 h-12 bg-purple-50/80 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm backdrop-blur-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold">Batch Automation</h3>
+                    <p class="text-sm leading-relaxed font-medium">Manage student cohorts through agentic AI workflows.</p>
                 </div>
             </div>
         </div>
 
-        <div class="lg:col-span-2 p-12 lg:p-20 flex flex-col justify-center bg-slate-50/50">
-            <div class="mb-12">
-                <h2 class="text-4xl font-bold text-slate-900 mb-3 tracking-tight">Faculty Portal</h2>
-                <p class="text-slate-700 text-lg font-medium leading-snug">Sign in to your dashboard to manage your teaching materials.</p>
+        <div class="pt-8 border-t border-slate-200/50">
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-4">Integration Partners</p>
+            <div class="flex items-center gap-8 text-slate-500 font-bold">
+               <span class="text-xs tracking-tighter hover:text-blue-600 transition-colors cursor-default">GOOGLE DOCS</span>
+               <span class="text-xs tracking-tighter hover:text-blue-600 transition-colors cursor-default">GOOGLE FORMS</span>
+               <span class="text-xs tracking-tighter hover:text-blue-600 transition-colors cursor-default">WORKSPACE</span>
             </div>
-
-            <div class="space-y-8">
-                <a href="{{ url_for('auth.google_login') }}"
-                    class="group flex items-center justify-center gap-4 w-full bg-[#2563EB] hover:bg-blue-700 text-white font-bold py-5 px-6 rounded-2xl transition-all duration-300 shadow-xl shadow-blue-600/20 transform hover:-translate-y-1">
-                    <div class="bg-white p-1 rounded-full shadow-sm">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                    </div>
-                    <span>Continue with Institution Email</span>
-                </a>
-
-                <div class="bg-white p-6 rounded-[24px] border border-slate-100 dashboard-shadow">
-                    <div class="flex gap-4">
-                        <div class="shrink-0 text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-900 mb-1">Privacy & Compliance</p>
-                            <p class="text-xs text-slate-600 font-medium leading-relaxed">
-                                PNai uses Google Workspace permissions solely to automate your instructional documents. We prioritize your institutional data security.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <footer class="mt-auto pt-16 border-t border-slate-200">
-                <div class="flex flex-col gap-6">
-                    <div class="flex justify-between items-center text-xs font-bold tracking-widest text-slate-500 uppercase">
-                        <a href="#" class="hover:text-blue-600 transition-colors">Privacy</a>
-                        <a href="#" class="hover:text-blue-600 transition-colors">Compliance</a>
-                        <a href="#" class="hover:text-blue-600 transition-colors">Support</a>
-                    </div>
-                    <div class="text-[10px] text-slate-500 font-medium">
-                        &copy; 2025 Pyin Nyar AI. Empowering Educators.
-                    </div>
-                </div>
-            </footer>
         </div>
+    </div>
+
+    <!-- Login Block (Right Side) -->
+    <div class="w-full lg:w-[400px] xl:w-[460px] h-full flex flex-col justify-center p-8 md:p-12 lg:p-14 login-card z-10 relative overflow-y-auto no-scrollbar">
+        <div class="mb-12">
+            <div class="lg:hidden mb-8">
+                <h1 class="text-5xl font-bold tracking-tighter serif-title text-blue-600">PNai</h1>
+            </div>
+            <h2 class="text-4xl font-bold text-slate-900 mb-3 tracking-tight">Faculty Portal</h2>
+            <p class="text-slate-600 text-lg font-medium leading-snug">Sign in to manage your teaching materials.</p>
+        </div>
+
+        <div class="space-y-8">
+            <a href="{{ url_for('auth.google_login') }}"
+                class="group flex items-center justify-center gap-4 w-full bg-[#2563EB] hover:bg-blue-700 text-white font-bold py-5 px-6 rounded-2xl transition-all duration-300 shadow-xl shadow-blue-600/20 transform hover:-translate-y-1 active:scale-95">
+                <div class="bg-white p-1.5 rounded-full shadow-sm">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                </div>
+                <span class="text-base tracking-tight">Continue with Institution Email</span>
+            </a>
+
+            <div class="bg-slate-50 p-6 rounded-[24px] border border-slate-100 shadow-sm">
+                <div class="flex gap-4">
+                    <div class="shrink-0 text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-900 mb-1.5">Privacy & Compliance</p>
+                        <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                            PNai uses Google Workspace permissions solely to automate documents. We prioritize your institutional data security.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 lg:mt-auto pt-10 border-t border-slate-100">
+            <div class="flex flex-col gap-6">
+                <div class="flex justify-between items-center text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+                    <a href="#" class="hover:text-blue-600 transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Compliance</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Support</a>
+                </div>
+                <div class="text-[10px] text-slate-400 font-medium">
+                    &copy; 2025 Pyin Nyar AI. Empowering Educators.
+                </div>
+            </div>
+        </footer>
     </div>
 
 </body>
