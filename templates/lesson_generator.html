@@ -128,6 +128,13 @@
         <h2 class="text-lg font-bold text-slate-800">Generated Plan</h2>
 
         <div class="flex flex-wrap items-center gap-2">
+          <button id="lp-edit-btn" type="button"
+            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+            <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Plan
+          </button>
           <button id="lp-copy-btn" type="button"
             class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
             <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -154,7 +161,10 @@
         </div>
       </div>
 
-      <article id="lp-result" class="prose prose-slate max-w-none"></article>
+      <div id="lp-result-container" class="relative min-h-[200px]">
+        <article id="lp-result" class="prose prose-slate max-w-none"></article>
+        <textarea id="lp-editor" class="hidden w-full min-h-[500px] p-4 font-mono text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 text-slate-700 leading-relaxed" spellcheck="false"></textarea>
+      </div>
 
       <div id="tt-preview"
         class="mt-6 hidden bg-white border border-slate-200 rounded-xl p-6 shadow-sm ring-1 ring-slate-900/5">
@@ -390,6 +400,30 @@
     font-family: inherit;
     font-size: 0.9em;
   }
+
+  /* Editor styling */
+  #lp-editor:not(.hidden) {
+    display: block;
+    width: 100%;
+    min-height: 600px;
+    padding: 1.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: #334155;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    resize: vertical;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  #lp-editor:focus {
+    background-color: #fff;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
@@ -401,6 +435,8 @@
     const form = document.getElementById("lesson-form");
     const resultWrapper = document.getElementById("lp-result-wrapper");
     const resultEl = document.getElementById("lp-result");
+    const editorEl = document.getElementById("lp-editor");
+    const editBtn = document.getElementById("lp-edit-btn");
     const copyBtn = document.getElementById("lp-copy-btn");
     const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
     const saveBtn = document.getElementById("lp-save-btn");
@@ -686,6 +722,7 @@
         }
 
         lastMarkdown = md;
+        editorEl.value = md; // ✅ Sync editor value on generation
         const html = typeof marked !== "undefined" ? marked.parse(md) : md;
         const safe =
           typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
@@ -834,9 +871,48 @@
       }
     });
 
+    // Edit button functionality
+    editBtn.addEventListener("click", () => {
+      const isEditing = !editorEl.classList.contains("hidden");
+      if (isEditing) {
+        // Switching from editor to preview
+        lastMarkdown = editorEl.value;
+        const html = typeof marked !== "undefined" ? marked.parse(lastMarkdown) : lastMarkdown;
+        const safe = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(html) : html;
+        resultEl.innerHTML = safe;
+        
+        editorEl.classList.add("hidden");
+        resultEl.classList.remove("hidden");
+        editBtn.innerHTML = `
+          <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Plan
+        `;
+      } else {
+        // Switching from preview to editor
+        editorEl.value = lastMarkdown;
+        editorEl.classList.remove("hidden");
+        resultEl.classList.add("hidden");
+        editBtn.innerHTML = `
+          <svg class="w-4 h-4 mr-1.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Preview Plan
+        `;
+      }
+    });
+
     // Save to DB
     saveBtn.addEventListener("click", async () => {
       if (!lastRawJson) return;
+      
+      // Sync markdown from editor if currently editing
+      if (!editorEl.classList.contains("hidden")) {
+        lastMarkdown = editorEl.value;
+      }
+
       saveBtn.disabled = true;
       saveBtn.innerHTML = "Saving...";
       try {
@@ -846,7 +922,8 @@
           options: lastUploadInfo.options,
           result: (() => {
             const c = JSON.parse(JSON.stringify(lastRawJson || {}));
-            delete c._markdown;
+            // Update with edited markdown
+            c._markdown = lastMarkdown;
             return c;
           })(),
         };

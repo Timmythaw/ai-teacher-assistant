@@ -246,7 +246,8 @@ def lesson_plan_detail(lesson_plan_id):
     try:
         result = lesson_plan.get("result")
         if isinstance(result, dict):
-            markdown = render_lesson_plan_markdown(result)
+            # Check if there is an edited markdown version
+            markdown = result.get("_markdown") or render_lesson_plan_markdown(result)
         else:
             markdown = None
     except Exception:
@@ -291,7 +292,7 @@ def lesson_plan_markdown(id):
                 404,
             )
 
-        md = render_lesson_plan_markdown(result)
+        md = result.get("_markdown") or render_lesson_plan_markdown(result)
         return jsonify({"ok": True, "markdown": md}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
