@@ -11,7 +11,7 @@
         {{ batch.name }}
       </h1>
       <span
-        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100"
+        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100"
       >
         ID: {{ batch.id }}
       </span>
@@ -30,7 +30,7 @@
     </a>
     <button
       id="open-send-all"
-      class="btn-primary gap-2 shadow-md hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
+      class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
     >
       <svg
         class="w-4 h-4"
@@ -59,7 +59,7 @@
     class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
   >
     <div
-      class="absolute -top-16 -right-10 w-40 h-40 bg-blue-400/22 blur-3xl"
+      class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-400/22 blur-3xl"
     ></div>
     <div
       class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-400/20 blur-3xl"
@@ -68,7 +68,7 @@
 
   <!-- Hover ring -->
   <div
-    class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-blue-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300"
+    class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-emerald-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300"
   ></div>
 
   <!-- Inner content -->
@@ -106,7 +106,7 @@
             data-email="{{ s.email }}"
           >
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
+              <div class="text-sm font-medium text-slate-900 group-hover:text-emerald-600 transition-colors">
                 {{ s.name }}
               </div>
             </td>
@@ -119,12 +119,12 @@
               class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
             >
               <button
-                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all"
                 data-send="{{ s.id }}"
               >
                 <span class="mr-1">Email</span>
                 <svg
-                  class="w-3 h-3 text-slate-500 group-hover:text-blue-600 transition-colors"
+                  class="w-3 h-3 text-slate-500 group-hover:text-emerald-600 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -189,7 +189,7 @@
       class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
     >
       <div
-        class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
+        class="relative transform overflow-scroll rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
       >
         <div
           class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between"
@@ -220,7 +220,7 @@
           </button>
         </div>
 
-        <form id="email-form" class="p-5 space-y-4">
+        <form id="email-form" class="px-5 space-y-5">
           <input type="hidden" id="email-mode" value="single" />
           <input type="hidden" id="email-single-name" />
           <input type="hidden" id="email-single-email" />
@@ -230,7 +230,7 @@
             <input
               id="email-to"
               type="email"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
               placeholder="student@example.com"
             />
             <div
@@ -245,7 +245,7 @@
               <input
                 id="email-cc"
                 type="text"
-                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
                 placeholder="Optional"
               />
             </div>
@@ -256,7 +256,7 @@
               <input
                 id="email-bcc"
                 type="text"
-                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
                 placeholder="Optional"
               />
             </div>
@@ -269,7 +269,7 @@
             <input
               id="email-subject"
               type="text"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
               placeholder="Enter subject line..."
             />
           </div>
@@ -281,7 +281,7 @@
             <textarea
               id="email-notes"
               rows="5"
-              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+              class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
               placeholder="Tell the AI what this email is about (e.g., 'Remind them about the quiz on Friday')..."
             ></textarea>
             <p class="text-xs text-slate-400">
@@ -296,7 +296,7 @@
               >
               <select
                 id="email-tone"
-                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 py-2.5 sm:text-base"
+                class="block w-full rounded-md px-1.5 border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 py-2.5 sm:text-base"
               >
                 <option selected>Professional & Friendly</option>
                 <option>Concise & Formal</option>
@@ -318,7 +318,7 @@
                     name="email-action"
                     value="send"
                     checked
-                    class="text-brand-600 focus:ring-brand-500"
+                    class="text-emerald-600 focus:ring-emerald-500"
                   />
                   <span>Send Immediately</span>
                 </label>
@@ -329,7 +329,7 @@
                     type="radio"
                     name="email-action"
                     value="draft"
-                    class="text-brand-600 focus:ring-brand-500"
+                    class="text-emerald-600 focus:ring-emerald-500"
                   />
                   <span>Save Draft</span>
                 </label>
@@ -341,10 +341,10 @@
           <div id="email-status-section" class="pt-4 border-t border-slate-100">
             <div
               id="email-progress"
-              class="hidden rounded-md bg-blue-50 p-3 text-sm text-blue-700 border border-blue-100 flex items-center gap-2 mb-3"
+              class="hidden rounded-md bg-emerald-50 p-3 text-sm text-emerald-700 border border-emerald-100 flex items-center gap-2 mb-3"
             >
               <svg
-                class="animate-spin h-4 w-4 text-brand-600"
+                class="animate-spin h-4 w-4 text-emerald-600"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -385,7 +385,7 @@
             <button type="button" id="email-cancel" class="btn-secondary">
               Cancel
             </button>
-            <button type="submit" id="email-submit" class="btn-primary">
+            <button type="submit" id="email-submit" class="btn-primary bg-emerald-600 hover:bg-emerald-700">
               Generate & Send
             </button>
           </div>
