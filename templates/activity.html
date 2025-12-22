@@ -38,13 +38,13 @@
 >
   <!-- Glow background -->
   <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-    <div class="absolute -top-16 -right-10 w-40 h-40 bg-blue-400/22 blur-3xl"></div>
+    <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-400/22 blur-3xl"></div>
     <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-400/20 blur-3xl"></div>
   </div>
 
   <!-- Hover ring -->
   <div
-    class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-blue-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300"
+    class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-emerald-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300"
   ></div>
 
   <!-- Inner content -->
@@ -64,11 +64,11 @@
               {% endif %}
 
               <div
-                class="relative flex items-start space-x-4 group hover:bg-slate-50/80 rounded-xl px-2 py-1 transition-colors duration-150"
+                class="relative flex items-start space-x-4 group hover:bg-emerald-50 rounded-xl px-2 py-1 transition-colors duration-150"
               >
                 <!-- icon circle -->
                 <div
-                  class="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 ring-8 ring-white group-hover:scale-110 transition-transform duration-150"
+                  class="relative flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 ring-8 ring-white group-hover:scale-110 transition-transform duration-150"
                 >
                   {% if 'assessment' in act.type %}
                   <i data-lucide="file-check" class="w-5 h-5"></i>
@@ -113,7 +113,7 @@
                           {{ url_for('main.index') }}
                         {% endif %}
                         "
-                        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all"
                       >
                         View
                       </a>
@@ -141,7 +141,7 @@
       </p>
       <a
         href="{{ url_for('main.index') }}"
-        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
       >
         Go to Dashboard
       </a>

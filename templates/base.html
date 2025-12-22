@@ -94,7 +94,7 @@
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
         </span>
-        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="ml-2 p-2 rounded-xl hover:bg-slate-100 text-slate-500 border border-slate-200/80
+        <button type="button" onclick="toggleDesktopSidebar()" id="sidebar-toggle-btn" class="ml-2 p-2 rounded-xl hover:bg-emerald-100 text-slate-500 border border-slate-200/80
                  transition-all active:scale-95 hidden md:inline-flex shadow-sm" title="Toggle sidebar">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
@@ -105,20 +105,18 @@
         <!-- Dashboard -->
         <a href="{{ url_for('main.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                  {% if request.endpoint == 'main.index' %}
-                   text-brand-800 bg-gradient-to-r from-brand-100 to-sky-100
-                   border border-brand-300 shadow-md -translate-y-0.5
+                   text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                   border border-emerald-300 shadow-md -translate-y-0.5
                  {% else %}
-                   text-slate-700 bg-gradient-to-r from-brand-50 to-sky-50
-                   border border-transparent hover:border-brand-200
-                   hover:shadow-md hover:-translate-y-0.5
+                   text-slate-600 hover:text-slate-900
+                   hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                   border border-transparent hover:border-slate-200
+                   hover:shadow-sm hover:-translate-y-0.5
                  {% endif %}
                  transition-all">
-          <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-200/40 via-sky-200/30 to-transparent
-                   {% if request.endpoint == 'main.index' %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %}
-                   transition-opacity pointer-events-none">
-          </span>
+         
           <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
-                   {% if request.endpoint == 'main.index' %}text-brand-700{% else %}text-brand-600{% endif %}">
+                   {% if request.endpoint == 'main.index' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}">
           </i>
           <span class="relative sidebar-text transition-opacity duration-200">Dashboard</span>
         </a>
@@ -126,17 +124,17 @@
         <!-- Batches – DESKTOP -->
         <a href="{{ url_for('batches.batches_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
          {% if request.endpoint == 'batches.batches_page' %}
-           text-slate-900 bg-blue-100
-           border border-blue-300 shadow-md -translate-y-0.5
-         {% else %}
-           text-slate-800 hover:text-slate-900
-           hover:bg-blue-50
-           border border-transparent hover:border-blue-200
-           hover:shadow-sm hover:-translate-y-0.5
-         {% endif %}
+           text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                   border border-emerald-300 shadow-md -translate-y-0.5
+                 {% else %}
+                   text-slate-600 hover:text-slate-900
+                   hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                   border border-transparent hover:border-slate-200
+                   hover:shadow-sm hover:-translate-y-0.5
+                 {% endif %}
          transition-all">
           <i data-lucide="users" class="w-5 h-5
-           {% if request.endpoint == 'batches.batches_page' %}text-blue-700{% else %}text-slate-500 group-hover:text-blue-600{% endif %}
+           {% if request.endpoint == 'batches.batches_page' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
            transition-colors">
           </i>
           <span class="sidebar-text transition-opacity duration-200">Batches</span>
@@ -147,17 +145,17 @@
         <!-- Lesson Plans -->
         <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                  {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}
-                   text-indigo-800 bg-gradient-to-r from-indigo-100 to-white
-                   border border-indigo-300 shadow-md -translate-y-0.5
+                    text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                   border border-emerald-300 shadow-md -translate-y-0.5
                  {% else %}
                    text-slate-600 hover:text-slate-900
-                   hover:bg-gradient-to-r hover:from-white hover:via-indigo-50/60 hover:to-white
+                   hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
                    border border-transparent hover:border-slate-200
                    hover:shadow-sm hover:-translate-y-0.5
                  {% endif %}
                  transition-all">
           <i data-lucide="book-open" class="w-5 h-5
-                   {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-indigo-700{% else %}text-slate-500 group-hover:text-indigo-600{% endif %}
+                   {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
                    transition-colors">
           </i>
           <span class="sidebar-text transition-opacity duration-200">Lesson Plans</span>
@@ -185,17 +183,17 @@
         <!-- Send Emails -->
         <a href="{{ url_for('email.email_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                  {% if request.endpoint == 'email.email_page' %}
-                   text-amber-800 bg-gradient-to-r from-amber-100 to-white
-                   border border-amber-300 shadow-md -translate-y-0.5
+                   text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                   border border-emerald-300 shadow-md -translate-y-0.5
                  {% else %}
                    text-slate-600 hover:text-slate-900
-                   hover:bg-gradient-to-r hover:from-white hover:via-amber-50/60 hover:to-white
+                   hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
                    border border-transparent hover:border-slate-200
                    hover:shadow-sm hover:-translate-y-0.5
                  {% endif %}
                  transition-all">
           <i data-lucide="mail" class="w-5 h-5
-                   {% if request.endpoint == 'email.email_page' %}text-amber-700{% else %}text-slate-500 group-hover:text-amber-600{% endif %}
+                   {% if request.endpoint == 'email.email_page' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
                    transition-colors">
           </i>
           <span class="sidebar-text transition-opacity duration-200">Send Emails</span>
@@ -290,7 +288,7 @@
       <div class="relative flex w-full max-w-xs flex-1 flex-col bg-white pb-4 pt-5 shadow-2xl rounded-r-2xl">
 
         <div class="absolute top-4 right-4 z-50">
-          <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 hover:bg-slate-50
+          <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 hover:bg-emerald-50
                    focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500 shadow transition" data-close
             aria-label="Close sidebar">
             <svg class="h-6 w-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
@@ -311,20 +309,18 @@
             <!-- Dashboard -->
             <a href="{{ url_for('main.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                      {% if request.endpoint == 'main.index' %}
-                       text-brand-800 bg-gradient-to-r from-brand-100 to-sky-100
-                       border border-brand-300 shadow-md -translate-y-0.5
+                       text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                       border border-emerald-300 shadow-md -translate-y-0.5
                      {% else %}
-                       text-slate-700 bg-gradient-to-r from-brand-50 to-sky-50
-                       border border-transparent hover:border-brand-200
-                       hover:shadow-md hover:-translate-y-0.5
+                       text-slate-600 hover:text-slate-900
+                       hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                       border border-transparent hover:border-slate-200
+                       hover:shadow-sm hover:-translate-y-0.5
                      {% endif %}
                      transition-all">
-              <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-200/40 via-sky-200/30 to-transparent
-                       {% if request.endpoint == 'main.index' %}opacity-100{% else %}opacity-0 group-hover:opacity-100{% endif %}
-                       transition-opacity pointer-events-none">
-              </span>
+              
               <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
-                       {% if request.endpoint == 'main.index' %}text-brand-700{% else %}text-brand-600{% endif %}">
+                       {% if request.endpoint == 'main.index' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}">
               </i>
               <span class="relative">Dashboard</span>
             </a>
@@ -332,17 +328,17 @@
             <!-- Batches – MOBILE DRAWER -->
             <a href="{{ url_for('batches.batches_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
          {% if request.endpoint == 'batches.batches_page' %}
-           text-slate-900 bg-blue-100
-           border border-blue-300 shadow-md -translate-y-0.5
-         {% else %}
-           text-slate-800 hover:text-slate-900
-           hover:bg-blue-50
-           border border-transparent hover:border-blue-200
-           hover:shadow-sm hover:-translate-y-0.5
-         {% endif %}
+           text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                       border border-emerald-300 shadow-md -translate-y-0.5
+                     {% else %}
+                       text-slate-600 hover:text-slate-900
+                       hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
+                       border border-transparent hover:border-slate-200
+                       hover:shadow-sm hover:-translate-y-0.5
+                     {% endif %}
          transition-all">
               <i data-lucide="users" class="w-5 h-5
-           {% if request.endpoint == 'batches.batches_page' %}text-blue-700{% else %}text-slate-500 group-hover:text-blue-600{% endif %}
+           {% if request.endpoint == 'batches.batches_page' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
            transition-colors">
               </i>
               <span>Batches</span>
@@ -352,17 +348,17 @@
             <!-- Lesson Plans -->
             <a href="{{ url_for('lesson_plans.list_lesson_plans') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                      {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}
-                       text-indigo-800 bg-gradient-to-r from-indigo-100 to-white
-                       border border-indigo-300 shadow-md -translate-y-0.5
+                       text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                       border border-emerald-300 shadow-md -translate-y-0.5
                      {% else %}
                        text-slate-600 hover:text-slate-900
-                       hover:bg-gradient-to-r hover:from-white hover:via-indigo-50/60 hover:to-white
+                       hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
                        border border-transparent hover:border-slate-200
                        hover:shadow-sm hover:-translate-y-0.5
                      {% endif %}
                      transition-all">
               <i data-lucide="book-open" class="w-5 h-5
-                       {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-indigo-700{% else %}text-slate-500 group-hover:text-indigo-600{% endif %}
+                       {% if request.endpoint == 'lesson_plans.list_lesson_plans' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
                        transition-colors">
               </i>
               <span>Lesson Plans</span>
@@ -390,17 +386,17 @@
             <!-- Send Emails -->
             <a href="{{ url_for('email.email_page') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl whitespace-nowrap group
                      {% if request.endpoint == 'email.email_page' %}
-                       text-amber-800 bg-gradient-to-r from-amber-100 to-white
-                       border border-amber-300 shadow-md -translate-y-0.5
+                       text-emerald-800 bg-gradient-to-r from-emerald-100 to-white
+                       border border-emerald-300 shadow-md -translate-y-0.5
                      {% else %}
                        text-slate-600 hover:text-slate-900
-                       hover:bg-gradient-to-r hover:from-white hover:via-amber-50/60 hover:to-white
+                       hover:bg-gradient-to-r hover:from-white hover:via-emerald-50/60 hover:to-white
                        border border-transparent hover:border-slate-200
                        hover:shadow-sm hover:-translate-y-0.5
                      {% endif %}
                      transition-all">
               <i data-lucide="mail" class="w-5 h-5
-                       {% if request.endpoint == 'email.email_page' %}text-amber-700{% else %}text-slate-500 group-hover:text-amber-600{% endif %}
+                       {% if request.endpoint == 'email.email_page' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}
                        transition-colors">
               </i>
               <span>Send Emails</span>

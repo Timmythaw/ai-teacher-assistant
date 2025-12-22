@@ -8,12 +8,12 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-emerald-50 via-emerald-50 to-emerald-100 min-h-screen flex items-center justify-center p-4">
 
   <!-- Soft background glows -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute -top-24 -left-10 w-64 h-64 bg-blue-300/30 blur-3xl"></div>
-    <div class="absolute -bottom-24 -right-10 w-64 h-64 bg-indigo-300/30 blur-3xl"></div>
+    <div class="absolute -top-24 -left-10 w-64 h-64 bg-emerald-300/30 blur-3xl"></div>
+    <div class="absolute -bottom-24 -right-10 w-64 h-64 bg-emerald-300/30 blur-3xl"></div>
   </div>
 
   <div
@@ -25,13 +25,13 @@
 
     <!-- Card inner glow on hover -->
     <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-      <div class="absolute -top-10 right-0 w-40 h-40 bg-blue-400/25 blur-3xl"></div>
-      <div class="absolute bottom-0 -left-10 w-40 h-40 bg-indigo-400/25 blur-3xl"></div>
+      <div class="absolute -top-10 right-0 w-40 h-40 bg-emerald-400/25 blur-3xl"></div>
+      <div class="absolute bottom-0 -left-10 w-40 h-40 bg-emerald-400/25 blur-3xl"></div>
     </div>
 
     <!-- Accent border on hover -->
     <div class="absolute inset-0 rounded-3xl border border-transparent
-                group-hover:border-blue-400/70 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.35)]
+                group-hover:border-emerald-400/70 group-hover:shadow-[0_0_0_1px_rgba(16,185,129,0.35)]
                 transition-all duration-300"></div>
 
     <div class="relative z-10">
@@ -39,25 +39,25 @@
       <div class="mb-6 sm:mb-8 flex flex-col items-center justify-center">
         <div class="relative inline-flex items-center justify-center">
           <span
-            class="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-400/35 via-sky-300/30 to-indigo-400/35 blur-2xl opacity-80">
+            class="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-400/35 via-emerald-300/30 to-emerald-500/35 blur-2xl opacity-80">
           </span>
           <span
             class="relative inline-flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24 rounded-full
-                   bg-white/80 border border-slate-200/80 shadow-inner shadow-white">
+                   bg-white/80 border border-emerald-100 shadow-inner shadow-white">
             <span class="text-4xl sm:text-5xl">🔍</span>
           </span>
         </div>
         <h1
           class="mt-4 text-6xl sm:text-7xl font-extrabold tracking-tight
-                 bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-600 bg-clip-text text-transparent">
+                 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-700 bg-clip-text text-transparent">
           404
         </h1>
       </div>
 
-      <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">
+      <h2 class="text-2xl sm:text-3xl font-bold text-emerald-900 mb-3">
         Page Not Found
       </h2>
-      <p class="text-sm sm:text-base text-slate-600 mb-8 max-w-md mx-auto">
+      <p class="text-sm sm:text-base text-emerald-800/80 mb-8 max-w-md mx-auto">
         The page you're looking for doesn't exist or you don't have permission to access it.
       </p>
 
@@ -66,19 +66,19 @@
         <a href="{{ url_for('main.index') }}"
            class="relative inline-flex items-center justify-center px-6 py-3 rounded-xl
                   text-sm font-semibold text-white
-                  bg-blue-600 hover:bg-blue-700
-                  shadow-lg shadow-blue-400/50
-                  transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/70
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-50 focus:ring-blue-400">
+                  bg-emerald-600 hover:bg-emerald-700
+                  shadow-lg shadow-emerald-400/50
+                  transition-all duration-200 hover:-translate-y-0.5 hover:shadow-emerald-500/70
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-emerald-50 focus:ring-emerald-400">
           Go Home
         </a>
 
         <button
           onclick="window.history.back()"
           class="inline-flex items-center justify-center px-6 py-3 rounded-xl
-                 text-sm font-semibold text-slate-700
-                 border border-slate-300 bg-white/80
-                 hover:bg-slate-50 hover:border-slate-400
+                 text-sm font-semibold text-emerald-900
+                 border border-emerald-200 bg-white/80
+                 hover:bg-emerald-50 hover:border-emerald-300
                  shadow-sm hover:shadow-md
                  transition-all duration-200 hover:-translate-y-0.5">
           Go Back

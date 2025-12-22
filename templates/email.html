@@ -7,7 +7,7 @@
   <div class="mb-8 flex flex-col sm:flex-row items-start justify-between gap-4">
     <div class="flex-1">
       <h1 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-        <i data-lucide="mail-plus" class="w-5 h-5 text-amber-500"></i>
+        <i data-lucide="mail-plus" class="w-5 h-5 text-emerald-500"></i>
         Compose Email
       </h1>
       <p class="text-sm text-slate-500 mt-1">
@@ -36,9 +36,9 @@
     id="email-loading-overlay"
     class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center">
     <div class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 px-6 py-5 flex items-center gap-4">
-      <div class="h-9 w-9 rounded-full border-4 border-amber-100 border-t-amber-500 animate-spin"></div>
+      <div class="h-9 w-9 rounded-full border-4 border-emerald-100 border-t-emerald-500 animate-spin"></div>
       <div class="text-left">
-        <p class="text-sm font-semibold text-amber-700">Processing your email…</p>
+        <p class="text-sm font-semibold text-emerald-700">Processing your email…</p>
         <p class="text-xs text-slate-500 mt-1">This usually takes just a few seconds.</p>
       </div>
     </div>
@@ -75,13 +75,13 @@
            transition-transform transition-shadow transition-colors duration-300 w-full">
     <!-- Glow background -->
     <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-      <div class="absolute -top-16 -right-10 w-40 h-40 bg-amber-400/25 blur-3xl"></div>
-      <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-orange-400/20 blur-3xl"></div>
+      <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-400/25 blur-3xl"></div>
+      <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-white-400/20 blur-3xl"></div>
     </div>
     <!-- Hover ring -->
     <div
       class="absolute inset-0 rounded-2xl border border-transparent
-             group-hover:border-amber-400/80 group-hover:shadow-[0_0_0_1px_rgba(245,158,11,0.5)]
+             group-hover:border-emerald-400/80 group-hover:shadow-[0_0_0_1px_rgba(245,158,11,0.5)]
              transition-all duration-300">
     </div>
 
@@ -100,8 +100,8 @@
             type="email"
             placeholder="student@example.com"
             required
-            class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+            class="block w-full rounded-lg border border-emerald-200 bg-slate-50
+                   focus:bg-white focus:border-emerald-500 
                    shadow-inner shadow-white/60
                    sm:text-sm placeholder:text-slate-400 py-3 px-3
                    transition-colors transition-shadow transition-transform duration-200
@@ -113,7 +113,7 @@
             id="tone"
             name="tone"
             class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   focus:bg-white focus:border-emerald-500
                    shadow-inner shadow-white/60
                    sm:text-sm py-3 px-3
                    transition-colors transition-shadow transition-transform duration-200
@@ -134,7 +134,7 @@
           type="text"
           placeholder="e.g., Assignment Due Date Reminder"
           class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                 focus:bg-white focus:border-emerald-500 
                  shadow-inner shadow-white/60
                  sm:text-sm placeholder:text-slate-400 py-3 px-3
                  transition-colors transition-shadow transition-transform duration-200
@@ -152,7 +152,7 @@
             type="text"
             placeholder="colleague@school.edu"
             class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   focus:bg-white focus:border-emerald-500 
                    shadow-inner shadow-white/60
                    sm:text-sm placeholder:text-slate-400 py-3 px-3
                    transition-colors transition-shadow transition-transform duration-200
@@ -168,7 +168,7 @@
             type="text"
             placeholder=""
             class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   focus:bg-white focus:border-emerald-500 
                    shadow-inner shadow-white/60
                    sm:text-sm placeholder:text-slate-400 py-3 px-3
                    transition-colors transition-shadow transition-transform duration-200
@@ -187,7 +187,7 @@
             rows="6"
             placeholder="Describe what you want to say. For example: 'Remind them about the quiz on Friday covering Chapter 3. Tell them to bring a calculator.'"
             class="block w-full rounded-lg border border-slate-200 bg-slate-50
-                   focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/60
+                   focus:bg-white focus:border-emerald-500 
                    shadow-inner shadow-white/60
                    sm:text-sm placeholder:text-slate-400 py-3 px-3
                    transition-colors transition-shadow transition-transform duration-200
@@ -211,10 +211,10 @@
           id="submit-btn"
           type="submit"
           class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg
-                 text-white bg-blue-400 hover:bg-blue-500
+                 text-white bg-emerald-500 hover:bg-emerald-600
                  shadow-md hover:shadow-lg
                  transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]
-                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500
+                 focus:outline-none 
                  disabled:opacity-70 disabled:cursor-not-allowed w-full sm:w-auto">
           <svg class="w-4 h-4 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path
@@ -237,13 +237,13 @@
       <div
         class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
       >
-        <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-3">
-          <div class="p-2 bg-amber-100 rounded-full text-amber-600">
+        <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex items-center gap-3">
+          <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-amber-900">Important Notice</h3>
+          <h3 class="text-lg font-bold text-emerald-900">Important Notice</h3>
         </div>
 
         <div class="p-6">
@@ -268,7 +268,7 @@
         <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end">
           <button
             id="sensitive-modal-acknowledge"
-            class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
           >
             I Understand
           </button>

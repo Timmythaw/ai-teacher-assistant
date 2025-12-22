@@ -146,3 +146,20 @@
   width: 1.25rem;
   height: 1.25rem;
 }
+
+/* Chrome/Edge autofill -> emerald */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ecfdf5 inset !important; /* emerald-50 */
+  -webkit-text-fill-color: #065f46; /* emerald-700 */
+  border-color: #34d399 !important; /* emerald-400 */
+}
+
+/* Any non-empty input (user typed something) -> emerald */
+input:not(:placeholder-shown) {
+  background-color: #ecfdf5;   /* emerald-50 */
+  border-color: #34d399;       /* emerald-400 */
+  color: #065f46;              /* emerald-700 */
+}
+
