@@ -128,13 +128,12 @@
         <h2 class="text-lg font-bold text-slate-800">Generated Plan</h2>
 
         <div class="flex flex-wrap items-center gap-2">
-          <button id="lp-copy-md-btn" type="button"
+          <button id="lp-copy-btn" type="button"
             class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-            Copy Markdown
-          </button>
-          <button id="lp-copy-plain-btn" type="button"
-            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-            Copy Text
+            <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copy to Clipboard
           </button>
           <button id="lp-download-pdf-btn" type="button"
             class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
@@ -281,6 +280,117 @@
 {% endblock %}
 
 {% block scripts %}
+<style>
+  /* Enhanced Lesson Plan Readability Styles */
+  #lp-result {
+    line-height: 1.8;
+  }
+
+  #lp-result h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #10b981;
+    letter-spacing: -0.025em;
+  }
+
+  #lp-result h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #lp-result h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.5rem;
+    background: #10b981;
+    border-radius: 2px;
+  }
+
+  #lp-result h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    background-color: #f8fafc;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+  }
+
+  #lp-result p {
+    margin-bottom: 1rem;
+    color: #475569;
+  }
+
+  #lp-result strong {
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  #lp-result ul, #lp-result ol {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  #lp-result li {
+    margin-bottom: 0.5rem;
+    color: #475569;
+  }
+
+  #lp-result li::marker {
+    color: #10b981;
+    font-weight: bold;
+  }
+
+  /* Specific styling for the metadata section (Duration, Class Size, etc.) */
+  #lp-result p:first-of-type {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: #f0fdf4;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #dcfce7;
+    font-size: 0.875rem;
+    color: #166534;
+  }
+
+  #lp-result p:first-of-type strong {
+    color: #14532d;
+  }
+
+  /* Card-like styling for weekly sections if they are grouped */
+  .week-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  /* Highlight vocabulary or key terms */
+  #lp-result code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9em;
+  }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.2/dist/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -291,8 +401,7 @@
     const form = document.getElementById("lesson-form");
     const resultWrapper = document.getElementById("lp-result-wrapper");
     const resultEl = document.getElementById("lp-result");
-    const copyMdBtn = document.getElementById("lp-copy-md-btn");
-    const copyPlainBtn = document.getElementById("lp-copy-plain-btn");
+    const copyBtn = document.getElementById("lp-copy-btn");
     const downloadPdfBtn = document.getElementById("lp-download-pdf-btn");
     const saveBtn = document.getElementById("lp-save-btn");
     const suggestTtBtn = document.getElementById("lp-suggest-tt-btn");
@@ -389,37 +498,75 @@
 
       lines.push(`# ${title}`, "");
 
+      // Enhanced metadata section
       const meta = [];
       const totalWeeks = pick(data, ["total_duration", "weeks", "duration_weeks"]);
       const classSize = pick(data, ["class_size", "students", "num_students"]);
       const sectionsPerWeek = pick(data, ["sections_per_week", "sectionsPerWeek"]);
+      const teachingApproach = pick(data, ["teaching_approach", "approach"]);
 
       if (totalWeeks != null) meta.push(`**Duration:** ${totalWeeks} week(s)`);
       if (classSize != null) meta.push(`**Class Size:** ${classSize}`);
       if (sectionsPerWeek != null) meta.push(`**Sessions/Week:** ${sectionsPerWeek}`);
-      if (meta.length) lines.push(meta.join(" | "));
+      if (teachingApproach != null) meta.push(`**Approach:** ${teachingApproach}`);
+      
+      if (meta.length) {
+        lines.push(meta.join(" | "));
+        lines.push("");
+      }
 
-      const overview = pick(data, ["overview", "summary"]);
-      if (overview)
-        lines.push(
-          "",
-          "## Overview",
-          "",
-          typeof overview === "string" ? overview : JSON.stringify(overview, null, 2)
-        );
+      const overview = pick(data, ["overview", "summary", "description"]);
+      if (overview) {
+        lines.push("## Overview", "");
+        lines.push(typeof overview === "string" ? overview : JSON.stringify(overview, null, 2));
+        lines.push("");
+      }
+
+      const learningObjectives = pick(data, ["learning_objectives", "objectives"]);
+      if (learningObjectives && Array.isArray(learningObjectives)) {
+        lines.push("## Learning Objectives", "");
+        learningObjectives.forEach(obj => lines.push(`- ${obj}`));
+        lines.push("");
+      }
 
       const weekly = pick(data, ["weekly_schedule", "weeks_schedule", "plan", "weekly"]);
       if (Array.isArray(weekly) && weekly.length) {
-        lines.push("", "## Weekly Schedule", "");
+        lines.push("## Weekly Schedule", "");
         weekly.forEach((w, i) => {
           const label = pick(w, ["week", "label"]) ?? i + 1;
           const topic = pick(w, ["topic", "title"]) || `Week ${label}`;
-          lines.push(`### Week ${label}: ${topic}`);
+          lines.push(`### Week ${label}: ${topic}`, "");
 
           const objectives = pick(w, ["objectives", "goals", "learning_objectives"]);
-          if (objectives) {
+          if (objectives && Array.isArray(objectives)) {
             lines.push("**Objectives:**");
             toArray(objectives).forEach((o) => lines.push(`- ${String(o)}`));
+            lines.push("");
+          }
+
+          const vocabulary = pick(w, ["vocabulary", "key_terms"]);
+          if (vocabulary && Array.isArray(vocabulary) && vocabulary.length) {
+            lines.push("**Vocabulary:**");
+            lines.push(vocabulary.join(", "));
+            lines.push("");
+          }
+
+          const activities = pick(w, ["activities", "tasks"]);
+          if (activities && Array.isArray(activities) && activities.length) {
+            lines.push("**Activities:**");
+            activities.forEach(act => {
+              if (typeof act === 'string') {
+                lines.push(`- ${act}`);
+              } else {
+                const actName = pick(act, ["name", "title", "activity"]);
+                const actDur = pick(act, ["duration_minutes", "time", "duration"]);
+                const actType = pick(act, ["type", "category"]);
+                let actStr = `- ${actName}`;
+                if (actDur) actStr += ` (${actDur} min)`;
+                if (actType) actStr += ` [${actType}]`;
+                lines.push(actStr);
+              }
+            });
             lines.push("");
           }
 
@@ -723,12 +870,9 @@
       }
     });
 
-    // Copy buttons
-    copyMdBtn.addEventListener("click", () =>
-      copyWithFeedback(copyMdBtn, lastMarkdown || resultEl.innerText.trim())
-    );
-    copyPlainBtn.addEventListener("click", () =>
-      copyWithFeedback(copyPlainBtn, resultEl.innerText.trim())
+    // Copy button
+    copyBtn.addEventListener("click", () =>
+      copyWithFeedback(copyBtn, resultEl.innerText.trim())
     );
 
     // PDF download
