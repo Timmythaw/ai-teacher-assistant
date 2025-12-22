@@ -129,6 +129,7 @@
 
               <button type="button" data-send-btn data-asmt-id="{{ asmt.id }}"
                 data-asmt-title="{{ asmt.original_filename or 'Assessment' }}"
+                {% if has_form %}data-form-url="{{ asmt.google_form.formUrl }}"{% endif %}
                 class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
                 <svg class="w-3 h-3 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2"
                   viewBox="0 0 24 24">
@@ -219,39 +220,136 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-2 pt-2">
-            <input id="send-draft" type="checkbox"
-              class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-            <label for="send-draft" class="text-sm text-slate-700">Save as Drafts (don't send yet)</label>
-          </div>
-
-          <!-- Status and View Drafts Section -->
-          <div id="send-status-container" class="pt-4 border-t border-slate-100 mt-2">
-            <div id="send-status" class="text-sm font-medium text-blue-600 mb-3"></div>
-            <a id="view-drafts-btn" href="https://mail.google.com/mail/u/0/#drafts" target="_blank"
-              class="hidden inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mb-3">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
-              <span class="underline">View Drafts in Gmail</span>
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-              </svg>
-            </a>
-          </div>
+          <div id="send-status" class="text-sm font-medium text-blue-600 mb-3"></div>
 
           <!-- Action Buttons -->
-          <div class="flex items-center justify-end gap-3 pt-3">
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
             <button type="button" id="send-cancel"
               class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               Cancel
             </button>
             <button type="submit" id="send-submit"
-              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              Send Emails
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+              Generate Preview
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Email Preview/Edit Modal -->
+<div id="preview-modal" class="fixed inset-0 z-[60] hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+  
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+      <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-3xl border border-slate-200">
+        <!-- Header -->
+        <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-emerald-900 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+            Review & Edit Email
+          </h3>
+          <button id="preview-close" class="text-slate-400 hover:text-slate-600 rounded-md p-1 hover:bg-emerald-100 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Email Preview/Edit Form -->
+        <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm text-blue-900 font-medium">AI-Generated Email Preview</p>
+              <p class="text-xs text-blue-700 mt-1">
+                This email will be sent to <span id="preview-batch-count" class="font-semibold"></span> in the selected batch. 
+                <span id="preview-form-notice" class="hidden">
+                  <br><strong>✓ Google Form link included</strong> - Feel free to edit the content.
+                </span>
+                <span id="preview-no-form-notice">
+                  You can edit the content before proceeding.
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">To (Batch)</label>
+            <input id="preview-batch-name" type="text" readonly
+              class="block w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Subject</label>
+            <input id="preview-subject" type="text"
+              class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/60" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Email Body</label>
+            <textarea id="preview-body" rows="14"
+              class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/60 resize-y font-mono"></textarea>
+            <p class="mt-2 text-xs text-slate-500">
+              <svg class="w-3 h-3 inline text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+              </svg>
+              Feel free to edit the generated email. This content will be used for all students in the batch.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer with Actions -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
+          <div class="flex flex-col gap-3">
+            <!-- Status and View Drafts Section -->
+            <div id="preview-status-section">
+              <div id="preview-status" class="text-sm font-medium text-emerald-600 mb-3 hidden"></div>
+              <a id="preview-view-drafts" href="https://mail.google.com/mail/u/0/#drafts" target="_blank"
+                class="hidden inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mb-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                <span class="underline">View Drafts in Gmail</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                </svg>
+              </a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-3">
+              <button type="button" id="preview-cancel"
+                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                Cancel
+              </button>
+              <button type="button" id="preview-save-draft"
+                class="inline-flex items-center justify-center px-4 py-2 border border-emerald-300 shadow-sm text-sm font-medium rounded-md text-emerald-700 bg-emerald-50 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2h2m3-4H9a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-1m-1 4l-3 3m0 0l-3-3m3 3V3" />
+                </svg>
+                Save as Draft
+              </button>
+              <button type="button" id="preview-send"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                </svg>
+                Send Emails
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -315,14 +413,31 @@
     const inpSubject = document.getElementById("send-subject");
     const inpTone = document.getElementById("send-tone");
     const taNotes = document.getElementById("send-notes");
-    const cbDraft = document.getElementById("send-draft");
     const sendStatus = document.getElementById("send-status");
     const sendSubmit = document.getElementById("send-submit");
     const hiddenAsmtId = document.getElementById("send-asmt-id");
-    const viewDraftsBtn = document.getElementById("view-drafts-btn");
+
+    // Preview modal elements
+    const previewModal = document.getElementById("preview-modal");
+    const previewClose = document.getElementById("preview-close");
+    const previewCancel = document.getElementById("preview-cancel");
+    const previewBatchName = document.getElementById("preview-batch-name");
+    const previewBatchCount = document.getElementById("preview-batch-count");
+    const previewSubject = document.getElementById("preview-subject");
+    const previewBody = document.getElementById("preview-body");
+    const previewSaveDraft = document.getElementById("preview-save-draft");
+    const previewSend = document.getElementById("preview-send");
+    const previewStatus = document.getElementById("preview-status");
+    const previewViewDrafts = document.getElementById("preview-view-drafts");
+
+    let currentBatchId = null;
+    let currentBatchData = null;
+    let batchesData = null;
+    let currentFormUrl = null; // Store form URL from button
 
     function openModal(prefill) {
       hiddenAsmtId.value = prefill.asmtId || "";
+      currentFormUrl = prefill.formUrl || null; // Store form URL for later use
       const base = (prefill.asmtTitle || "Assessment").replace(/\.[^.]+$/, "");
       if (!inpSubject.value.trim()) inpSubject.value = `Assessment: ${base}`;
       modal.classList.remove("hidden");
@@ -332,9 +447,14 @@
     function closeModal() {
       modal.classList.add("hidden");
       sendStatus.textContent = "";
-      viewDraftsBtn?.classList.add("hidden");
       formSend.reset();
       hiddenAsmtId.value = "";
+    }
+
+    function closePreviewModal() {
+      previewModal.classList.add("hidden");
+      previewStatus.classList.add("hidden");
+      previewViewDrafts.classList.add("hidden");
     }
 
     document.querySelectorAll("[data-send-btn]").forEach((btn) => {
@@ -342,12 +462,15 @@
         e.stopPropagation();
         const asmtId = btn.getAttribute("data-asmt-id");
         const asmtTitle = btn.getAttribute("data-asmt-title");
-        openModal({ asmtId, asmtTitle });
+        const formUrl = btn.getAttribute("data-form-url") || null;
+        openModal({ asmtId, asmtTitle, formUrl });
       });
     });
 
     btnClose?.addEventListener("click", closeModal);
     btnCancel?.addEventListener("click", closeModal);
+    previewClose?.addEventListener("click", closePreviewModal);
+    previewCancel?.addEventListener("click", closePreviewModal);
 
     async function fetchBatches() {
       selBatch.innerHTML = `<option value="">Loading...</option>`;
@@ -357,12 +480,15 @@
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error("Failed to load batches");
 
+        batchesData = data.batches; // Store for later use
         selBatch.innerHTML = `<option value="">Select a batch...</option>`;
         if (data.batches && data.batches.length) {
           data.batches.forEach((b) => {
             const opt = document.createElement("option");
             opt.value = b.id;
             opt.textContent = `${b.name} (${b.student_count} students)`;
+            opt.setAttribute("data-student-count", b.student_count);
+            opt.setAttribute("data-batch-name", b.name);
             selBatch.appendChild(opt);
           });
           batchHint.textContent = "Select the group of students to email.";
@@ -375,63 +501,266 @@
       }
     }
 
+    // Step 1: Generate AI preview
     formSend.addEventListener("submit", async (e) => {
       e.preventDefault();
       const batchId = selBatch.value.trim();
       if (!batchId) {
         sendStatus.textContent = "Please select a batch.";
+        sendStatus.className = "text-sm font-medium text-red-600";
         return;
       }
 
+      const selectedOption = selBatch.options[selBatch.selectedIndex];
+      const studentCount = selectedOption.getAttribute("data-student-count");
+      const batchName = selectedOption.getAttribute("data-batch-name");
+
       sendSubmit.disabled = true;
-      sendSubmit.textContent = "Processing...";
-      sendStatus.textContent = cbDraft.checked
-        ? "Creating drafts..."
-        : "Sending emails...";
-      sendStatus.className = "text-xs font-medium text-blue-600 animate-pulse";
+      const originalBtnText = sendSubmit.innerHTML;
+      sendSubmit.innerHTML = `<svg class="w-4 h-4 mr-2 animate-spin inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Generating...`;
+      sendStatus.textContent = "Generating AI email preview...";
+      sendStatus.className = "text-sm font-medium text-blue-600 animate-pulse";
 
       try {
         const asmtId = hiddenAsmtId.value;
-        const notes = taNotes.value;
-        const mergedNotes = asmtId
-          ? `[Assessment Context ID: ${asmtId}] ${notes}`
-          : notes;
+        let notes = taNotes.value;
 
-        const res = await fetch("/email/api/send-batch", {
+        // Use the form URL that was stored when modal opened
+        const formUrl = currentFormUrl;
+
+        // Include Google Form link in notes if available
+        let mergedNotes = notes;
+        if (formUrl) {
+          mergedNotes = `${notes}\n\nGoogle Form: ${formUrl}`;
+        }
+        if (asmtId) {
+          mergedNotes = `[Assessment Context ID: ${asmtId}] ${mergedNotes}`;
+        }
+
+        // Call AI to generate a single email preview using the compose endpoint
+        const formData = new FormData();
+        formData.append("to_email", "preview@example.com"); // Dummy email for preview
+        formData.append("subject", inpSubject.value.trim());
+        formData.append("notes", mergedNotes);
+        formData.append("tone", inpTone.value.trim());
+        formData.append("action", "draft"); // Generate as draft mode
+        
+        const res = await fetch("/email/compose", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            batch_id: batchId,
-            subject: inpSubject.value.trim(),
-            notes: mergedNotes,
-            tone: inpTone.value.trim(),
-            action: cbDraft.checked ? "draft" : "send",
-            assessment_id: asmtId || null,
-          }),
+          body: formData,
         });
 
         const data = await res.json();
-        if (!res.ok || !data.ok) throw new Error(data.error || "Server Error");
+        if (!res.ok || !data.ok) throw new Error(data.error || "Failed to generate preview");
 
-        const s = data.summary || {};
-        const isDraft = cbDraft.checked;
+        // Store current batch data for later (including form URL)
+        currentBatchId = batchId;
+        currentBatchData = {
+          asmtId: hiddenAsmtId.value,
+          tone: inpTone.value.trim(),
+          formUrl: formUrl, // Form URL from button data attribute
+        };
+
+        // Populate preview modal
+        previewBatchName.value = `${batchName} (${studentCount} students)`;
+        previewBatchCount.textContent = `${studentCount} student${studentCount > 1 ? 's' : ''}`;
         
-        if (isDraft && (s.drafted || 0) > 0) {
-          sendStatus.textContent = `Success! ${s.drafted} draft${s.drafted > 1 ? 's' : ''} created.`;
-          sendStatus.className = "text-xs font-medium text-green-600";
-          viewDraftsBtn?.classList.remove("hidden");
-          // Don't auto-close modal so user can click View Drafts
+        // Extract subject - use returned subject or original
+        const generatedSubject = data.subject || inpSubject.value.trim();
+        previewSubject.value = generatedSubject;
+        
+        // Extract email body from EmailAgent response
+        let emailBody = "";
+        if (data.preview && data.preview.plain) {
+          emailBody = data.preview.plain;
+        } else if (data.body) {
+          emailBody = data.body;
+        } else if (data.content) {
+          emailBody = data.content;
+        } else if (data.message) {
+          emailBody = data.message;
         } else {
-          sendStatus.textContent = `Success! Sent: ${s.sent || 0}, Drafts: ${s.drafted || 0}`;
-          sendStatus.className = "text-xs font-medium text-green-600";
-          setTimeout(closeModal, 1500);
+          emailBody = "Unable to extract email preview. Response: " + JSON.stringify(data, null, 2);
         }
+        
+        // Ensure Google Form link is explicitly visible in preview
+        if (formUrl && !emailBody.includes(formUrl)) {
+          emailBody += `\n\nGoogle Form: ${formUrl}`;
+        }
+        
+        previewBody.value = emailBody;
+
+        // Update the info notice based on whether form link is included
+        const formNotice = document.getElementById("preview-form-notice");
+        const noFormNotice = document.getElementById("preview-no-form-notice");
+        if (formUrl) {
+          formNotice?.classList.remove("hidden");
+          noFormNotice?.classList.add("hidden");
+        } else {
+          formNotice?.classList.add("hidden");
+          noFormNotice?.classList.remove("hidden");
+        }
+
+        // Close send modal and open preview modal
+        closeModal();
+        previewModal.classList.remove("hidden");
       } catch (e) {
         sendStatus.textContent = "Error: " + e.message;
-        sendStatus.className = "text-xs font-medium text-red-600";
+        sendStatus.className = "text-sm font-medium text-red-600";
       } finally {
         sendSubmit.disabled = false;
-        sendSubmit.textContent = "Send Emails";
+        sendSubmit.innerHTML = originalBtnText;
+      }
+    });
+
+    // Step 2: Save as Draft from preview
+    previewSaveDraft.addEventListener("click", async () => {
+      if (!currentBatchId) return;
+
+      previewSaveDraft.disabled = true;
+      previewSend.disabled = true;
+      previewStatus.textContent = "Saving drafts...";
+      previewStatus.className = "text-sm font-medium text-blue-600 animate-pulse";
+      previewStatus.classList.remove("hidden");
+
+      try {
+        // Get edited content
+        const editedContent = previewBody.value.trim();
+        const editedSubject = previewSubject.value.trim();
+        
+        // Ensure Google Form link is included in the edited content
+        let finalContent = editedContent;
+        if (currentBatchData.formUrl && !editedContent.includes(currentBatchData.formUrl)) {
+          finalContent += `\n\nGoogle Form: ${currentBatchData.formUrl}`;
+        }
+
+        // Fetch students in the batch
+        const studentsRes = await fetch(`/batches/api/${currentBatchId}/students`);
+        if (!studentsRes.ok) throw new Error("Failed to fetch students");
+        const studentsData = await studentsRes.json();
+        const students = studentsData.students || [];
+
+        if (!students.length) throw new Error("No students found in batch");
+
+        // Send to each student individually using /email/compose
+        let drafted = 0, failed = 0;
+        previewStatus.textContent = `Creating drafts: 0/${students.length}`;
+
+        for (let i = 0; i < students.length; i++) {
+          const student = students[i];
+          previewStatus.textContent = `Creating drafts: ${i + 1}/${students.length}`;
+
+          const formData = new FormData();
+          formData.append("to_email", student.email);
+          formData.append("subject", editedSubject);
+          // Wrap content with clear instruction to use it exactly as-is
+          const exactContentInstruction = `IMPORTANT: Use the following email content EXACTLY as written. Do not modify, rephrase, or regenerate. This is the final approved content:\n\n${finalContent}`;
+          formData.append("notes", exactContentInstruction);
+          formData.append("tone", "use exact content without any modifications");
+          formData.append("action", "draft");
+
+          try {
+            const res = await fetch("/email/compose", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await res.json();
+            if (res.ok && data.ok) {
+              drafted++;
+            } else {
+              failed++;
+            }
+          } catch (err) {
+            failed++;
+          }
+        }
+
+        previewStatus.textContent = `Success! ${drafted} draft${drafted > 1 ? 's' : ''} created in Gmail${failed > 0 ? `, ${failed} failed` : ''}.`;
+        previewStatus.className = "text-sm font-medium text-green-600";
+        previewViewDrafts.classList.remove("hidden");
+      } catch (e) {
+        previewStatus.textContent = "Error: " + e.message;
+        previewStatus.className = "text-sm font-medium text-red-600";
+      } finally {
+        previewSaveDraft.disabled = false;
+        previewSend.disabled = false;
+      }
+    });
+
+    // Step 3: Send from preview
+    previewSend.addEventListener("click", async () => {
+      if (!currentBatchId) return;
+
+      previewSaveDraft.disabled = true;
+      previewSend.disabled = true;
+      previewStatus.textContent = "Sending emails...";
+      previewStatus.className = "text-sm font-medium text-blue-600 animate-pulse";
+      previewStatus.classList.remove("hidden");
+
+      try {
+        // Get edited content
+        const editedContent = previewBody.value.trim();
+        const editedSubject = previewSubject.value.trim();
+        
+        // Ensure Google Form link is included in the edited content
+        let finalContent = editedContent;
+        if (currentBatchData.formUrl && !editedContent.includes(currentBatchData.formUrl)) {
+          finalContent += `\n\nGoogle Form: ${currentBatchData.formUrl}`;
+        }
+
+        // Fetch students in the batch
+        const studentsRes = await fetch(`/batches/api/${currentBatchId}/students`);
+        if (!studentsRes.ok) throw new Error("Failed to fetch students");
+        const studentsData = await studentsRes.json();
+        const students = studentsData.students || [];
+
+        if (!students.length) throw new Error("No students found in batch");
+
+        // Send to each student individually using /email/compose
+        let sent = 0, failed = 0;
+        previewStatus.textContent = `Sending emails: 0/${students.length}`;
+
+        for (let i = 0; i < students.length; i++) {
+          const student = students[i];
+          previewStatus.textContent = `Sending emails: ${i + 1}/${students.length}`;
+
+          const formData = new FormData();
+          formData.append("to_email", student.email);
+          formData.append("subject", editedSubject);
+          // Wrap content with clear instruction to use it exactly as-is
+          const exactContentInstruction = `IMPORTANT: Use the following email content EXACTLY as written. Do not modify, rephrase, or regenerate. This is the final approved content:\n\n${finalContent}`;
+          formData.append("notes", exactContentInstruction);
+          formData.append("tone", "use exact content without any modifications");
+          formData.append("action", "send");
+
+          try {
+            const res = await fetch("/email/compose", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await res.json();
+            if (res.ok && data.ok) {
+              sent++;
+            } else {
+              failed++;
+            }
+          } catch (err) {
+            failed++;
+          }
+        }
+
+        previewStatus.textContent = `Success! Sent ${sent} email${sent > 1 ? 's' : ''}${failed > 0 ? `, ${failed} failed` : ''}.`;
+        previewStatus.className = "text-sm font-medium text-green-600";
+        setTimeout(() => {
+          closePreviewModal();
+          location.reload();
+        }, 1500);
+      } catch (e) {
+        previewStatus.textContent = "Error: " + e.message;
+        previewStatus.className = "text-sm font-medium text-red-600";
+      } finally {
+        previewSaveDraft.disabled = false;
+        previewSend.disabled = false;
       }
     });
   });
