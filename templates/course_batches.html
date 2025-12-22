@@ -215,13 +215,15 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2" for="students_csv">Upload Students
+            <label class="block text-sm font-semibold text-slate-700 mb-2" for="students_csv">Upload Students
               (CSV)</label>
             <input id="students_csv" name="students_csv" type="file" accept=".csv" required class="block w-full text-sm text-slate-700
-             file:mr-3 file:rounded-md file:border-0
-             file:bg-emerald-600 file:px-4 file:py-3
-             file:text-xs file:font-medium file:text-white
-             hover:file:bg-emerald-700 cursor-pointer" />
+             file:mr-3 file:py-2.5 file:px=4 file:rounded-md file:border-0
+             file:bg-emerald-600 file:py-3
+             file:text-sm file:font-semibold file:text-white
+             hover:file:bg-emerald-700 cursor-pointer
+             focus:outline-none focus:ring-2 focus:ring-emerald-500 
+                     focus:border-emerald-500" />
             <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2"
                 viewBox="0 0 24 24">
@@ -270,20 +272,24 @@
           <div class="border-t border-slate-100 pt-4">
             <label class="block text-sm font-medium text-slate-700 mb-3">Add Students</label>
 
-            <div class="grid grid-cols-2 gap-2 mb-2">
+            <div class="grid grid-cols-[1fr_1fr_auto] gap-2 mb-2 items-center">
               <input id="manual_name" placeholder="Student name" type="text" class="block w-full rounded-md px-1.5 border border-emerald-200 bg-slate-50
                    focus:bg-white focus:border-emerald-500 py-2.5 sm:text-base" />
               <input id="manual_email" placeholder="Student email" type="email" class="block w-full rounded-md px-1.5 border border-emerald-200 bg-slate-50
                    focus:bg-white focus:border-emerald-500 py-2.5 sm:text-base" />
+              <button type="button" id="add-student" class="inline-flex items-center justify-center
+         w-8 h-8 rounded-full
+         border border-emerald-300 bg-emerald-50
+         text-emerald-700 hover:bg-emerald-100 hover:border-emerald-400
+         shadow-sm transition-colors" aria-label="Add student">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+
             </div>
 
-            <button type="button" id="add-student"
-              class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 mb-3">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Add Student
-            </button>
+
 
             <div id="manual-students-list" class="space-y-2">
               <!-- dynamic student items appear here -->

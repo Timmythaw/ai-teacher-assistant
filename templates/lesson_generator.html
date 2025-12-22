@@ -13,49 +13,41 @@
 
   {# Glow-style card around the main form #}
   <div
-    class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-0 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow transition-colors duration-300 w-full"
-  >
+    class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-0 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow transition-colors duration-300 w-full">
     <!-- Glow background -->
     <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-      <div class="absolute -top-16 -right-10 w-40 h-40 bg-indigo-400/22 blur-3xl"></div>
+      <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-400/22 blur-3xl"></div>
       <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-sky-400/20 blur-3xl"></div>
     </div>
 
     <!-- Hover ring -->
     <div
-      class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-indigo-300 group-hover:shadow-[0_0_0_1px_rgba(79,70,229,0.45)] transition-all duration-300"
-    ></div>
+      class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-emerald-300 group-hover:shadow-[0_0_0_1px_rgba(79,70,229,0.45)] transition-all duration-300">
+    </div>
 
     <!-- Inner content -->
     <div class="relative z-10 rounded-2xl bg-white p-6">
-      <form
-        id="lesson-form"
-        action="{{ url_for('lesson_plans.generate_lesson_plan') }}"
-        method="post"
-        enctype="multipart/form-data"
-        class="space-y-6"
-      >
+      <form id="lesson-form" action="{{ url_for('lesson_plans.generate_lesson_plan') }}" method="post"
+        enctype="multipart/form-data" class="space-y-6">
 
         <div>
           <label for="course_outline" class="block text-sm font-semibold text-slate-700 mb-2">
             Course Outline / Syllabus (PDF)
           </label>
           <div class="relative">
-            <input
-              id="course_outline"
-              name="course_outline"
-              type="file"
-              accept="application/pdf"
-              class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <input id="course_outline" name="course_outline" type="file" accept="application/pdf" class="block w-full text-sm text-slate-500 
+              file:mr-3 file:py-2.5 file:px-4 file:rounded-md 
+              file:border-0 
+              file:bg-emerald-600 file:py-3
+              file:text-sm file:font-semibold file:text-white 
+                hover:file:bg-emerald-700 cursor-pointer 
+                 focus:outline-none focus:ring-2 focus:ring-emerald-500 
+                 focus:border-emerald-500" />
           </div>
           <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
             Providing a PDF (max 20 MB) helps the AI tailor the content to your specific curriculum.
           </p>
@@ -64,85 +56,47 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div>
             <label for="weeks" class="block text-sm font-semibold text-slate-700 mb-2">Duration (Weeks)</label>
-            <input
-              id="weeks"
-              name="weeks"
-              type="number"
-              min="1"
-              max="52"
-              step="1"
-              value="8"
-              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            />
+            <input id="weeks" name="weeks" type="number" min="1" max="52" step="1" value="8"
+              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+              required />
           </div>
 
           <div>
             <label for="students" class="block text-sm font-semibold text-slate-700 mb-2">Class Size</label>
-            <input
-              id="students"
-              name="students"
-              type="number"
-              min="1"
-              max="500"
-              step="1"
-              value="30"
-              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            />
+            <input id="students" name="students" type="number" min="1" max="500" step="1" value="30"
+              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+              required />
           </div>
 
           <div>
             <label for="sections" class="block text-sm font-semibold text-slate-700 mb-2">Sessions per Week</label>
-            <input
-              id="sections"
-              name="sections"
-              type="number"
-              min="1"
-              max="10"
-              step="1"
-              value="2"
-              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              required
-            />
+            <input id="sections" name="sections" type="number" min="1" max="10" step="1" value="2"
+              class="block w-full h-10 px-3 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+              required />
           </div>
         </div>
 
         <div
-          class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4"
-        >
+          class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-slate-100 gap-4">
           <div class="text-xs text-slate-400 italic">
             Note: Generation may take 15–30 seconds.
           </div>
 
           <div class="flex items-center gap-3">
-            <button
-              id="lp-suggest-tt-btn"
-              type="button"
-              disabled
-              class="inline-flex items-center justify-center px-4 py-2 border border-indigo-200 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
+            <button id="lp-suggest-tt-btn" type="button" disabled
+              class="inline-flex items-center justify-center px-4 py-2 border border-emerald-200 shadow-sm text-sm font-medium rounded-md text-emerald-700 bg-emerald-50 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Suggest Timetable
             </button>
 
-            <button
-              id="lp-generate-btn"
-              type="submit"
-              class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
+            <button id="lp-generate-btn" type="submit"
+              class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-70 disabled:cursor-not-allowed">
               <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
               </svg>
               Generate Plan
             </button>
@@ -156,18 +110,17 @@
 {# Glow-style wrapper for Generated Plan + timetable #}
 <section id="lp-result-wrapper" class="mt-8 hidden animate-fade-in-up max-w-auto mx-auto md:mx-0">
   <div
-    class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-0 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow transition-colors duration-300 w-full"
-  >
+    class="relative group overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-0 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow transition-colors duration-300 w-full">
     <!-- Glow background -->
     <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-      <div class="absolute -top-16 -right-10 w-40 h-40 bg-blue-400/22 blur-3xl"></div>
+      <div class="absolute -top-16 -right-10 w-40 h-40 bg-emerald-400/22 blur-3xl"></div>
       <div class="absolute -bottom-16 -left-10 w-40 h-40 bg-cyan-400/20 blur-3xl"></div>
     </div>
 
     <!-- Hover ring -->
     <div
-      class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-blue-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300"
-    ></div>
+      class="absolute inset-0 rounded-2xl border border-transparent group-hover:border-emerald-300 group-hover:shadow-[0_0_0_1px_rgba(59,130,246,0.45)] transition-all duration-300">
+    </div>
 
     <!-- Inner content -->
     <div class="relative z-10 rounded-2xl bg-white p-6">
@@ -175,40 +128,25 @@
         <h2 class="text-lg font-bold text-slate-800">Generated Plan</h2>
 
         <div class="flex flex-wrap items-center gap-2">
-          <button
-            id="lp-copy-md-btn"
-            type="button"
-            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
+          <button id="lp-copy-md-btn" type="button"
+            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
             Copy Markdown
           </button>
-          <button
-            id="lp-copy-plain-btn"
-            type="button"
-            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
+          <button id="lp-copy-plain-btn" type="button"
+            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
             Copy Text
           </button>
-          <button
-            id="lp-download-pdf-btn"
-            type="button"
-            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-              />
+          <button id="lp-download-pdf-btn" type="button"
+            class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+            <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             Download PDF
           </button>
-          <button
-            id="lp-save-btn"
-            type="button"
-            disabled
-            class="inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button id="lp-save-btn" type="button" disabled
+            class="inline-flex items-center px-4 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
@@ -219,19 +157,14 @@
 
       <article id="lp-result" class="prose prose-slate max-w-none"></article>
 
-      <div
-        id="tt-preview"
-        class="mt-6 hidden bg-white border border-slate-200 rounded-xl p-6 shadow-sm ring-1 ring-slate-900/5"
-      >
+      <div id="tt-preview"
+        class="mt-6 hidden bg-white border border-slate-200 rounded-xl p-6 shadow-sm ring-1 ring-slate-900/5">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+            <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
               </svg>
             </div>
             <div>
@@ -239,19 +172,14 @@
               <p class="text-xs text-slate-500">AI suggested slots based on your preferences.</p>
             </div>
           </div>
-          <button
-            id="tt-insert-btn"
-            type="button"
-            disabled
-            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
+          <button id="tt-insert-btn" type="button" disabled
+            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-emerald-700 bg-emerald-100 hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50">
             Add to Google Calendar
           </button>
         </div>
-        <div
-          id="tt-list"
-          class="text-sm text-slate-600 max-h-64 overflow-auto bg-slate-50 rounded-lg p-4 border border-slate-100"
-        ></div>
+        <div id="tt-list"
+          class="text-sm text-slate-600 max-h-64 overflow-auto bg-slate-50 rounded-lg p-4 border border-slate-100">
+        </div>
       </div>
 
       <div id="tt-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
@@ -259,14 +187,11 @@
         <div class="fixed inset-0 z-10 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div
-              class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
-            >
-              <div class="bg-indigo-50 px-4 py-4 border-b border-indigo-100 flex items-center justify-between">
-                <h3 class="text-base font-semibold leading-6 text-indigo-900">Confirm Schedule</h3>
-                <button
-                  id="tt-modal-close"
-                  class="text-indigo-400 hover:text-indigo-600 rounded-md p-1 hover:bg-indigo-100 transition-colors"
-                >
+              class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+              <div class="bg-emerald-50 px-4 py-4 border-b border-emerald-100 flex items-center justify-between">
+                <h3 class="text-base font-semibold leading-6 text-emerald-900">Confirm Schedule</h3>
+                <button id="tt-modal-close"
+                  class="text-emerald-400 hover:text-emerald-600 rounded-md p-1 hover:bg-emerald-100 transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -278,23 +203,18 @@
                   Review the suggested time slots below. Clicking "Add" will insert these events directly into your
                   primary Google Calendar.
                 </p>
-                <div
-                  id="tt-modal-list"
-                  class="text-sm text-slate-700 max-h-60 overflow-y-auto border border-slate-200 rounded-lg bg-slate-50 p-3 space-y-2"
-                ></div>
+                <div id="tt-modal-list"
+                  class="text-sm text-slate-700 max-h-60 overflow-y-auto border border-slate-200 rounded-lg bg-slate-50 p-3 space-y-2">
+                </div>
               </div>
 
               <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end gap-3">
-                <button
-                  id="tt-modal-cancel"
-                  class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+                <button id="tt-modal-cancel"
+                  class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                   Cancel
                 </button>
-                <button
-                  id="tt-modal-confirm"
-                  class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
+                <button id="tt-modal-confirm"
+                  class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                   Add to Calendar
                 </button>
               </div>
@@ -313,21 +233,22 @@
   <div class="fixed inset-0 z-10 overflow-y-auto">
     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
       <div
-        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200"
-      >
-        <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-3">
-          <div class="p-2 bg-amber-100 rounded-full text-amber-600">
+        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+        <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex items-center gap-3">
+          <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-amber-900">Important Notice</h3>
+          <h3 class="text-lg font-bold text-emerald-900">Important Notice</h3>
         </div>
 
         <div class="p-6">
           <div class="space-y-4">
             <p class="text-sm text-slate-700 leading-relaxed">
-              Please be aware that this tool uses Artificial Intelligence to generate lesson plans based on your provided documents.
+              Please be aware that this tool uses Artificial Intelligence to generate lesson plans based on your
+              provided documents.
             </p>
             <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
               <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Key Considerations:</h4>
@@ -338,16 +259,15 @@
               </ul>
             </div>
             <p class="text-sm text-slate-700 leading-relaxed">
-              By proceeding, you acknowledge that you understand these limitations and take full responsibility for the final output.
+              By proceeding, you acknowledge that you understand these limitations and take full responsibility for the
+              final output.
             </p>
           </div>
         </div>
 
         <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end">
-          <button
-            id="sensitive-modal-acknowledge"
-            class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
+          <button id="sensitive-modal-acknowledge"
+            class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
             I Understand
           </button>
         </div>
@@ -412,8 +332,8 @@
         type === "success"
           ? "bg-emerald-600 text-white"
           : type === "error"
-          ? "bg-red-600 text-white"
-          : "bg-slate-800 text-white";
+            ? "bg-red-600 text-white"
+            : "bg-slate-800 text-white";
 
       wrapper.className =
         "min-w-[300px] max-w-md rounded-lg shadow-xl px-4 py-3 " +
@@ -422,11 +342,9 @@
 
       const actionHtml =
         action && action.href
-          ? `<a href="${action.href}" target="${
-              (action.target || "_blank").replace('"', "")
-            }" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${
-              action.text || "Open"
-            }</a>`
+          ? `<a href="${action.href}" target="${(action.target || "_blank").replace('"', "")
+          }" class="ml-auto px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-xs font-semibold tracking-wide uppercase transition-colors">${action.text || "Open"
+          }</a>`
           : "";
 
       wrapper.innerHTML = `
@@ -651,7 +569,7 @@
       suggestTtBtn.disabled = true;
       const original = suggestTtBtn.innerHTML;
       suggestTtBtn.innerHTML =
-        '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...';
+        '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-emerald-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...';
 
       try {
         const payload = {
@@ -722,7 +640,7 @@
           minute: "2-digit",
         });
         return `<div class="flex items-start gap-3 p-2 hover:bg-white rounded transition-colors group">
-          <div class="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0 group-hover:scale-110 transition-transform"></div>
+          <div class="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0 group-hover:scale-110 transition-transform"></div>
           <div>
             <div class="font-medium text-slate-800">${s.title}</div>
             <div class="text-xs text-slate-500">${date} at ${time}</div>
