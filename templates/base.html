@@ -12,6 +12,7 @@
     rel="stylesheet" />
 
   <!-- Tailwind config + CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind = tailwind || {};
     tailwind.config = {
@@ -41,7 +42,7 @@
       },
     };
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -114,8 +115,9 @@
                    hover:shadow-sm hover:-translate-y-0.5
                  {% endif %}
                  transition-all">
-         
-          <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
+
+          <i data-lucide="home"
+            class="relative w-5 h-5 flex-shrink-0
                    {% if request.endpoint == 'main.index' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}">
           </i>
           <span class="relative sidebar-text transition-opacity duration-200">Dashboard</span>
@@ -318,8 +320,9 @@
                        hover:shadow-sm hover:-translate-y-0.5
                      {% endif %}
                      transition-all">
-              
-              <i data-lucide="home" class="relative w-5 h-5 flex-shrink-0
+
+              <i data-lucide="home"
+                class="relative w-5 h-5 flex-shrink-0
                        {% if request.endpoint == 'main.index' %}text-emerald-700{% else %}text-slate-500 group-hover:text-emerald-600{% endif %}">
               </i>
               <span class="relative">Dashboard</span>

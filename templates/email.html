@@ -253,13 +253,13 @@
 
         <!-- Email Preview/Edit Form -->
         <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-            <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
             </svg>
             <div class="flex-1">
-              <p class="text-sm text-blue-900 font-medium">AI-Generated Email Preview</p>
-              <p class="text-xs text-blue-700 mt-1">
+              <p class="text-sm text-emerald-900 font-medium">AI-Generated Email Preview</p>
+              <p class="text-xs text-emerald-700 mt-1">
                 Feel free to edit the generated email. Your edited content will be used exactly as written.
               </p>
             </div>
@@ -322,7 +322,7 @@
                 Save as Draft
               </button>
               <button type="button" id="preview-send"
-                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
@@ -360,7 +360,7 @@
             </p>
             <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
               <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Key Considerations:</h4>
-              <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+              <ul class="text-sm text-slate-600 space-y-2 list-disc pl-5">
                 <li>AI may occasionally produce inaccurate or tone-deaf content.</li>
                 <li>Always review and edit the drafted email before sending it.</li>
                 <li>Avoid providing highly sensitive personal data in the email instructions.</li>
@@ -560,7 +560,7 @@
     previewSaveDraft.disabled = true;
     previewSend.disabled = true;
     previewStatus.textContent = "Saving draft...";
-    previewStatus.className = "text-sm font-medium text-blue-600 animate-pulse";
+    previewStatus.className = "text-sm font-medium text-emerald-600 animate-pulse";
     previewStatus.classList.remove("hidden");
 
     try {
@@ -601,7 +601,7 @@
     previewSaveDraft.disabled = true;
     previewSend.disabled = true;
     previewStatus.textContent = "Sending email...";
-    previewStatus.className = "text-sm font-medium text-blue-600 animate-pulse";
+    previewStatus.className = "text-sm font-medium text-emerald-600 animate-pulse";
     previewStatus.classList.remove("hidden");
 
     try {
