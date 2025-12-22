@@ -242,6 +242,43 @@
   </div>
 </div>
 
+<!-- Loading overlay -->
+<div
+  id="email-loading-overlay"
+  class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center">
+  <div class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 px-6 py-5 flex items-center gap-4">
+    <div class="h-9 w-9 rounded-full border-4 border-emerald-100 border-t-emerald-500 animate-spin"></div>
+    <div class="text-left">
+      <p class="text-sm font-semibold text-emerald-700">Processing your email…</p>
+      <p class="text-xs text-slate-500 mt-1">This usually takes just a few seconds.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback popup -->
+<div
+  id="email-feedback"
+  class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center">
+  <div
+    id="email-feedback-card"
+    class="bg-white rounded-2xl shadow-xl border px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]">
+    <div id="email-feedback-icon" class="mt-0.5 shrink-0"></div>
+    <div class="flex-1">
+      <h3 id="email-feedback-title" class="text-sm font-semibold"></h3>
+      <p id="email-feedback-message" class="mt-1 text-xs text-slate-600"></p>
+      <div class="mt-3 flex justify-end">
+        <button
+          type="button"
+          id="email-feedback-close"
+          class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium
+                 bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Email Preview/Edit Modal -->
 <div id="preview-modal" class="fixed inset-0 z-[60] hidden" role="dialog" aria-modal="true">
   <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
@@ -430,10 +467,71 @@
     const previewStatus = document.getElementById("preview-status");
     const previewViewDrafts = document.getElementById("preview-view-drafts");
 
+    const loadingOverlay = document.getElementById("email-loading-overlay");
+    const feedback = document.getElementById("email-feedback");
+    const feedbackCard = document.getElementById("email-feedback-card");
+    const feedbackIcon = document.getElementById("email-feedback-icon");
+    const feedbackTitle = document.getElementById("email-feedback-title");
+    const feedbackMessage = document.getElementById("email-feedback-message");
+    const feedbackClose = document.getElementById("email-feedback-close");
+
     let currentBatchId = null;
     let currentBatchData = null;
     let batchesData = null;
     let currentFormUrl = null; // Store form URL from button
+
+    function showLoading() {
+      loadingOverlay.classList.remove("hidden");
+      loadingOverlay.classList.add("flex");
+    }
+    function hideLoading() {
+      loadingOverlay.classList.add("hidden");
+      loadingOverlay.classList.remove("flex");
+    }
+
+    function closePreviewModal() {
+      previewModal.classList.add("hidden");
+      previewStatus.classList.add("hidden");
+      previewViewDrafts.classList.add("hidden");
+    }
+
+    function showFeedback(type, title, message) {
+      if (type === "success") {
+        feedbackCard.className =
+          "bg-white rounded-2xl shadow-xl border border-green-200 px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]";
+        feedbackIcon.innerHTML =
+          `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round"
+                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+           </svg>`;
+        feedbackTitle.className = "text-sm font-semibold text-green-800";
+      } else {
+        feedbackCard.className =
+          "bg-white rounded-2xl shadow-xl border border-red-200 px-6 py-6 max-w-sm w-full mx-4 flex items-start gap-4 min-h-[6rem]";
+        feedbackIcon.innerHTML =
+          `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round"
+                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+           </svg>`;
+        feedbackTitle.className = "text-sm font-semibold text-red-800";
+      }
+      feedbackTitle.textContent = title;
+      feedbackMessage.textContent = message;
+      feedback.classList.remove("hidden");
+      feedback.classList.add("flex");
+    }
+
+    function hideFeedback() {
+      feedback.classList.add("hidden");
+      feedback.classList.remove("flex");
+    }
+
+    if (feedbackClose) {
+      feedbackClose.addEventListener("click", hideFeedback);
+    }
+    feedback?.addEventListener("click", (e) => {
+      if (e.target === feedback) hideFeedback();
+    });
 
     function openModal(prefill) {
       hiddenAsmtId.value = prefill.asmtId || "";
@@ -449,12 +547,6 @@
       sendStatus.textContent = "";
       formSend.reset();
       hiddenAsmtId.value = "";
-    }
-
-    function closePreviewModal() {
-      previewModal.classList.add("hidden");
-      previewStatus.classList.add("hidden");
-      previewViewDrafts.classList.add("hidden");
     }
 
     document.querySelectorAll("[data-send-btn]").forEach((btn) => {
@@ -506,8 +598,7 @@
       e.preventDefault();
       const batchId = selBatch.value.trim();
       if (!batchId) {
-        sendStatus.textContent = "Please select a batch.";
-        sendStatus.className = "text-sm font-medium text-red-600";
+        showFeedback("error", "Selection Required", "Please select a batch.");
         return;
       }
 
@@ -515,11 +606,8 @@
       const studentCount = selectedOption.getAttribute("data-student-count");
       const batchName = selectedOption.getAttribute("data-batch-name");
 
+      showLoading();
       sendSubmit.disabled = true;
-      const originalBtnText = sendSubmit.innerHTML;
-      sendSubmit.innerHTML = `<svg class="w-4 h-4 mr-2 animate-spin inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Generating...`;
-      sendStatus.textContent = "Generating AI email preview...";
-      sendStatus.className = "text-sm font-medium text-emerald-600 animate-pulse";
 
       try {
         const asmtId = hiddenAsmtId.value;
@@ -551,7 +639,12 @@
         });
 
         const data = await res.json();
-        if (!res.ok || !data.ok) throw new Error(data.error || "Failed to generate preview");
+        
+        hideLoading();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Failed to generate preview");
+        }
 
         // Store current batch data for later (including form URL)
         currentBatchId = batchId;
@@ -605,11 +698,10 @@
         closeModal();
         previewModal.classList.remove("hidden");
       } catch (e) {
-        sendStatus.textContent = "Error: " + e.message;
-        sendStatus.className = "text-sm font-medium text-red-600";
+        hideLoading();
+        showFeedback("error", "Unable to generate preview", e.message || "Something went wrong while generating your email. Please try again.");
       } finally {
         sendSubmit.disabled = false;
-        sendSubmit.innerHTML = originalBtnText;
       }
     });
 

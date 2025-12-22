@@ -149,5 +149,5 @@ The email workflow is now standardized across all pages:
 - ✅ `batch_students.html` - Email students in batch
 - ✅ `assessment_detail.html` - Email individual students
 
-All users now benefit from the preview/edit workflow, ensuring better control and safety when sending emails through the AI Teacher Assistant.
+All users now benefit from the preview/edit workflow, ensuring better control and safety when sending emails through the AI Teaching Companion.
 

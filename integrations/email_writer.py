@@ -137,7 +137,7 @@ Length: 120-180 words. Avoid flowery language.
             
         if not result["subject"].strip():
             logger.warning("AI generated empty subject, using fallback")
-            result["subject"] = "Message from AI Teacher Assistant"
+            result["subject"] = "Message from AI Teaching Companion"
             
         logger.info("Email content drafted successfully with subject: %s", result["subject"])
         return result
