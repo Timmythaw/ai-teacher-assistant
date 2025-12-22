@@ -220,7 +220,7 @@
         <div
           class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between"
         >
-          <h3 class="text-base font-semibold leading-6 text-slate-800">
+          <h3 class="text-base font-semibold leading-6 text-slate-800" id="modal-title">
             Create New Batch
           </h3>
           <button
@@ -244,19 +244,81 @@
           </button>
         </div>
 
+        <!-- STEP 1: Choose Input Method -->
+        <div id="step-choose-method" class="p-6">
+          <p class="text-sm text-slate-600 mb-4">
+            Choose how you'd like to add students to this batch:
+          </p>
+          
+          <div class="grid grid-cols-1 gap-4">
+            <!-- CSV Upload Option -->
+            <button
+              type="button"
+              id="choose-csv"
+              class="group relative flex items-start p-5 border-2 border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50/30 transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <div class="flex-shrink-0 mt-0.5">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-4 flex-1">
+                <div class="font-semibold text-slate-900 text-base mb-1">Upload CSV File</div>
+                <p class="text-sm text-slate-600">
+                  Import multiple students at once from a CSV file containing name and email columns.
+                </p>
+              </div>
+              <div class="flex-shrink-0 ml-3 text-slate-400 group-hover:text-blue-500 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
+
+            <!-- Manual Input Option -->
+            <button
+              type="button"
+              id="choose-manual"
+              class="group relative flex items-start p-5 border-2 border-slate-200 rounded-xl hover:border-green-500 hover:bg-green-50/30 transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <div class="flex-shrink-0 mt-0.5">
+                <div class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-4 flex-1">
+                <div class="font-semibold text-slate-900 text-base mb-1">Add Manually</div>
+                <p class="text-sm text-slate-600">
+                  Enter student names and emails one by one through a simple form.
+                </p>
+              </div>
+              <div class="flex-shrink-0 ml-3 text-slate-400 group-hover:text-green-500 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: CSV Upload Form -->
         <form
-          id="create-form"
-          class="p-6 space-y-4"
+          id="csv-form"
+          class="p-6 space-y-4 hidden"
           enctype="multipart/form-data"
         >
           <div>
             <label
               class="block text-sm font-medium text-slate-700 mb-1"
-              for="batch_name"
+              for="batch_name_csv"
               >Batch Name</label
             >
             <input
-              id="batch_name"
+              id="batch_name_csv"
               name="batch_name"
               type="text"
               required
@@ -276,6 +338,7 @@
               name="students_csv"
               type="file"
               accept=".csv"
+              required
               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
@@ -303,10 +366,67 @@
             </p>
           </div>
 
-          <!-- Manual students input -->
-          <div class="pt-3 border-t border-slate-100">
-            <label class="block text-sm font-medium text-slate-700 mb-2"
-              >Or add students manually</label
+          <div
+            id="csv-status"
+            class="text-xs font-medium text-blue-600"
+          ></div>
+
+          <div
+            class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2"
+          >
+            <button
+              type="button"
+              id="back-from-csv"
+              class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Back
+            </button>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                id="cancel-csv"
+                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="submit-csv"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Create Batch
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- STEP 3: Manual Input Form -->
+        <form
+          id="manual-form"
+          class="p-6 space-y-4 hidden"
+        >
+          <div>
+            <label
+              class="block text-sm font-medium text-slate-700 mb-1"
+              for="batch_name_manual"
+              >Batch Name</label
+            >
+            <input
+              id="batch_name_manual"
+              name="batch_name"
+              type="text"
+              required
+              placeholder="e.g., CS101 - Fall 2025"
+              class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 px-2 sm:text-base"
+            />
+          </div>
+
+          <div class="border-t border-slate-100 pt-4">
+            <label class="block text-sm font-medium text-slate-700 mb-3"
+              >Add Students</label
             >
 
             <div class="grid grid-cols-2 gap-2 mb-2">
@@ -324,47 +444,60 @@
               />
             </div>
 
-            <div class="flex items-center gap-2 mb-3">
-              <button
-                type="button"
-                id="add-student"
-                class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
-              >
-                Add Student
-              </button>
-              <div class="text-xs text-slate-500">
-                Added students will be submitted when you click
-                <span class="font-semibold">Create Batch</span>.
-              </div>
-            </div>
+            <button
+              type="button"
+              id="add-student"
+              class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 mb-3"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Student
+            </button>
 
             <div id="manual-students-list" class="space-y-2">
               <!-- dynamic student items appear here -->
             </div>
+
+            <p class="text-xs text-slate-500 mt-3" id="manual-count">
+              No students added yet.
+            </p>
           </div>
 
           <div
-            id="create-status"
+            id="manual-status"
             class="text-xs font-medium text-blue-600"
           ></div>
 
           <div
-            class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-2"
+            class="flex items-center justify-between pt-4 border-t border-slate-100 mt-2"
           >
             <button
               type="button"
-              id="cancel-create"
-              class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              id="back-from-manual"
+              class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
             >
-              Cancel
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Back
             </button>
-            <button
-              type="submit"
-              id="submit-create"
-              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Create Batch
-            </button>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                id="cancel-manual"
+                class="inline-flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="submit-manual"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Create Batch
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -378,33 +511,63 @@
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("create-modal");
+    const modalTitle = document.getElementById("modal-title");
     const openBtn = document.getElementById("open-create");
     const closeBtn = document.getElementById("close-create");
-    const cancelBtn = document.getElementById("cancel-create");
-    const form = document.getElementById("create-form");
-    const statusEl = document.getElementById("create-status");
-    const submitBtn = document.getElementById("submit-create");
+    
+    // Step elements
+    const stepChooseMethod = document.getElementById("step-choose-method");
+    const csvForm = document.getElementById("csv-form");
+    const manualForm = document.getElementById("manual-form");
+    
+    // Method choice buttons
+    const chooseCsvBtn = document.getElementById("choose-csv");
+    const chooseManualBtn = document.getElementById("choose-manual");
+    
+    // CSV form elements
+    const csvStatusEl = document.getElementById("csv-status");
+    const submitCsvBtn = document.getElementById("submit-csv");
+    const cancelCsvBtn = document.getElementById("cancel-csv");
+    const backFromCsvBtn = document.getElementById("back-from-csv");
+    const csvInput = document.getElementById("students_csv");
+    const batchNameCsv = document.getElementById("batch_name_csv");
+    
+    // Manual form elements
+    const manualStatusEl = document.getElementById("manual-status");
+    const submitManualBtn = document.getElementById("submit-manual");
+    const cancelManualBtn = document.getElementById("cancel-manual");
+    const backFromManualBtn = document.getElementById("back-from-manual");
     const addStudentBtn = document.getElementById("add-student");
     const manualNameInput = document.getElementById("manual_name");
     const manualEmailInput = document.getElementById("manual_email");
     const manualListEl = document.getElementById("manual-students-list");
-    const csvInput = document.getElementById("students_csv");
+    const manualCountEl = document.getElementById("manual-count");
+    const batchNameManual = document.getElementById("batch_name_manual");
 
     let manualStudents = [];
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
 
     function renderManualList() {
       manualListEl.innerHTML = "";
       manualStudents.forEach((s, i) => {
         const item = document.createElement("div");
         item.className =
-          "flex items-center justify-between gap-3 px-3 py-2 rounded border border-slate-100";
+          "flex items-center justify-between gap-3 px-3 py-2 rounded border border-slate-200 bg-slate-50";
         item.innerHTML = `
           <div class="text-sm">
             <div class="font-medium text-slate-900">${escapeHtml(s.name)}</div>
             <div class="text-xs text-slate-500">${escapeHtml(s.email)}</div>
           </div>
           <div class="flex items-center gap-2">
-            <button data-index="${i}" class="remove-student inline-flex items-center px-2 py-1 border border-red-200 text-xs rounded-md text-red-600 bg-red-50 hover:bg-red-100">Remove</button>
+            <button type="button" data-index="${i}" class="remove-student inline-flex items-center px-2 py-1 border border-red-200 text-xs rounded-md text-red-600 bg-red-50 hover:bg-red-100 transition-colors">Remove</button>
           </div>
         `;
         manualListEl.appendChild(item);
@@ -417,33 +580,55 @@
           renderManualList();
         });
       });
+
+      // Update count
+      if (manualStudents.length === 0) {
+        manualCountEl.textContent = "No students added yet.";
+        manualCountEl.className = "text-xs text-slate-500 mt-3";
+      } else {
+        manualCountEl.textContent = `${manualStudents.length} student${manualStudents.length === 1 ? '' : 's'} added.`;
+        manualCountEl.className = "text-xs text-green-600 font-medium mt-3";
+      }
+    }
+
+    function showStep(step) {
+      stepChooseMethod.classList.add("hidden");
+      csvForm.classList.add("hidden");
+      manualForm.classList.add("hidden");
+
+      if (step === "choose") {
+        modalTitle.textContent = "Create New Batch";
+        stepChooseMethod.classList.remove("hidden");
+      } else if (step === "csv") {
+        modalTitle.textContent = "Create Batch - Upload CSV";
+        csvForm.classList.remove("hidden");
+      } else if (step === "manual") {
+        modalTitle.textContent = "Create Batch - Add Manually";
+        manualForm.classList.remove("hidden");
+      }
     }
 
     function openModal() {
-      form.reset();
+      // Reset all forms
+      csvForm.reset();
+      manualForm.reset();
       manualStudents = [];
       renderManualList();
-      statusEl.textContent = "";
+      csvStatusEl.textContent = "";
+      manualStatusEl.textContent = "";
+      
+      // Show step 1
+      showStep("choose");
       modal.classList.remove("hidden");
     }
 
     function closeModal() {
       modal.classList.add("hidden");
-      statusEl.textContent = "";
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
-
+    // Open modal
     if (openBtn) openBtn.addEventListener("click", openModal);
     if (closeBtn) closeBtn.addEventListener("click", closeModal);
-    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
 
     // Close when clicking backdrop
     modal.addEventListener("click", (e) => {
@@ -453,16 +638,92 @@
       }
     });
 
+    // Method selection
+    if (chooseCsvBtn) {
+      chooseCsvBtn.addEventListener("click", () => {
+        showStep("csv");
+        setTimeout(() => batchNameCsv.focus(), 50);
+      });
+    }
+
+    if (chooseManualBtn) {
+      chooseManualBtn.addEventListener("click", () => {
+        showStep("manual");
+        setTimeout(() => batchNameManual.focus(), 50);
+      });
+    }
+
+    // Back buttons
+    if (backFromCsvBtn) {
+      backFromCsvBtn.addEventListener("click", () => showStep("choose"));
+    }
+
+    if (backFromManualBtn) {
+      backFromManualBtn.addEventListener("click", () => showStep("choose"));
+    }
+
+    // Cancel buttons
+    if (cancelCsvBtn) cancelCsvBtn.addEventListener("click", closeModal);
+    if (cancelManualBtn) cancelManualBtn.addEventListener("click", closeModal);
+
+    // CSV Form Submit
+    csvForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const hasFile = csvInput && csvInput.files && csvInput.files.length > 0;
+      if (!hasFile) {
+        csvStatusEl.textContent = "Please select a CSV file.";
+        csvStatusEl.className = "text-xs font-medium text-red-600";
+        return;
+      }
+
+      csvStatusEl.textContent = "Uploading and creating batch...";
+      csvStatusEl.className = "text-xs font-medium text-blue-600 animate-pulse";
+      submitCsvBtn.disabled = true;
+      submitCsvBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+      try {
+        const fd = new FormData(csvForm);
+
+        const res = await fetch(
+          "{{ url_for('batches.create_batch_upload_csv') }}",
+          {
+            method: "POST",
+            credentials: "same-origin",
+            body: fd,
+          }
+        );
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Failed (${res.status}). ${text.slice(0, 200)}`);
+        }
+
+        csvStatusEl.textContent = "Success! Reloading...";
+        csvStatusEl.className = "text-xs font-medium text-green-600";
+        setTimeout(() => {
+          location.reload();
+        }, 500);
+      } catch (err) {
+        csvStatusEl.textContent = "Error: " + (err.message || err);
+        csvStatusEl.className = "text-xs font-medium text-red-600";
+        submitCsvBtn.disabled = false;
+        submitCsvBtn.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+    });
+
     // Add student button
     if (addStudentBtn) {
       addStudentBtn.addEventListener("click", () => {
         const name = (manualNameInput.value || "").trim();
         const email = (manualEmailInput.value || "").trim();
         if (!name) {
+          alert("Please enter student name.");
           manualNameInput.focus();
           return;
         }
         if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          alert("Please enter a valid email address.");
           manualEmailInput.focus();
           return;
         }
@@ -475,72 +736,52 @@
       });
     }
 
-    form.addEventListener("submit", async (e) => {
+    // Manual Form Submit
+    manualForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const hasFile = csvInput && csvInput.files && csvInput.files.length > 0;
-      const hasManual = manualStudents.length > 0;
-      if (!hasFile && !hasManual) {
-        statusEl.textContent =
-          "Please upload a CSV or add at least one student manually.";
-        statusEl.className = "text-xs font-medium text-red-600";
+      if (manualStudents.length === 0) {
+        manualStatusEl.textContent = "Please add at least one student.";
+        manualStatusEl.className = "text-xs font-medium text-red-600";
         return;
       }
 
-      statusEl.textContent = "Uploading and creating batch...";
-      statusEl.className = "text-xs font-medium text-blue-600 animate-pulse";
-      submitBtn.disabled = true;
-      submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+      manualStatusEl.textContent = "Creating batch...";
+      manualStatusEl.className = "text-xs font-medium text-blue-600 animate-pulse";
+      submitManualBtn.disabled = true;
+      submitManualBtn.classList.add("opacity-50", "cursor-not-allowed");
 
       try {
-        let res;
+        const payload = {
+          batch_name: batchNameManual.value,
+          students_manual: manualStudents,
+        };
 
-        if (hasManual && !hasFile) {
-          const payload = {
-            batch_name: form.batch_name.value,
-            students_manual: manualStudents,
-          };
-
-          res = await fetch(
-            "{{ url_for('batches.create_batch_upload_csv') }}",
-            {
-              method: "POST",
-              credentials: "same-origin",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            }
-          );
-        } else {
-          const fd = new FormData(form);
-          if (hasManual) {
-            fd.append("students_manual", JSON.stringify(manualStudents));
+        const res = await fetch(
+          "{{ url_for('batches.create_batch_upload_csv') }}",
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
           }
-
-          res = await fetch(
-            "{{ url_for('batches.create_batch_upload_csv') }}",
-            {
-              method: "POST",
-              credentials: "same-origin",
-              body: fd,
-            }
-          );
-        }
+        );
 
         if (!res.ok) {
           const text = await res.text();
           throw new Error(`Failed (${res.status}). ${text.slice(0, 200)}`);
         }
 
-        statusEl.textContent = "Success! Reloading...";
-        statusEl.className = "text-xs font-medium text-green-600";
+        manualStatusEl.textContent = "Success! Reloading...";
+        manualStatusEl.className = "text-xs font-medium text-green-600";
         setTimeout(() => {
           location.reload();
         }, 500);
       } catch (err) {
-        statusEl.textContent = "Error: " + (err.message || err);
-        statusEl.className = "text-xs font-medium text-red-600";
-        submitBtn.disabled = false;
-        submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        manualStatusEl.textContent = "Error: " + (err.message || err);
+        manualStatusEl.className = "text-xs font-medium text-red-600";
+        submitManualBtn.disabled = false;
+        submitManualBtn.classList.remove("opacity-50", "cursor-not-allowed");
       }
     });
 
@@ -579,3 +820,4 @@
   });
 </script>
 {% endblock %}
+

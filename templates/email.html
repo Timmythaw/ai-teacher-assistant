@@ -4,14 +4,31 @@
 {% block content %}
 
 <div class="max-w-3xl mx-auto md:mx-0">
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-      <i data-lucide="mail-plus" class="w-5 h-5 text-amber-500"></i>
-      Compose Email
-    </h1>
-    <p class="text-sm text-slate-500 mt-1">
-      Draft and send AI-assisted emails to students or colleagues.
-    </p>
+  <div class="mb-8 flex flex-col sm:flex-row items-start justify-between gap-4">
+    <div class="flex-1">
+      <h1 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <i data-lucide="mail-plus" class="w-5 h-5 text-amber-500"></i>
+        Compose Email
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Draft and send AI-assisted emails to students or colleagues.
+      </p>
+    </div>
+    
+    <!-- View Drafts Button -->
+    <a 
+      href="https://mail.google.com/mail/u/0/#drafts" 
+      target="_blank"
+      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 text-sm font-medium group shrink-0"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+      </svg>
+      <span>View Drafts</span>
+      <svg class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+      </svg>
+    </a>
   </div>
 
   <!-- Loading overlay -->
